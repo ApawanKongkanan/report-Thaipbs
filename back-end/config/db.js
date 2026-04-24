@@ -1,8 +1,7 @@
 const sql = require("mssql");
-
 const dbConfig = {
-  server: "localhost",
-  database: "ThaiPBS_DB",
+  server: "DESKTOP-HP",
+  database: "MissingPersonDB",
   user: "sa",
   password: "StrongPass123",
   port: 1433,
