@@ -6,6 +6,5 @@ back-end/uploads/*.jpg
 back-end/uploads/*.png
 back-end/uploads/*.jpeg
 
-# (ทางเลือก) ถ้าฝั่ง front-end มีรูปขยะเยอะ ก็เพิ่มได้ครับ
 front-end/*.png
 front-end/*.jpg
