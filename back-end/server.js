@@ -15,6 +15,8 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 const missingRoutes = require("./routes/missing.routes");
+const reportRoutes = require('./routes/report.routes');
+const dashboardRoutes = require('./routes/dashboard.routes');
 //สร้าง Web Server ขึ้นมา
 const app = express();
 //เปิดให้ frontend เรียก API ได้
@@ -31,6 +33,8 @@ app.get("/", (req, res) => {
 
 // เชื่อม route
 app.use("/api/missing-persons", missingRoutes);
+app.use('/api/reports', reportRoutes);           // สำหรับจัดการเบาะแส
+app.use('/api/dashboard', dashboardRoutes);     // สำหรับจัดการหน้า Dashboard
 
 app.listen(3000, () => {
   console.log("Server running at http://localhost:3000");

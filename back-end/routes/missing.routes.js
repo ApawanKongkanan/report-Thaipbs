@@ -24,217 +24,132 @@ router.post("/",
     { name: "image_url", maxCount: 1 }
   ]),
   async (req, res) => {
-
-  //รับข้อมูลจาก Frontend มาจาก name form
-try {
-
-    const {
-    missing_title,
-    missing_name,
-    gender,
-    birthday,
-    age,
-    race,
-
-    missing_reason,
-    priority,
-
-    owner_title,
-    owner_name,
-    owner_phone,
-    relation_to_missing,
-
-    missing_date,
-    missing_time,
-    missing_place,
-
-    postal_code,
-    province,
-    district,
-    subdistrict,
-
-    hair_styles,
-    hair_color,
-    height_cm,
-
-    police_station_name,
-    police_station_province,
-    police_station_phone,
-    latest_characteristics,
-    inform_channels
-  } = req.body;
-//เชื่อมต่อ DB
     const pool = await sql.connect(dbConfig);
-    // ================================
-    // รวมข้อมูลสถานที่เป็น JSON
-    // ================================
-    const latestLastSeenJSON = JSON.stringify({
-      missing_date,
-      missing_time,
-      postal_code,
-      province,
-      district,
-      subdistrict,
-      missing_place
-    });
-    // ===============================
-    // Insert MissingPerson
-    // ===============================
+    const transaction = new sql.Transaction(pool);
 
-const personResult = await pool.request()
-  .input("missing_title", sql.NVarChar, missing_title)
-  .input("missing_name", sql.NVarChar, missing_name)
-  .input("gender", sql.NVarChar, gender)
-  .input("birthday", sql.Date, birthday)
-  .input("age", sql.Int, age)
-  .input("race", sql.NVarChar, race)
+    try {
+      await transaction.begin();
 
-  .query(`
-    INSERT INTO MissingPerson
-    (
-      missing_title,
-      missing_name,
-      gender,
-      birthday,
-      age,
-      race
-    )
-    OUTPUT INSERTED.missingperson_id
-    VALUES
-    (
-      @missing_title,
-      @missing_name,
-      @gender,
-      @birthday,
-      @age,
-      @race
-    )
-  `);
+      // --- 1. รับข้อมูลจาก Body ---
+      const {
+        missing_title, missing_name, gender, birthday, age, race,
+        id_number, id_type, // สำหรับ IdentityDocument
+        missing_reason, priority,
+        owner_name, owner_phone, relation_to_missing,
+        missing_date, missing_time, missing_place,
+        postal_code, province, district, subdistrict,
+        hair_styles, hair_color, height_cm, skin_color, body_shape,
+        police_station_name, ps_phone, // สำหรับ PoliceStation
+        inform_channels,
+        role 
+      } = req.body;
 
-const missingperson_id = personResult.recordset[0].missingperson_id;
+      // --- 2. Phase 1: Hard-coded Staff Data ---
+      // กำหนดค่าสมมติให้เป็นเจ้าหน้าที่ระบบกลาง ID 1
+      const STAFF_ID_DEFAULT = 1; 
+      const STAFF_NAME_DEFAULT = 'เจ้าหน้าที่ศูนย์รับแจ้ง (System)';
 
-     // ===============================
-    // Insert CaseOwner ก่อน
-    // ===============================
-    const ownerResult = await pool.request()
-      .input("owner_title", sql.NVarChar, "ไม่ระบุ")
-      .input("owner_name", sql.NVarChar, owner_name)
-      .query(`
-        INSERT INTO CaseOwner (owner_title, owner_name)
-        OUTPUT INSERTED.owner_id
-        VALUES (@owner_title, @owner_name)
-      `);
-    const owner_id = ownerResult.recordset[0].owner_id;
+      const initialStatus = (role === 'admin') ? 'รับแจ้ง' : 'รอรับเรื่อง';
 
-    //console.log("owner_id =", owner_id);
-    //console.log("owner_phone =", owner_phone);
-//if (owner_phone) {
-  await pool.request()
-    .input("owner_id", sql.Int, owner_id)
-    .input("owner_phone", sql.NVarChar, owner_phone)
-    .query(`
-      INSERT INTO CaseOwner_Phone (owner_id, owner_phone)
-      VALUES (@owner_id, @owner_phone)
-    `);
-//}
+      // --- 3. Insert MissingPerson ---
+      const personResult = await transaction.request()
+        .input("m_title", sql.NVarChar, missing_title)
+        .input("m_name", sql.NVarChar, missing_name)
+        .input("gender", sql.NVarChar, gender)
+        .input("bday", sql.Date, birthday)
+        .input("age", sql.Int, age)
+        .input("race", sql.NVarChar, race)
+        .query(`INSERT INTO MissingPerson (missing_title, missing_name, gender, birthday, age, race) 
+                OUTPUT INSERTED.missingperson_id VALUES (@m_title, @m_name, @gender, @bday, @age, @race)`);
+      const mp_id = personResult.recordset[0].missingperson_id;
 
-//จัดการ birth_time
-    /*let formattedTime = null;
+      // --- 4. Insert IdentityDocument ---
+      if (id_number) {
+        await transaction.request()
+          .input("num", sql.NVarChar, id_number)
+          .input("type", sql.NVarChar, id_type || "บัตรประชาชน")
+          .input("mp_id", sql.Int, mp_id)
+          .query(`INSERT INTO IdentityDocument (id_number, id_type, missingperson_id) VALUES (@num, @type, @mp_id)`);
+      }
 
-    if (birth_time && /^\d{2}:\d{2}$/.test(birth_time)) {
-      const [hours, minutes] = birth_time.split(":");
-      formattedTime = new Date(1970, 0, 1, hours, minutes, 0);
+      // --- 5. Insert CaseOwner & Phone ---
+      const ownerResult = await transaction.request()
+        .input("oname", sql.NVarChar, owner_name)
+        .query(`INSERT INTO CaseOwner (owner_title, owner_name) OUTPUT INSERTED.owner_id VALUES (N'ไม่ระบุ', @oname)`);
+      const owner_id = ownerResult.recordset[0].owner_id;
+      if (owner_phone) {
+        await transaction.request().input("oid", sql.Int, owner_id).input("p", sql.NVarChar, owner_phone)
+          .query(`INSERT INTO CaseOwner_Phone (owner_id, owner_phone) VALUES (@oid, @p)`);
+      }
+
+      // --- 6. Insert PoliceStation ---
+      const psResult = await transaction.request()
+        .input("psn", sql.NVarChar, police_station_name || "ไม่ระบุ")
+        .input("psp", sql.NVarChar, province)
+        .input("pst", sql.NVarChar, ps_phone || "ไม่ระบุ")
+        .query(`INSERT INTO PoliceStation (police_station_name, police_station_province, police_station_phone) 
+                OUTPUT INSERTED.police_station_id VALUES (@psn, @psp, @pst)`);
+      const ps_id = psResult.recordset[0].police_station_id;
+
+      // --- 7. จัดการไฟล์และ JSON ---
+      const imageFile = req.files?.image_url?.[0];
+      const imageUrl = imageFile ? `http://localhost:3000/uploads/${imageFile.filename}` : "no-image.jpg";
+      const lastSeenJSON = JSON.stringify({ missing_date, missing_time, postal_code, province, district, subdistrict, missing_place });
+      const characteristicsJSON = JSON.stringify({ hair_styles, hair_color, height_cm, skin_color, body_shape, image_url: imageUrl });
+
+      // --- 8. Insert MissingCase (ใช้ Staff Hard-coded) ---
+      const caseResult = await transaction.request()
+        .input("priority", sql.NVarChar, priority)
+        .input("reason", sql.NVarChar, missing_reason)
+        .input("status", sql.NVarChar, initialStatus)
+        .input("ls", sql.NVarChar, lastSeenJSON)
+        .input("chars", sql.NVarChar, characteristicsJSON)
+        .input("chan", sql.NVarChar, inform_channels || "หน้าเว็บ")
+        .input("notice", sql.NVarChar, "ไม่มีรายละเอียด")
+        .input("rel", sql.NVarChar, relation_to_missing || "ไม่ระบุ")
+        .input("staff_id", sql.Int, STAFF_ID_DEFAULT) // <--- ใส่ Hard-coded ID
+        .input("owner_id", sql.Int, owner_id)
+        .input("mp_id", sql.Int, mp_id)
+        .input("ps_id", sql.Int, ps_id)
+        .query(`INSERT INTO MissingCase (priority, latest_status, missing_reason, staff_id, latest_last_seen_at, first_last_seen_at, latest_characteristics, relation_to_missing, inform_channels, notice, owner_id, missingperson_id, police_station_id) 
+                OUTPUT INSERTED.case_id VALUES (@priority, @status, @reason, @staff_id, @ls, @ls, @chars, @rel, @chan, @notice, @owner_id, @mp_id, @ps_id)`);
+      const case_id = caseResult.recordset[0].case_id;
+
+      // --- 9. Insert StatusLog (ใช้ Staff Name Hard-coded) ---
+      const logResult = await transaction.request()
+        .input("case_id", sql.Int, case_id)
+        .input("status", sql.NVarChar, initialStatus)
+        .input("logged_by", sql.NVarChar, STAFF_NAME_DEFAULT) // <--- ใส่ Hard-coded Name
+        .query(`INSERT INTO StatusLog (case_id, description, case_status, logged_by) 
+                OUTPUT INSERTED.log_id VALUES (@case_id, N'บันทึกรับแจ้งครั้งแรก', @status, @logged_by)`);
+      const log_id = logResult.recordset[0].log_id;
+
+      // --- 10. Insert Character Log ---
+      await transaction.request()
+        .input("lid", sql.Int, log_id).input("img", sql.NVarChar, imageUrl)
+        .input("skin", sql.NVarChar, skin_color || "ไม่ระบุ").input("shape", sql.NVarChar, body_shape || "ไม่ระบุ")
+        .input("hs", sql.NVarChar, hair_styles || "ไม่ระบุ").input("hc", sql.NVarChar, hair_color || "ไม่ระบุ").input("h", sql.Int, height_cm || 0)
+        .query(`INSERT INTO Missingperson_Character_Log (log_id, image_url, skin_color, body_shape, hair_styles, hair_color, height_cm) 
+                VALUES (@lid, @img, @skin, @shape, @hs, @hc, @h)`);
+
+      // --- 11. Insert Last_Seen_Log ---
+      await transaction.request()
+        .input("lid", sql.Int, log_id).input("d", sql.Date, missing_date).input("t", sql.NVarChar, missing_time)
+        .input("p", sql.NVarChar, missing_place || "ไม่ระบุ").input("sub", sql.NVarChar, subdistrict || "ไม่ระบุ")
+        .input("dist", sql.NVarChar, district || "ไม่ระบุ").input("prov", sql.NVarChar, province || "ไม่ระบุ")
+        .query(`INSERT INTO Last_Seen_Log (log_id, missing_date, missing_time, missing_place, subdistrict, district, province) 
+                VALUES (@lid, @d, @t, @p, @sub, @dist, @prov)`);
+
+      await transaction.commit();
+      res.status(201).json({ success: true, message: "บันทึกสำเร็จ" });
+
+    } catch (err) {
+      if (transaction) await transaction.rollback();
+      console.error("POST ERROR:", err);
+      res.status(500).json({ success: false, error: err.message });
     }
-    */
-    // ===============================
-    // จัดการไฟล์รูป
-    // ===============================
-    let fileUrl = null;
-// 🔥 ดึงไฟล์
-const noticeFile = req.files?.notice?.[0];
-const imageFile = req.files?.image_url?.[0];
-
-// 🔥 สร้าง URL
-const noticeUrl = noticeFile
-  ? `http://localhost:3000/uploads/${noticeFile.filename}`
-  : null;
-
-const imageUrl = imageFile
-  ? `http://localhost:3000/uploads/${imageFile.filename}`
-  : null;
-
-// 🔥 ใช้แทน notice
-const noticeValue = noticeUrl || "ไม่มีรายละเอียด";
-
-
-    // ===============================
-    // Insert MissingCase
-    // ===============================
-    await pool.request()
-      .input("priority", sql.NVarChar, priority)
-      .input("missing_reason", sql.NVarChar, missing_reason)
-      .input("latest_last_seen_at", sql.NVarChar, latestLastSeenJSON)
-      .input("latest_characteristics", sql.NVarChar, latest_characteristics || "{}")
-      .input("inform_channels", sql.NVarChar, inform_channels || "{}")
-      .input("notice", sql.NVarChar, noticeValue)
-      .input("relation_to_missing", sql.NVarChar, relation_to_missing || "ไม่ระบุ")
-      // FK (ใช้ owner_id ที่ insert สด ๆ)
-      .input("staff_id", sql.Int, 1)
-      .input("owner_id", sql.Int, owner_id)
-      .input("missingperson_id", sql.Int, missingperson_id)
-      .input("police_station_id", sql.Int, 1)
-
-      .query(`
-        INSERT INTO MissingCase
-        (
-          priority,
-          latest_status,
-          missing_reason,
-          staff_id,
-          latest_last_seen_at,
-          first_last_seen_at,
-          latest_characteristics,
-          inform_channels,
-          notice,
-          relation_to_missing,
-          owner_id,
-          missingperson_id,
-          police_station_id
-        )
-        VALUES
-        (
-          @priority,
-          N'รับแจ้ง',
-          @missing_reason,
-          @staff_id,
-          @latest_last_seen_at,
-          @latest_last_seen_at,
-          @latest_characteristics,
-          @inform_channels,
-          @notice,
-          @relation_to_missing,
-          @owner_id,
-          @missingperson_id,
-          @police_station_id
-        )
-      `);
-
-
-  
-//ส่งผลลัพธ์กลับ
-    res.status(201).json({
-      message: "บันทึกข้อมูลสำเร็จ"
-    });
-
-  } catch (err) {
-    console.error("DB Error:", err);
-    res.status(500).json({
-      message: "เกิดข้อผิดพลาด",
-      error: err.message
-    });
   }
-
-});
+);
 
 
 /*========== GET/api/mising-case ==========*/
@@ -286,6 +201,7 @@ router.get("/:id", async (req, res) => {
         SELECT 
           mc.case_id,
           mp.missing_name,
+          mc.latest_status,
           mp.gender,
           mp.age,
           mp.race,
@@ -408,5 +324,95 @@ router.put("/:id", async (req, res) => {
     });
   }
 });
+
+/*========== UPDATE STATUS ==========*/
+router.put("/:id/status", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const pool = await sql.connect(dbConfig);
+
+    await pool.request()
+      .input("id", sql.Int, id)
+      .input("status", sql.NVarChar, status)
+      .query(`
+        UPDATE MissingCase
+        SET latest_status = @status
+        WHERE case_id = @id
+      `);
+
+    res.json({
+      success: true,
+      message: "อัปเดตสถานะสำเร็จ"
+    });
+
+  } catch (err) {
+    console.error("STATUS ERROR:", err);
+    res.status(500).json({
+      success: false,
+      error: err.message
+    });
+  }
+});
+
+/*========== DELETE (Phase 1) ==========*/
+router.delete("/:id", async (req, res) => {
+  try {
+    const { id } = req.params; // case_id
+    const pool = await sql.connect(dbConfig);
+    const transaction = new sql.Transaction(pool);
+    await transaction.begin();
+
+    try {
+      // 1. หา log_id ทั้งหมดที่ผูกกับ case_id นี้ก่อน
+      const logData = await transaction.request()
+        .input("case_id_find", sql.Int, id) // ใช้ชื่อตัวแปรที่ต่างกันเพื่อความชัดเจน
+        .query(`SELECT log_id FROM StatusLog WHERE case_id = @case_id_find`);
+      
+      const logIds = logData.recordset.map(row => row.log_id);
+
+      // ถ้ามี Log ให้ทำการลบตารางลูกของ Log ก่อน
+      if (logIds.length > 0) {
+        const idList = logIds.join(',');
+
+        // ลบข้อมูลลักษณะเด่นที่ผูกกับ log_id
+        await transaction.request()
+          .query(`DELETE FROM Missingperson_Character_Log WHERE log_id IN (${idList})`);
+        
+        // ลบข้อมูลสถานที่ที่ผูกกับ log_id
+        await transaction.request()
+          .query(`DELETE FROM Last_Seen_Log WHERE log_id IN (${idList})`);
+
+        // ลบตัวแม่ของประวัติ (StatusLog)
+        await transaction.request()
+          .query(`DELETE FROM StatusLog WHERE log_id IN (${idList})`);
+      }
+
+      // 2. ลบ ReportedTips (ถ้ามี)
+      await transaction.request()
+        .input("case_id_tips", sql.Int, id)
+        .query(`DELETE FROM ReportedTips WHERE case_id = @case_id_tips`);
+
+      // 3. ลบตัวคดีหลัก (MissingCase) เป็นลำดับสุดท้าย
+      await transaction.request()
+        .input("case_id_main", sql.Int, id)
+        .query(`DELETE FROM MissingCase WHERE case_id = @case_id_main`);
+
+      await transaction.commit();
+      res.json({ success: true, message: `ลบข้อมูลคดี ID ${id} และประวัติที่เกี่ยวข้องทั้งหมดเรียบร้อยแล้ว` });
+
+    } catch (err) {
+      if (transaction) await transaction.rollback();
+      throw err;
+    }
+
+  } catch (err) {
+    console.error("DELETE ERROR:", err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+
 
 module.exports = router;
