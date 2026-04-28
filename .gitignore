@@ -1,0 +1,11 @@
+# กันไฟล์ใน node_modules ไม่ให้ขึ้น git
+node_modules/
+
+# กันรูปภาพทดสอบใน uploads ของฝั่ง back-end
+back-end/uploads/*.jpg
+back-end/uploads/*.png
+back-end/uploads/*.jpeg
+
+# (ทางเลือก) ถ้าฝั่ง front-end มีรูปขยะเยอะ ก็เพิ่มได้ครับ
+front-end/*.png
+front-end/*.jpg
