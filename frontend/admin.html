@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin - จัดการเคส</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      background: #f4f6f9;
+    }
+
+    .card {
+      border-radius: 15px;
+    }
+
+    .status-badge {
+      font-size: 0.85rem;
+      padding: 5px 10px;
+      border-radius: 20px;
+      display: inline-block;
+      min-width: 120px;
+    }
+
+    .status-default { background: #6c757d; color: #fff; }
+    .status-waiting { background: #ffc107; color: #000; }
+    .status-progress { background: #0dcaf0; color: #000; }
+    .status-found { background: #198754; color: #fff; }
+
+    .table td, .table th {
+      vertical-align: middle;
+    }
+
+    .action-btns {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark" style="background:#0b2c4d;">
+  <div class="container-fluid">
+    <a class="navbar-brand d-flex align-items-center gap-2" href="Homepage.html">
+      <img src="LOGO ThaiPBS.png" height="40" alt="logo">
+      <span class="fw-bold">ศูนย์ข้อมูลคนหาย</span>
+    </a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainMenu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse justify-content-end" id="mainMenu">
+      <ul class="navbar-nav align-items-lg-center gap-2">
+        <li class="nav-item">
+          <a class="nav-link" href="Homepage.html">หน้าหลัก</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="report-missing-step/report-missing-step.html">แจ้งคนหาย</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">แจ้งเบาะแส</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">ติดตามเคส</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="admin.html">สำหรับเจ้าหน้าที่</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-4">
+  <p class="text-muted text-center mx-auto mb-4" style="max-width:700px;">
+    หน้านี้สำหรับเจ้าหน้าที่ใช้ติดตาม แก้ไข ลบ และเปลี่ยนสถานะเคสคนหาย
+  </p>
+
+  <div class="card shadow p-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+      <h4 class="mb-0">📋 จัดการสถานะเคสคนหาย</h4>
+      <button type="button" class="btn btn-outline-primary" onclick="loadCases()">รีเฟรชข้อมูล</button>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover align-middle text-center">
+        <thead class="table-dark">
+          <tr>
+            <th>ID</th>
+            <th>ชื่อผู้สูญหาย</th>
+            <th>เหตุผล/หัวข้อ</th>
+            <th>ความเร่งด่วน</th>
+            <th>สถานะ</th>
+            <th>เปลี่ยนสถานะ</th>
+            <th>จัดการ</th>
+          </tr>
+        </thead>
+        <tbody id="caseTable"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal fade" id="editCaseModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <form id="editCaseForm">
+        <div class="modal-header">
+          <h5 class="modal-title">แก้ไขข้อมูลเคส</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <input type="hidden" id="edit_case_id">
+
+          <div class="mb-3">
+            <label class="form-label">ชื่อผู้สูญหาย</label>
+            <input type="text" class="form-control" id="edit_missing_name" required>
+          </div>
+
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label class="form-label">เพศ</label>
+              <select class="form-select" id="edit_gender">
+                <option value="">-- เลือก --</option>
+                <option value="ชาย">ชาย</option>
+                <option value="หญิง">หญิง</option>
+                <option value="อื่น ๆ">อื่น ๆ</option>
+              </select>
+            </div>
+
+            <div class="col-md-4 mb-3">
+              <label class="form-label">อายุ</label>
+              <input type="number" class="form-control" id="edit_age" min="0" max="120">
+            </div>
+
+            <div class="col-md-4 mb-3">
+              <label class="form-label">สัญชาติ</label>
+              <input type="text" class="form-control" id="edit_race">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">หัวข้อการแจ้ง</label>
+            <input type="text" class="form-control" id="edit_missing_reason">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">ความเร่งด่วน</label>
+            <select class="form-select" id="edit_priority">
+              <option value="กลาง">กลาง</option>
+              <option value="สูง">สูง</option>
+              <option value="สูงมาก">สูงมาก</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">ความสัมพันธ์กับคนหาย</label>
+            <input type="text" class="form-control" id="edit_relation_to_missing">
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+          <button type="submit" class="btn btn-primary">บันทึกการแก้ไข</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+const API = "http://localhost:3000/api/missing-persons";
+let caseList = [];
+const editModal = new bootstrap.Modal(document.getElementById("editCaseModal"));
+
+function getStatusClass(status) {
+  if (!status) return "status-default";
+
+  if (status.includes("รับแจ้ง")) return "status-waiting";
+  if (status.includes("กำลังตรวจสอบ") || status.includes("ประชาสัมพันธ์")) return "status-progress";
+  if (status.includes("พบเบาะแส") || status.includes("พบแล้ว")) return "status-found";
+
+  return "status-default";
+}
+
+function getStatusOptions(currentStatus) {
+  const options = [
+    { value: "รับแจ้งเคส", label: "รับแจ้งเคส" },
+    { value: "กำลังตรวจสอบ", label: "กำลังตรวจสอบ" },
+    { value: "ประชาสัมพันธ์ครั้งที่ 1", label: "ประชาสัมพันธ์ครั้งที่ 1" },
+    { value: "พบเบาะแสครั้งที่ 1", label: "พบเบาะแสครั้งที่ 1" }
+  ];
+
+  return options.map(opt => `
+    <option value="${opt.value}" ${currentStatus === opt.value ? "selected" : ""}>
+      ${opt.label}
+    </option>
+  `).join("");
+}
+
+async function loadCases() {
+  try {
+    const res = await fetch(API);
+    const result = await res.json();
+
+    const rows = Array.isArray(result) ? result : (result.data || []);
+
+    caseList = rows;
+
+    const table = document.getElementById("caseTable");
+    table.innerHTML = "";
+
+    if (caseList.length === 0) {
+      table.innerHTML = `
+        <tr>
+          <td colspan="7" class="text-muted py-4">ยังไม่มีข้อมูลเคส</td>
+        </tr>
+      `;
+      return;
+    }
+
+    caseList.forEach(item => {
+      const currentStatus = item.latest_status || "รับแจ้งเคส";
+
+      table.innerHTML += `
+        <tr>
+          <td>${item.case_id ?? "-"}</td>
+          <td>${item.missing_name || "-"}</td>
+          <td>${item.missing_reason || "-"}</td>
+          <td>${item.priority || "-"}</td>
+          <td>
+            <span class="status-badge ${getStatusClass(currentStatus)}">
+              ${currentStatus}
+            </span>
+          </td>
+          <td style="min-width: 220px;">
+            <select onchange="updateStatus(${item.case_id}, this.value)" class="form-select">
+              ${getStatusOptions(currentStatus)}
+            </select>
+          </td>
+          <td style="min-width: 180px;">
+            <div class="action-btns">
+              <button type="button" class="btn btn-sm btn-warning" onclick="openEditModal(${item.case_id})">แก้ไข</button>
+              <button type="button" class="btn btn-sm btn-danger" onclick="deleteCase(${item.case_id})">ลบ</button>
+            </div>
+          </td>
+        </tr>
+      `;
+    });
+
+  } catch (err) {
+    console.error("LOAD CASES ERROR:", err);
+    alert("ไม่สามารถโหลดรายการเคสได้");
+  }
+}
+
+async function updateStatus(id, status) {
+  try {
+    const res = await fetch(`${API}/${id}/status`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ status })
+    });
+
+    const result = await res.json();
+
+    if (result.success === false) {
+      throw new Error(result.error || "อัปเดตสถานะไม่สำเร็จ");
+    }
+
+    alert("อัปเดตสถานะสำเร็จ");
+    loadCases();
+  } catch (err) {
+    console.error("UPDATE STATUS ERROR:", err);
+    alert("ไม่สามารถอัปเดตสถานะได้");
+  }
+}
+
+async function openEditModal(id) {
+  try {
+    const res = await fetch(`${API}/${id}`);
+    const result = await res.json();
+
+    const item = result.data || result;
+
+    if (!item || (!item.case_id && !item.missing_name)) {
+      throw new Error("โหลดข้อมูลเคสไม่สำเร็จ");
+    }
+
+    document.getElementById("edit_case_id").value = item.case_id || "";
+    document.getElementById("edit_missing_name").value = item.missing_name || "";
+    document.getElementById("edit_gender").value = item.gender || "";
+    document.getElementById("edit_age").value = item.age || "";
+    document.getElementById("edit_race").value = item.race || "";
+    document.getElementById("edit_missing_reason").value = item.missing_reason || "";
+    document.getElementById("edit_priority").value = item.priority || "กลาง";
+    document.getElementById("edit_relation_to_missing").value = item.relation_to_missing || "";
+
+    editModal.show();
+  } catch (err) {
+    console.error("GET CASE DETAIL ERROR:", err);
+    alert("ไม่สามารถโหลดข้อมูลสำหรับแก้ไขได้");
+  }
+}
+
+document.getElementById("editCaseForm").addEventListener("submit", async function (e) {
+  e.preventDefault();
+
+  const id = document.getElementById("edit_case_id").value;
+
+  const payload = {
+    missing_name: document.getElementById("edit_missing_name").value,
+    gender: document.getElementById("edit_gender").value,
+    age: document.getElementById("edit_age").value ? Number(document.getElementById("edit_age").value) : null,
+    race: document.getElementById("edit_race").value,
+    priority: document.getElementById("edit_priority").value,
+    missing_reason: document.getElementById("edit_missing_reason").value,
+    relation_to_missing: document.getElementById("edit_relation_to_missing").value
+  };
+
+  try {
+    const res = await fetch(`${API}/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const result = await res.json();
+
+    if (result.success === false) {
+      throw new Error(result.error || "แก้ไขข้อมูลไม่สำเร็จ");
+    }
+
+    alert("แก้ไขข้อมูลสำเร็จ");
+    editModal.hide();
+    loadCases();
+  } catch (err) {
+    console.error("EDIT CASE ERROR:", err);
+    alert("ไม่สามารถแก้ไขข้อมูลได้");
+  }
+});
+
+async function deleteCase(id) {
+  const confirmed = confirm(`ต้องการลบเคส ID ${id} ใช่หรือไม่?`);
+  if (!confirmed) return;
+
+  try {
+    const res = await fetch(`${API}/${id}`, {
+      method: "DELETE"
+    });
+
+    const result = await res.json();
+
+    if (result.success === false) {
+      throw new Error(result.error || "ลบข้อมูลไม่สำเร็จ");
+    }
+
+    alert("ลบข้อมูลสำเร็จ");
+    loadCases();
+  } catch (err) {
+    console.error("DELETE CASE ERROR:", err);
+    alert("ไม่สามารถลบข้อมูลได้");
+  }
+}
+
+loadCases();
+</script>
+
+</body>
+</html>
