@@ -100,10 +100,23 @@
     <!-- STEP 2 -->
     <section class="step" data-step="2">
       <h4>2. ข้อมูลผู้แจ้ง</h4>
-
-      <div class="mb-3">
-        <label class="form-label">ชื่อ-สกุลผู้แจ้ง</label>
-        <input type="text" class="form-control" name="owner_name" required>
+      <div class="row">
+        <div class="col-md-3 mb-3">
+          <label class="form-label">คำนำหน้า</label>
+          <select class="form-select" name="owner_title" required>
+            <option value="">-- เลือก --</option>
+            <option value="นาย">นาย</option>
+            <option value="นาง">นาง</option>
+            <option value="นางสาว">นางสาว</option>
+            <option value="เด็กชาย">เด็กชาย</option>
+            <option value="เด็กหญิง">เด็กหญิง</option>
+          </select>
+        </div>
+      
+        <div class="col-md-9 mb-3">
+          <label class="form-label">ชื่อ-สกุลผู้แจ้ง</label>
+          <input type="text" class="form-control" name="owner_name" required>
+        </div>
       </div>
 
       <div class="mb-3">

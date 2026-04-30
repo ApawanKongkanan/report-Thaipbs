@@ -142,7 +142,13 @@ async function nextStep() {
 
     if (response.ok) {
       alert("✅ ส่งข้อมูลเรียบร้อย");
-      window.location.reload();
+    
+      if (result.case_id) {
+        window.location.href = `../track-case.html?case_id=${result.case_id}`;
+      } else {
+        const missingName = formData.get("missing_name") || "";
+        window.location.href = `../track-case.html?name=${encodeURIComponent(missingName)}`;
+      }
     } else {
       alert("❌ เกิดข้อผิดพลาด");
       console.log(result);
