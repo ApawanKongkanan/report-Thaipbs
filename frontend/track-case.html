@@ -133,11 +133,8 @@
             <a class="nav-link" href="admin.html">สำหรับเจ้าหน้าที่</a>
           </li>
   
-          <li class="nav-item ms-lg-3">
-            <button class="btn btn-outline-light rounded-pill">
-              <i class="fa-solid fa-user"></i> เข้าสู่ระบบ
-            </button>
-          </li>
+          <li class="nav-item" id="dashboardMenu"></li>
+<li class="nav-item ms-lg-3" id="authBtn"></li>
   
         </ul>
       </div>
@@ -174,6 +171,7 @@
   </div>
 
   <script>
+    const isAdmin = localStorage.getItem("isAdminLogin");
     const API = "http://localhost:3000/api/missing-persons";
 
     function getStatusClass(status) {
@@ -199,6 +197,11 @@
       return "bg-success";
     }
 
+    function getTipsByCaseId(caseId) {
+  const tips = JSON.parse(localStorage.getItem("tips")) || [];
+  return tips.filter(t => String(t.caseId) === String(caseId));
+}
+
     function renderCases(cases) {
       const resultBox = document.getElementById("resultBox");
 
@@ -220,7 +223,7 @@
         const progressClass = getProgressColorClass(progress);
 
         return `
-          <div class="card case-card">
+        <div class="card case-card" data-id="${item.case_id}">
             <div class="card-body p-4">
               <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
                 <div>
@@ -267,6 +270,15 @@
                 </div>
               </div>
 
+              <div class="mb-3">
+  <strong>เบาะแส:</strong> ${getTipsByCaseId(item.case_id).length} รายการ
+</div>
+${getTipsByCaseId(item.case_id).slice(-2).map(t => `
+  <div class="small text-muted">
+    📍 ${t.location} (${t.date})
+  </div>
+`).join("")}
+
               <div class="d-flex flex-wrap gap-2">
                 <a href="tip-form.html?case_id=${item.case_id}" class="btn btn-primary">
                   <i class="fa-solid fa-lightbulb"></i> แจ้งเบาะแส
@@ -279,6 +291,8 @@
           </div>
         `;
       }).join("");
+
+      highlightCaseFromURL();
     }
 
     function viewCaseDetail(caseId) {
@@ -309,6 +323,7 @@
           );
         }
 
+
         renderCases(filtered);
       } catch (error) {
         console.error("LOAD TRACK CASE ERROR:", error);
@@ -321,6 +336,20 @@
         `;
       }
     }
+    function highlightCaseFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  const caseId = params.get("case_id");
+
+  if (!caseId) return;
+
+  setTimeout(() => {
+    const el = document.querySelector(`[data-id="${caseId}"]`);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+      el.classList.add("border-primary");
+    }
+  }, 300);
+}
 
     function handleSearch() {
       const name = document.getElementById("searchInput").value || "";
@@ -337,14 +366,59 @@
     });
 
     const params = new URLSearchParams(window.location.search);
-    const nameFromQuery = params.get("name") || "";
+    const caseIdFromQuery = params.get("case_id");
+const nameFromQuery = params.get("name") || "";
 
-    if (nameFromQuery) {
-      document.getElementById("searchInput").value = nameFromQuery;
-      loadCasesByName(nameFromQuery);
-    } else {
-      loadCasesByName();
-    }
+if (caseIdFromQuery) {
+  loadCasesByName();
+} 
+else if (nameFromQuery) {
+  document.getElementById("searchInput").value = nameFromQuery;
+  loadCasesByName(nameFromQuery);
+} 
+else {
+  loadCasesByName();
+}
+function renderAuthButton() {
+  const isAdmin = localStorage.getItem("isAdminLogin");
+  const el = document.getElementById("authBtn");
+
+  if (isAdmin === "true") {
+    el.innerHTML = `
+      <button class="btn btn-outline-danger" onclick="logoutAdmin()">
+        ออกจากระบบ
+      </button>
+    `;
+  } else {
+    el.innerHTML = `
+      <button class="btn btn-outline-light rounded-pill"
+        onclick="window.location.href='login.html'">
+        <i class="fa-solid fa-user"></i> เข้าสู่ระบบ
+      </button>
+    `;
+  }
+}
+function renderDashboardMenu() {
+  const isAdmin = localStorage.getItem("isAdminLogin");
+  const el = document.getElementById("dashboardMenu");
+
+  if (!el) return;
+
+  if (isAdmin === "true") {
+    el.innerHTML = `
+      <a class="nav-link" href="dashboard.html">สรุปภาพรวม</a>
+    `;
+  } else {
+    el.innerHTML = "";
+  }
+}
+function logoutAdmin() {
+  localStorage.removeItem("isAdminLogin");
+  localStorage.removeItem("adminUsername");
+  window.location.reload();
+}
+renderAuthButton();
+renderDashboardMenu();
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

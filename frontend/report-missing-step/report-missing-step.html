@@ -461,12 +461,52 @@ fetch("../partials/header.html")
   .then(res => res.text())
   .then(html => {
     document.getElementById("header").innerHTML = html;
+
+    // 🔥 สำคัญมาก: ต้องเรียกหลัง inject HTML
+    renderNavbar();
   })
   .catch(err => console.error("โหลด header ไม่ได้", err));
 </script>
 
 <script src="script-step.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function renderNavbar() {
+    const isAdmin = localStorage.getItem("isAdminLogin");
+  
+    const authBtn = document.getElementById("authBtn");
+    const dashboardMenu = document.getElementById("dashboardMenu");
+  
+    if (!authBtn || !dashboardMenu) return;
+  
+    if (isAdmin === "true") {
+      authBtn.innerHTML = `
+        <button class="btn btn-outline-danger" onclick="logoutAdmin()">
+          ออกจากระบบ
+        </button>
+      `;
+  
+      dashboardMenu.innerHTML = `
+        <a class="nav-link" href="../dashboard.html">สรุปภาพรวม</a>
+      `;
+    } else {
+      authBtn.innerHTML = `
+        <button class="btn btn-outline-light rounded-pill"
+          onclick="window.location.href='../login.html'">
+          <i class="fa-solid fa-user"></i> เข้าสู่ระบบ
+        </button>
+      `;
+  
+      dashboardMenu.innerHTML = "";
+    }
+  }
+  
+  function logoutAdmin() {
+    localStorage.removeItem("isAdminLogin");
+    window.location.href = "../Homepage.html";
+  }
+  
 
+  </script>
 </body>
 </html>

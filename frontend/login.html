@@ -78,9 +78,9 @@
       const loginError = document.getElementById("loginError");
 
       if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-        localStorage.setItem("isAdminLoggedIn", "true");
+        localStorage.setItem("isAdminLogin", "true");
         localStorage.setItem("adminUsername", username);
-        window.location.href = "admin.html";
+        window.location.href = "dashboard.html";
       } else {
         loginError.classList.remove("d-none");
       }

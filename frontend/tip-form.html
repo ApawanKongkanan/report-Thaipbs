@@ -11,8 +11,14 @@
 
   <style>
     body {
-      background: #f4f6f9;
-    }
+  background: #f4f6f9;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+body.loaded {
+  opacity: 1;
+}
 
     .page-card {
       border: none;
@@ -27,6 +33,9 @@
       border-radius: 14px;
       padding: 18px;
     }
+    .case-info-box {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
 
     .section-title {
       color: #0b2c4d;
@@ -97,11 +106,8 @@
             <a class="nav-link" href="admin.html">สำหรับเจ้าหน้าที่</a>
           </li>
   
-          <li class="nav-item ms-lg-3">
-            <button class="btn btn-outline-light rounded-pill">
-              <i class="fa-solid fa-user"></i> เข้าสู่ระบบ
-            </button>
-          </li>
+          <li class="nav-item" id="dashboardMenu"></li>
+<li class="nav-item ms-lg-3" id="authBtn"></li>
   
         </ul>
       </div>
@@ -116,7 +122,7 @@
       </p>
 
       <!-- ส่วนค้นหาเคส -->
-      <div id="caseSearchSection" class="search-box mb-4" style="display:none;">
+      <div id="caseSearchSection" class="search-box mb-4">
         <h5 class="mb-3">1. เลือกเคสที่ต้องการแจ้งเบาะแส</h5>
 
         <div class="row g-3 align-items-end">
@@ -140,8 +146,7 @@
       </div>
 
       <!-- ข้อมูลเคสที่เลือก -->
-      <div id="caseInfo" class="case-info-box mb-4">
-        กำลังโหลดข้อมูลเคส...
+      <div id="caseInfo" class="case-info-box mb-4" style="opacity:0.5;">
       </div>
 
       <form id="tipForm">
@@ -214,217 +219,309 @@
     </div>
   </div>
 
-  <script>
-    const CASE_API = "http://localhost:3000/api/missing-persons";
-    const TIP_API = "http://localhost:3000/api/reports";
+<!-- (ตัด head + css เหมือนของคุณ ใช้ของเดิมได้) -->
 
-    const params = new URLSearchParams(window.location.search);
-    let caseId = params.get("case_id") || "";
-
-    function goBackToTrack() {
-      if (caseId) {
-        window.location.href = `track-case.html?case_id=${caseId}`;
-      } else {
-        window.location.href = "track-case.html";
-      }
+<script>
+  const CASE_API = "http://localhost:3000/api/missing-persons";
+  const TIP_API = "http://localhost:3000/api/reports";
+  
+  const params = new URLSearchParams(window.location.search);
+  let caseId = params.get("case_id") || "";
+  
+  /* =========================
+     NAVIGATION
+  ========================= */
+  function goBackToTrack() {
+    if (caseId) {
+      window.location.href = `track-case.html?case_id=${caseId}`;
+    } else {
+      window.location.href = "track-case.html";
     }
-
-    function renderCaseInfo(item) {
-      const caseInfo = document.getElementById("caseInfo");
-      caseInfo.innerHTML = `
-        <div class="row g-3">
-          <div class="col-md-6">
-            <div><strong>เลขเคส:</strong> ${item.case_id || "-"}</div>
-            <div><strong>ชื่อผู้สูญหาย:</strong> ${item.missing_name || "-"}</div>
-            <div><strong>เพศ:</strong> ${item.gender || "-"}</div>
-          </div>
-          <div class="col-md-6">
-            <div><strong>อายุ:</strong> ${item.age || "-"}</div>
-            <div><strong>เหตุผล/หัวข้อ:</strong> ${item.missing_reason || "-"}</div>
-            <div><strong>สถานะล่าสุด:</strong> ${item.latest_status || "-"}</div>
-          </div>
+  }
+  
+  /* =========================
+     RENDER CASE INFO
+  ========================= */
+  function renderCaseInfo(item) {
+    const caseInfo = document.getElementById("caseInfo");
+  
+    caseInfo.innerHTML = `
+      <div class="row g-3">
+        <div class="col-md-6">
+          <div><strong>เลขเคส:</strong> ${item.case_id || item.id}</div>
+          <div><strong>ชื่อ:</strong> ${item.missing_name || item.name}</div>
         </div>
-      `;
+        <div class="col-md-6">
+          <div><strong>อายุ:</strong> ${item.age || "-"}</div>
+          <div><strong>หัวข้อ:</strong> ${item.missing_reason || item.reason}</div>
+        </div>
+      </div>
+    `;
+  }
+  
+  /* =========================
+     LOAD CASE
+  ========================= */
+  async function loadCaseInfoById(selectedCaseId) {
+    document.getElementById("case_id").value = selectedCaseId;
+  
+    try {
+      const res = await fetch(`${CASE_API}/${selectedCaseId}`);
+      const result = await res.json();
+      const item = result.data || result;
+  
+      renderCaseInfo(item);
+
+const el = document.getElementById("caseInfo");
+el.style.opacity = "1";
+el.style.transform = "translateY(0)";
+  
+    } catch {
+      // fallback local
+      const cases = JSON.parse(localStorage.getItem("cases")) || [];
+      const item = cases.find(c => String(c.id) === String(selectedCaseId));
+  
+      if (item) {
+  renderCaseInfo(item);
+
+  const el = document.getElementById("caseInfo");
+  el.style.opacity = "1";
+  el.style.transform = "translateY(0)";
+}
+      else document.getElementById("caseInfo").innerHTML = "ไม่พบข้อมูล";
     }
+  }
+  
+  /* =========================
+     SEARCH CASE
+  ========================= */
+  async function searchCasesByName() {
+    const keyword = document.getElementById("caseSearchInput").value.toLowerCase();
+    const resultBox = document.getElementById("caseSearchResult");
 
-    async function loadCaseInfoById(selectedCaseId) {
-      const caseInfo = document.getElementById("caseInfo");
+    resultBox.style.display = "block";
+    resultBox.innerHTML = "กำลังค้นหา...";
 
-      if (!selectedCaseId) {
-        caseInfo.innerHTML = `
-          <div class="text-danger">
-            กรุณาเลือกเคสก่อนแจ้งเบาะแส
-          </div>
-        `;
-        return;
-      }
-
-      document.getElementById("case_id").value = selectedCaseId;
-
-      try {
-        const res = await fetch(`${CASE_API}/${selectedCaseId}`);
-        const result = await res.json();
-        const item = result.data || result;
-
-        if (!item || (!item.case_id && !item.missing_name)) {
-          throw new Error("ไม่พบข้อมูลเคส");
-        }
-
-        renderCaseInfo(item);
-      } catch (error) {
-        console.error("LOAD CASE INFO ERROR:", error);
-        caseInfo.innerHTML = `
-          <div class="text-danger">
-            ไม่สามารถโหลดข้อมูลเคสได้
-          </div>
-        `;
-      }
+    if (!keyword.trim()) {
+  resultBox.innerHTML = "กรุณาพิมพ์ชื่อก่อนค้นหา";
+  resultBox.style.display = "block";
+  return;
+}
+  
+    let rows = [];
+  
+    try {
+      const res = await fetch(CASE_API);
+      const result = await res.json();
+      rows = Array.isArray(result) ? result : (result.data || []);
+    } catch {
+      rows = JSON.parse(localStorage.getItem("cases")) || [];
     }
-
-    async function searchCasesByName() {
-      const keyword = document.getElementById("caseSearchInput").value.trim().toLowerCase();
-      const resultBox = document.getElementById("caseSearchResult");
-
-      if (!keyword) {
-        resultBox.style.display = "block";
-        resultBox.innerHTML = `<div class="text-danger">กรุณาพิมพ์ชื่อผู้สูญหายก่อนค้นหา</div>`;
-        return;
-      }
-
+  
+    const filtered = rows.filter(item =>
+      (item.missing_name || item.name || "").toLowerCase().includes(keyword)
+    );
+  
+    if (filtered.length === 0) {
+      resultBox.innerHTML = "ไม่พบเคส";
       resultBox.style.display = "block";
-      resultBox.innerHTML = `<div class="text-muted">กำลังค้นหาข้อมูลเคส...</div>`;
-
-      try {
-        const res = await fetch(CASE_API);
-        const result = await res.json();
-        const rows = Array.isArray(result) ? result : (result.data || []);
-
-        const filtered = rows.filter(item =>
-          (item.missing_name || "").toLowerCase().includes(keyword)
-        );
-
-        if (filtered.length === 0) {
-          resultBox.innerHTML = `<div class="text-muted">ไม่พบเคสที่ตรงกับชื่อที่ค้นหา</div>`;
-          return;
-        }
-
-        resultBox.innerHTML = filtered.map(item => `
-          <div class="case-select-card ${String(caseId) === String(item.case_id) ? "selected-case" : ""}">
-            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
-              <div>
-                <div><strong>เลขเคส:</strong> ${item.case_id || "-"}</div>
-                <div><strong>ชื่อผู้สูญหาย:</strong> ${item.missing_name || "-"}</div>
-                <div><strong>หัวข้อ:</strong> ${item.missing_reason || "-"}</div>
-                <div><strong>สถานะ:</strong> ${item.latest_status || "-"}</div>
-              </div>
-              <div>
-                <button type="button" class="btn btn-sm btn-primary" onclick="selectCase(${item.case_id})">
-                  เลือกเคสนี้
-                </button>
-              </div>
-            </div>
-          </div>
-        `).join("");
-      } catch (error) {
-        console.error("SEARCH CASE ERROR:", error);
-        resultBox.innerHTML = `<div class="text-danger">ไม่สามารถค้นหาข้อมูลเคสได้</div>`;
-      }
+      return;
     }
+  
+    resultBox.style.display = "block";
+    resultBox.innerHTML = filtered.map(item => `
+      <div class="case-select-card">
+        <div>
+          <strong>${item.missing_name || item.name}</strong><br>
+          ${item.missing_reason || item.reason}
+        </div>
+        <button class="btn btn-sm btn-primary mt-2"
+          onclick="selectCase(${item.case_id || item.id})">
+          เลือก
+        </button>
+      </div>
+    `).join("");
+  }
+  
+  function selectCase(id) {
 
-    function selectCase(selectedCaseId) {
-      caseId = String(selectedCaseId);
-      document.getElementById("case_id").value = caseId;
-      loadCaseInfoById(caseId);
+caseId = id;
 
-      const url = new URL(window.location.href);
-      url.searchParams.set("case_id", caseId);
-      window.history.replaceState({}, "", url);
+const info = document.getElementById("caseInfo");
 
-      const resultBox = document.getElementById("caseSearchResult");
-      const cards = resultBox.querySelectorAll(".case-select-card");
-      cards.forEach(card => card.classList.remove("selected-case"));
+// ✅ เพิ่มตรงนี้
 
-      const selectedButton = Array.from(resultBox.querySelectorAll("button")).find(
-        btn => btn.getAttribute("onclick") === `selectCase(${selectedCaseId})`
-      );
+info.style.opacity = "0.3";
 
-      if (selectedButton) {
-        const card = selectedButton.closest(".case-select-card");
-        if (card) card.classList.add("selected-case");
-      }
-    }
+info.style.transform = "translateY(5px)";
 
-    document.getElementById("tipForm").addEventListener("submit", async function (e) {
-      e.preventDefault();
+setTimeout(() => {
 
-      if (!caseId) {
-        alert("กรุณาเลือกเคสก่อนแจ้งเบาะแส");
-        return;
-      }
+  loadCaseInfoById(id);
 
-      const phoneInput = document.getElementById("tipster_phone");
-      const phoneRegex = /^[0-9]{10}$/;
+}, 200);
 
-      if (!phoneRegex.test(phoneInput.value.trim())) {
-        phoneInput.classList.add("is-invalid");
-        phoneInput.reportValidity();
-        return;
-      } else {
-        phoneInput.classList.remove("is-invalid");
-      }
+  const url = new URL(window.location.href);
+  url.searchParams.set("case_id", id);
+  window.history.replaceState({}, "", url);
 
-      const form = document.getElementById("tipForm");
-      const formData = new FormData(form);
-      formData.set("case_id", caseId);
+  // 🔥 highlight card
+  document.querySelectorAll(".case-select-card")
+    .forEach(el => el.classList.remove("selected-case"));
 
-      try {
-        const res = await fetch(TIP_API, {
-          method: "POST",
-          body: formData
-        });
+  const btn = [...document.querySelectorAll("button")]
+  .find(b => b.getAttribute("onclick")?.includes(`selectCase(${id})`));
 
-        const result = await res.json();
+  if (btn) {
+    btn.closest(".case-select-card")?.classList.add("selected-case");
+  }
 
-        if (res.ok) {
-          alert("✅ ส่งเบาะแสเรียบร้อย");
-          goBackToTrack();
-        } else {
-          alert("❌ เกิดข้อผิดพลาดในการส่งเบาะแส");
-          console.log(result);
-        }
-      } catch (error) {
-        console.error("SUBMIT TIP ERROR:", error);
-        alert("❌ ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
-      }
+  document.getElementById("caseInfo").scrollIntoView({ behavior: "smooth" });
+}
+  
+  /* =========================
+     SUBMIT TIP (สำคัญสุด🔥)
+  ========================= */
+  document.getElementById("tipForm").addEventListener("submit", async function (e) {
+  e.preventDefault();
+
+  const submitBtn = this.querySelector("button[type='submit']");
+  submitBtn.disabled = true;
+
+  if (!caseId) {
+    alert("กรุณาเลือกเคสก่อน");
+    submitBtn.disabled = false;
+    return;
+  }
+
+  const phone = document.getElementById("tipster_phone").value;
+  if (!/^[0-9]{10}$/.test(phone)) {
+    alert("เบอร์ไม่ถูกต้อง");
+    submitBtn.disabled = false;
+    return;
+  }
+
+  const form = new FormData(this);
+
+  // ✅ save local
+  let tips = JSON.parse(localStorage.getItem("tips")) || [];
+
+  const newTip = {
+    id: Date.now(),
+    caseId: caseId,
+    name: form.get("tipster_name"),
+    phone: form.get("tipster_phone"),
+    location: form.get("tip_location"),
+    date: form.get("tip_date"),
+    time: form.get("tip_time"),
+    detail: form.get("tip_detail"),
+    createdAt: Date.now()
+  };
+
+  tips.push(newTip);
+  localStorage.setItem("tips", JSON.stringify(tips));
+
+  // ✅ ยิง API (optional)
+  try {
+    await fetch(TIP_API, {
+      method: "POST",
+      body: form
     });
+  } catch {
+    console.warn("API ใช้ไม่ได้ ใช้ local แทน");
+  }
 
-    document.getElementById("caseSearchBtn").addEventListener("click", searchCasesByName);
-    document.getElementById("caseSearchInput").addEventListener("keydown", function (e) {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        searchCasesByName();
-      }
-    });
+  // ✅ success
+  alert("✅ ส่งเบาะแสเรียบร้อย");
+  this.reset();
+  submitBtn.disabled = false;
+  goBackToTrack();
+});
+  
+  /* =========================
+     EVENTS
+  ========================= */
+  document.getElementById("caseSearchBtn").addEventListener("click", searchCasesByName);
+  document.getElementById("caseSearchInput").addEventListener("keydown", function(e){
 
-    function initPage() {
-      const caseSearchSection = document.getElementById("caseSearchSection");
+if(e.key === "Enter"){
 
-      if (caseId) {
-        caseSearchSection.style.display = "none";
-        loadCaseInfoById(caseId);
-      } else {
-        caseSearchSection.style.display = "block";
-        document.getElementById("caseInfo").innerHTML = `
-          <div class="text-muted">
-            กรุณาค้นหาและเลือกเคสที่ต้องการแจ้งเบาะแสก่อนกรอกข้อมูล
-          </div>
-        `;
-      }
-    }
+  e.preventDefault();
 
-    initPage();
+  searchCasesByName();
+
+}
+
+});
+  
+  /* =========================
+     INIT
+  ========================= */
+  function initPage() {
+    if (caseId) {
+  loadCaseInfoById(caseId);
+} else {
+  const el = document.getElementById("caseInfo");
+  el.innerHTML = "กรุณาเลือกเคสก่อนแจ้งเบาะแส";
+  el.style.opacity = "1"; // ✅ เพิ่มบรรทัดนี้
+}
+  }
+  
+  initPage();
+
+  window.addEventListener("load", () => {
+  document.body.classList.add("loaded");
+});
+/* =========================
+   AUTH NAVBAR
+========================= */
+function renderAuthButton() {
+  const isAdmin = localStorage.getItem("isAdminLogin");
+  const el = document.getElementById("authBtn");
+
+  if (isAdmin === "true") {
+    el.innerHTML = `
+      <button class="btn btn-outline-danger" onclick="logoutAdmin()">
+        ออกจากระบบ
+      </button>
+    `;
+  } else {
+    el.innerHTML = `
+      <button class="btn btn-outline-light rounded-pill"
+        onclick="window.location.href='login.html'">
+        <i class="fa-solid fa-user"></i> เข้าสู่ระบบ
+      </button>
+    `;
+  }
+}
+
+/* =========================
+   ADMIN MENU
+========================= */
+function renderAdminMenu() {
+  const isAdmin = localStorage.getItem("isAdminLogin");
+
+  if (isAdmin === "true") {
+    document.getElementById("dashboardMenu").innerHTML = `
+      <a class="nav-link" href="dashboard.html">สรุปภาพรวม</a>
+    `;
+  }
+}
+
+/* =========================
+   LOGOUT
+========================= */
+function logoutAdmin() {
+  localStorage.removeItem("isAdminLogin");
+  localStorage.removeItem("adminUsername");
+  window.location.reload();
+}
+renderAuthButton();
+renderAdminMenu();
   </script>
+  
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  
 </body>
 </html>

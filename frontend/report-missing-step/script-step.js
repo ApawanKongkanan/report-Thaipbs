@@ -111,7 +111,7 @@ async function nextStep() {
   const form = document.getElementById("reportForm");
   const formData = new FormData(form);
 
-  // แปลงค่า other ให้ backend รับค่าเป็นข้อความจริง
+  // ===== แปลงค่า other =====
   if (formData.get("relation_to_missing") === "other") {
     formData.set("relation_to_missing", formData.get("other_relationship") || "อื่น ๆ");
   }
@@ -124,14 +124,15 @@ async function nextStep() {
     formData.set("hair_color", formData.get("other_hair_color") || "อื่น ๆ");
   }
 
-  // backend ใช้ role
   formData.set("role", "user");
 
-  // ถ้าไม่มีจังหวัดสถานีตำรวจ ให้ใช้จังหวัดจากสถานที่พบครั้งสุดท้ายแทน
   if (!formData.get("police_station_province")) {
     formData.set("police_station_province", formData.get("province") || "");
   }
 
+  // =========================
+  // 🔥 ใช้ API + fallback
+  // =========================
   try {
     const response = await fetch(API_URL, {
       method: "POST",
@@ -141,21 +142,38 @@ async function nextStep() {
     const result = await response.json();
 
     if (response.ok) {
-      alert("✅ ส่งข้อมูลเรียบร้อย");
-    
-      if (result.case_id) {
-        window.location.href = `../track-case.html?case_id=${result.case_id}`;
-      } else {
-        const missingName = formData.get("missing_name") || "";
-        window.location.href = `../track-case.html?name=${encodeURIComponent(missingName)}`;
-      }
-    } else {
-      alert("❌ เกิดข้อผิดพลาด");
-      console.log(result);
+      alert("✅ ส่งข้อมูลเรียบร้อย (ใช้ API)");
+
+      window.location.href = "../admin.html";
+      return;
     }
+
+    throw new Error("API error");
+
   } catch (error) {
-    console.error(error);
-    alert("❌ ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
+
+    console.warn("⚠️ API ใช้ไม่ได้ → ใช้ localStorage แทน");
+
+    // =========================
+    // 🔥 fallback localStorage
+    // =========================
+    let cases = JSON.parse(localStorage.getItem("cases")) || [];
+
+    const newCase = {
+      id: Date.now(),
+      name: formData.get("missing_name"),
+      reason: formData.get("missing_reason"),
+      priority: formData.get("priority"),
+      createdAt: Date.now()
+    };
+
+    cases.push(newCase);
+
+    localStorage.setItem("cases", JSON.stringify(cases));
+
+    alert("✅ บันทึกข้อมูลเรียบร้อย (offline mode)");
+
+    window.location.href = "../admin.html";
   }
 }
 

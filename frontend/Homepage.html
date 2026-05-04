@@ -60,11 +60,8 @@
             <a class="nav-link" href="admin.html">สำหรับเจ้าหน้าที่</a>
           </li>
   
-          <li class="nav-item ms-lg-3">
-            <a href="login.html" class="btn btn-outline-light rounded-pill">
-              <i class="fa-solid fa-user"></i> เข้าสู่ระบบ
-            </a>
-          </li>
+          <li class="nav-item" id="dashboardMenu"></li>
+<li class="nav-item ms-lg-3" id="authBtn"></li>
   
         </ul>
       </div>
@@ -155,5 +152,55 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <!-- Custom JS -->
+<script>
+  /* =========================
+     AUTH NAVBAR
+  ========================= */
+  function renderAuthButton() {
+    const isAdmin = localStorage.getItem("isAdminLogin");
+    const el = document.getElementById("authBtn");
+  
+    if (isAdmin === "true") {
+      el.innerHTML = `
+        <button class="btn btn-outline-danger" onclick="logoutAdmin()">
+          ออกจากระบบ
+        </button>
+      `;
+    } else {
+      el.innerHTML = `
+        <button class="btn btn-outline-light rounded-pill"
+          onclick="window.location.href='login.html'">
+          <i class="fa-solid fa-user"></i> เข้าสู่ระบบ
+        </button>
+      `;
+    }
+  }
+  
+  /* =========================
+     ADMIN MENU
+  ========================= */
+  function renderAdminMenu() {
+    const isAdmin = localStorage.getItem("isAdminLogin");
+  
+    if (isAdmin === "true") {
+      document.getElementById("dashboardMenu").innerHTML = `
+        <a class="nav-link" href="dashboard.html">สรุปภาพรวม</a>
+      `;
+    }
+  }
+  
+  /* =========================
+     LOGOUT
+  ========================= */
+  function logoutAdmin() {
+    localStorage.removeItem("isAdminLogin");
+    localStorage.removeItem("adminUsername");
+    window.location.reload();
+  }
+  
+  /* INIT */
+  renderAuthButton();
+  renderAdminMenu();
+  </script>
 </body>
 </html>
