@@ -5,25 +5,43 @@ const { dbConfig } = require('../config/db');
 
 // POST /api/reports - บันทึกเบาะแส (จัดการ 3 ตาราง: Reporter, Reporter_Phone, ReportedTips)
 router.post("/", async (req, res) => {
+    //เพิ่มการตรวจสอบข้อมูลเบื้องต้น
+    console.log("=== Received Report Data ===");
+    console.log("Body:", req.body);
+    // ป้องกันการพังถ้า req.body ว่างเปล่า
+    const data = req.body || {};
+    // ตรวจสอบชื่อตัวแปรเผื่อเพื่อนส่งมาหลายแบบ (case_id หรือ caseId หรือ m_id)
+    const case_id = data.case_id || data.caseId || data.m_id;
+    //ระบุเคส
+    if (!case_id) {
+        console.error("Missing case_id in request");
+        return res.status(400).json({ 
+            success: false, 
+            error: "กรุณาระบุรหัสเคส (case_id)",
+            debug_received_body: data 
+        });
+    }
+
     const pool = await sql.connect(dbConfig);
     const transaction = new sql.Transaction(pool);
 
     try {
         await transaction.begin();
+
+        // แกะค่าจาก data (ซึ่งคือ req.body)
         const { 
-            case_id, 
             reporter_name, 
             reporter_phone, 
-            details, // จะบันทึกเป็น description ใน StatusLog
-            location_found // ข้อมูลเพิ่มเติมสำหรับ Log
-        } = req.body;
+            details, 
+            location_found 
+        } = data;
 
         // 1. บันทึกข้อมูลผู้แจ้ง (Reporter)
-const reporterResult = await transaction.request()
-            .input("title", sql.NVarChar, req.body.reporter_title || 'คุณ') // เพิ่มบรรทัดนี้
+        const reporterResult = await transaction.request()
+            .input("title", sql.NVarChar, data.reporter_title || 'คุณ')
             .input("name", sql.NVarChar, reporter_name || 'ไม่ประสงค์ออกนาม')
             .query(`INSERT INTO Reporter (reporter_title, reporter_name) 
-                    OUTPUT INSERTED.reporter_id VALUES (@title, @name)`); // แก้ Query ตรงนี้
+                    OUTPUT INSERTED.reporter_id VALUES (@title, @name)`);
         
         const reporter_id = reporterResult.recordset[0].reporter_id;
 
@@ -35,16 +53,15 @@ const reporterResult = await transaction.request()
                 .query(`INSERT INTO Reporter_Phone (reporter_id, reporter_phone) VALUES (@rid, @phone)`);
         }
 
-        // 3. สร้าง StatusLog สำหรับเบาะแสนี้ (เพื่อให้มี log_id ไปผูกกับ ReportedTips)
+        // 3. สร้าง StatusLog (ปรับให้เก็บรายละเอียดเบาะแสได้ดีขึ้น)
         const logResult = await transaction.request()
             .input("case_id", sql.Int, case_id)
-            // ตรวจสอบให้แน่ใจว่าได้ส่งค่า details จาก req.body มาที่นี่
-            .input("desc", sql.NVarChar, details || 'ได้รับแจ้งเบาะแสใหม่') 
+            .input("desc", sql.NVarChar, (details || 'แจ้งเบาะแสใหม่') + (location_found ? ` สถานที่: ${location_found}` : '')) 
             .input("status", sql.NVarChar, 'ได้รับเบาะแส')
             .input("by", sql.NVarChar, 'Reporter: ' + (reporter_name || 'Anonymous'))
             .query(`INSERT INTO StatusLog (case_id, description, case_status, logged_by) 
-            OUTPUT INSERTED.log_id 
-            VALUES (@case_id, @desc, @status, @by)`);
+                    OUTPUT INSERTED.log_id 
+                    VALUES (@case_id, @desc, @status, @by)`);
         
         const log_id = logResult.recordset[0].log_id;
 
@@ -58,19 +75,19 @@ const reporterResult = await transaction.request()
         await transaction.commit();
         res.status(201).json({ 
             success: true, 
-            message: "บันทึกเบาะแสและสร้างประวัติเรียบร้อยแล้ว",
+            message: "บันทึกเบาะแสเรียบร้อยแล้ว",
             reporter_id,
             log_id 
         });
 
     } catch (err) {
         if (transaction) await transaction.rollback();
-        console.error("REPORT ERROR:", err);
-        res.status(500).json({ success: false, error: err.message });
+        console.error("SQL TRANSACTION ERROR:", err.message);
+        res.status(500).json({ success: false, error: "เกิดข้อผิดพลาดในการบันทึกข้อมูล SQL" });
     }
 });
 
-// GET /api/reports/:case_id - ดึงเบาะแสทั้งหมดของคดีนั้นๆ (Join ข้อมูลผู้แจ้ง)
+// GET /api/reports/:case_id
 router.get("/:case_id", async (req, res) => {
     try {
         const { case_id } = req.params;

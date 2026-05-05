@@ -24,7 +24,7 @@
   
       <!-- LOGO -->
       <a class="navbar-brand d-flex align-items-center gap-2"
-         href="flex-layout-1.html">
+         href="Homepage.html">
         <img src="LOGO ThaiPBS.png" height="40">
         <span class="fw-bold">ศูนย์ข้อมูลคนหาย</span>
       </a>
@@ -41,30 +41,27 @@
         <ul class="navbar-nav align-items-lg-center gap-2">
   
           <li class="nav-item">
-            <a class="nav-link active" href="flex-layout-1.html">หน้าหลัก</a>
+            <a class="nav-link active" href="Homepage.html">หน้าหลัก</a>
           </li>
   
           <li class="nav-item">
-            <a class="nav-link" href="report-missing.html">แจ้งคนหาย</a>
+            <a class="nav-link" href="report-missing-step/report-missing-step.html">แจ้งคนหาย</a>
           </li>
   
           <li class="nav-item">
-            <a class="nav-link" href="#">แจ้งเบาะแส</a>
+            <a class="nav-link" href="tip-form.html">แจ้งเบาะแส</a>
+          </li>
+          
+          <li class="nav-item">
+            <a class="nav-link" href="track-case.html">ติดตามเคส</a>
           </li>
   
           <li class="nav-item">
-            <a class="nav-link" href="#">ติดตามเคส</a>
+            <a class="nav-link" href="admin.html">สำหรับเจ้าหน้าที่</a>
           </li>
   
-          <li class="nav-item">
-            <a class="nav-link" href="#">สำหรับเจ้าหน้าที่</a>
-          </li>
-  
-          <li class="nav-item ms-lg-3">
-            <button class="btn btn-outline-light rounded-pill">
-              <i class="fa-solid fa-user"></i> เข้าสู่ระบบ
-            </button>
-          </li>
+          <li class="nav-item" id="dashboardMenu"></li>
+<li class="nav-item ms-lg-3" id="authBtn"></li>
   
         </ul>
       </div>
@@ -155,6 +152,55 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <!-- Custom JS -->
-<script src="script.js"></script>
+<script>
+  /* =========================
+     AUTH NAVBAR
+  ========================= */
+  function renderAuthButton() {
+    const isAdmin = localStorage.getItem("isAdminLogin");
+    const el = document.getElementById("authBtn");
+  
+    if (isAdmin === "true") {
+      el.innerHTML = `
+        <button class="btn btn-outline-danger" onclick="logoutAdmin()">
+          ออกจากระบบ
+        </button>
+      `;
+    } else {
+      el.innerHTML = `
+        <button class="btn btn-outline-light rounded-pill"
+          onclick="window.location.href='login.html'">
+          <i class="fa-solid fa-user"></i> เข้าสู่ระบบ
+        </button>
+      `;
+    }
+  }
+  
+  /* =========================
+     ADMIN MENU
+  ========================= */
+  function renderAdminMenu() {
+    const isAdmin = localStorage.getItem("isAdminLogin");
+  
+    if (isAdmin === "true") {
+      document.getElementById("dashboardMenu").innerHTML = `
+        <a class="nav-link" href="dashboard.html">สรุปภาพรวม</a>
+      `;
+    }
+  }
+  
+  /* =========================
+     LOGOUT
+  ========================= */
+  function logoutAdmin() {
+    localStorage.removeItem("isAdminLogin");
+    localStorage.removeItem("adminUsername");
+    window.location.reload();
+  }
+  
+  /* INIT */
+  renderAuthButton();
+  renderAdminMenu();
+  </script>
 </body>
 </html>

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin - จัดการเคส</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body { background: #f4f6f9; }
+
+    .card { border-radius: 15px; }
+
+    .status-badge {
+      font-size: 0.85rem;
+      padding: 5px 10px;
+      border-radius: 20px;
+      display: inline-block;
+      min-width: 120px;
+    }
+
+    .status-default { background: #6c757d; color: #fff; }
+    .status-waiting { background: #ffc107; color: #000; }
+    .status-progress { background: #0dcaf0; color: #000; }
+    .status-found { background: #198754; color: #fff; }
+
+    .table td, .table th { vertical-align: middle; }
+
+    .action-btns {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+    }
+  </style>
+</head>
+
+<body>
+
+<script>
+const isAdmin = localStorage.getItem("isAdminLogin");
+
+if (isAdmin !== "true") {
+
+  window.location.href = "login.html";
+
+}
+</script>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark" style="background:#0b2c4d;">
+  <div class="container-fluid">
+
+    <a class="navbar-brand d-flex align-items-center gap-2" href="Homepage.html">
+      <img src="LOGO ThaiPBS.png" height="40">
+      <span class="fw-bold">ศูนย์ข้อมูลคนหาย</span>
+    </a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainMenu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse justify-content-end" id="mainMenu">
+      <ul class="navbar-nav align-items-lg-center gap-2">
+
+        <li class="nav-item"><a class="nav-link" href="Homepage.html">หน้าหลัก</a></li>
+        <li class="nav-item"><a class="nav-link" href="report-missing-step/report-missing-step.html">แจ้งคนหาย</a></li>
+        <li class="nav-item"><a class="nav-link" href="tip-form.html">แจ้งเบาะแส</a></li>
+        <li class="nav-item"><a class="nav-link" href="track-case.html">ติดตามเคส</a></li>
+        <li class="nav-item"><a class="nav-link active" href="admin.html">สำหรับเจ้าหน้าที่</a></li>
+        <li class="nav-item"><a class="nav-link " href="dashboard.html">สรุปภาพรวม</a></li>
+
+        <li class="nav-item ms-lg-3">
+
+          <button class="btn btn-outline-danger" onclick="logoutAdmin()">
+        
+            ออกจากระบบ
+        
+          </button>
+        
+        </li>
+
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-4">
+  <p class="text-muted text-center mb-4">
+    หน้านี้สำหรับเจ้าหน้าที่ใช้ดูสถานะเคสคนหาย (อัปเดตอัตโนมัติ)
+  </p>
+
+  <div class="card shadow p-4">
+
+    <div class="d-flex justify-content-between mb-3">
+      <h4>📋 รายการเคสคนหาย</h4>
+      <button class="btn btn-outline-primary" onclick="loadCases()">รีเฟรช</button>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover text-center">
+        <thead class="table-dark">
+          <tr>
+            <th>ID</th>
+            <th>ชื่อ</th>
+            <th>เหตุผล</th>
+            <th>ความเร่งด่วน</th>
+            <th>สถานะ (AUTO)</th>
+            <th>จัดการ</th>
+          </tr>
+        </thead>
+        <tbody id="caseTable"></tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+const API = "http://localhost:3000/api/missing-persons";
+
+function getStatusClass(status) {
+  if (status === "รอรับเรื่อง") return "status-waiting";
+  if (status === "พบเบาะแส") return "status-progress";
+  if (status === "กำลังดำเนินการ") return "status-found";
+  return "status-default";
+}
+
+function viewCaseDetail(id) {
+  window.location.href = "login.html";
+}
+
+async function loadCases() {
+  let rows = [];
+
+  try {
+    const res = await fetch(API);
+    const result = await res.json();
+    rows = Array.isArray(result) ? result : (result.data || []);
+  } catch {
+    rows = JSON.parse(localStorage.getItem("cases")) || [];
+  }
+
+  const tips = JSON.parse(localStorage.getItem("tips")) || [];
+
+  const table = document.getElementById("caseTable");
+  table.innerHTML = "";
+
+  if (rows.length === 0) {
+    table.innerHTML = `<tr><td colspan="6">ไม่มีข้อมูล</td></tr>`;
+    return;
+  }
+
+  rows.forEach(item => {
+    const caseId = item.case_id || item.id;
+
+    const caseTips = tips.filter(t => t.caseId == caseId);
+
+    let status = "รอรับเรื่อง";
+    if (caseTips.length === 1) status = "พบเบาะแส";
+    if (caseTips.length >= 2) status = "กำลังดำเนินการ";
+
+    table.innerHTML += `
+      <tr>
+        <td>${caseId}</td>
+        <td>${item.missing_name || item.name || "-"}</td>
+        <td>${item.missing_reason || item.reason || "-"}</td>
+        <td>${item.priority || "-"}</td>
+        <td>
+          <span class="status-badge ${getStatusClass(status)}">
+            ${status}
+          </span>
+        </td>
+        <td>
+          <button class="btn btn-info btn-sm text-white"
+            onclick="viewCaseDetail(${caseId})">
+            รายละเอียด
+          </button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+function logoutAdmin() {
+  localStorage.removeItem("isAdminLogin");
+  localStorage.removeItem("adminUsername");
+  window.location.href = "Homepage.html";
+}
+
+loadCases();
+</script>
+
+</body>
+</html>

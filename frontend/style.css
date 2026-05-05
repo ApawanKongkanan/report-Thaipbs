@@ -1,0 +1,183 @@
+* {
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    margin: 0;
+    background: #e9f2fb;
+}
+
+/* ================= HEADER ================= */
+.header {
+    background: #0b2c4d;
+    color: white;
+    padding: 15px 30px;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.logo {
+    height: 45px;
+}
+
+.login-btn {
+    background: #195795;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+/* ================= BANNER ================= */
+.banner {
+    background: linear-gradient(
+        rgba(213, 227, 231, 0.5),
+        rgba(50, 85, 111, 0.5)
+    ),
+    url("https://via.placeholder.com/1400x400");
+    background-size: cover;
+    color: white;
+    text-align: center;
+    padding: 80px 20px;
+}
+
+.banner h1 {
+    font-size: 42px;
+}
+
+.banner span {
+    color: #ff4444;
+}
+
+/* ================= CONTENT ================= */
+.left, .right {
+    background: #195795;
+    padding: 20px;
+    border-radius: 10px;
+    color: white;
+}
+
+/* filter box */
+.filter {
+    background: #0b2c4d;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+/* card จาก API */
+.card {
+    border-radius: 10px;
+}
+
+/* image responsive */
+img {
+    max-width: 100%;
+}
+
+.summary-card{
+    background:#fff;
+    border-radius:10px;
+    padding:20px;
+    margin-bottom:20px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.08);
+  }
+  
+  .summary-title{
+    font-weight:700;
+    font-size:18px;
+    border-bottom:2px solid #eee;
+    margin-bottom:10px;
+    padding-bottom:5px;
+  }
+  
+  .summary-row{
+    display:flex;
+    justify-content:space-between;
+    padding:6px 0;
+    border-bottom:1px dashed #eee;
+  }
+  
+  .summary-label{
+    color:#555;
+  }
+  
+  .summary-value{
+    font-weight:500;
+  }
+  .summary-container {
+    max-width: 900px;
+    margin: auto;
+  }
+  
+  .summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 15px;
+  }
+  
+  .summary-card {
+    background: #fff;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  
+  .summary-title {
+    font-weight: 700;
+    margin-bottom: 8px;
+    font-size: 15px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+  }
+  
+  .summary-img {
+    max-width: 150px;
+    border-radius: 10px;
+    margin-top: 10px;
+  }
+/* ================= TIMELINE ================= */
+
+.timeline {
+  border-left: 3px solid #dee2e6;
+  margin-left: 10px;
+  padding-left: 15px;
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 15px;
+}
+
+.timeline-item::before {
+  content: "";
+  position: absolute;
+  left: -24px;
+  top: 5px;
+  width: 12px;
+  height: 12px;
+  background: #0d6efd;
+  border-radius: 50%;
+}
+
+.timeline-date {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #6c757d;
+}
+
+.timeline-content {
+  font-size: 0.9rem;
+}.timeline-item:hover {
+  transform: translateX(5px);
+  transition: 0.2s;
+}
+

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>ระบบทดสอบ Thai PBS Missing Person API</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f4f7f6; padding-top: 50px; }
+        .card { border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .login-status { font-weight: bold; color: #2c3e50; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="row">
+        <!-- ส่วนที่ 1: จำลองการ Login -->
+        <div class="col-md-4">
+            <div class="card p-4">
+                <h4><Step 1> จำลอง Login</h4>
+                <hr>
+                <div class="mb-3">
+                    <label class="form-label">Username</label>
+                    <select id="username" class="form-select">
+                        <option value="admin01">admin01 (Admin)</option>
+                        <option value="relativeA">relativeA (ญาติ A)</option>
+                        <option value="relativeB">relativeB (ญาติ B)</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <input type="password" id="password" class="form-control" value="1234">
+                </div>
+                <button onclick="login()" class="btn btn-primary w-100">เข้าสู่ระบบ</button>
+                <div id="authStatus" class="mt-3 text-center login-status">สถานะ: ยังไม่ได้เข้าสู่ระบบ</div>
+            </div>
+        </div>
+
+        <!-- ส่วนที่ 2: แสดงข้อมูลตามสิทธิ์ -->
+        <div class="col-md-8">
+            <div class="card p-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4><Step 2> รายการเคสที่มองเห็น</h4>
+                    <button onclick="fetchCases()" id="fetchBtn" class="btn btn-success" disabled>ดึงข้อมูลจากสิทธิ์ที่ได้รับ</button>
+                </div>
+                <hr>
+                <div id="caseList" class="row">
+                    <div class="text-center text-muted">กรุณาเข้าสู่ระบบก่อนดึงข้อมูล</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentUser = null;
+
+    // --- ฟังก์ชัน Login ---
+    async function login() {
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+        const statusDiv = document.getElementById("authStatus");
+
+        try {
+            const response = await fetch('http://localhost:3000/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            const result = await response.json();
+
+            if (result.success) {
+                currentUser = result.user; // เก็บ user_id และ role ไว้
+                statusDiv.innerText = `เข้าใช้งานในฐานะ: ${currentUser.username} (${currentUser.role})`;
+                statusDiv.className = "mt-3 text-center text-success fw-bold";
+                document.getElementById("fetchBtn").disabled = false;
+            } else {
+                alert("Login ล้มเหลว: " + result.message);
+            }
+        } catch (err) {
+            alert("เชื่อมต่อ Server ไม่ได้: " + err.message);
+        }
+    }
+
+    // --- ฟังก์ชันดึงข้อมูลเคสตาม Permission ---
+    async function fetchCases() {
+        if (!currentUser) return;
+
+        const listDiv = document.getElementById("caseList");
+        listDiv.innerHTML = "กำลังโหลดข้อมูล...";
+
+        try {
+            // แนบ user_id และ role ไปใน Query String
+            // แก้ไขบรรทัดที่ 84 ในไฟล์ test-api.html
+const url = `http://localhost:3000/api/missing-persons?user_id=${currentUser.user_id}&role=${currentUser.role}`;
+            const response = await fetch(url);
+            const result = await response.json();
+
+            if (result.success && result.data.length > 0) {
+                listDiv.innerHTML = result.data.map(item => `
+                    <div class="col-12 mb-3">
+                        <div class="card p-3 border-start border-primary border-4 shadow-sm">
+                            <div class="d-flex justify-content-between">
+                                <h6 class="mb-1 text-primary">เคส ID: ${item.case_id} - ${item.missing_name}</h6>
+                                <span class="badge bg-secondary">${item.status}</span>
+                            </div>
+                            <small class="text-muted">เจ้าของเคส (User ID): ${item.user_id}</small>
+                            <p class="mb-0 mt-2 small">เหตุผลการหาย: ${item.missing_reason}</p>
+                        </div>
+                    </div>
+                `).join("");
+            } else {
+                listDiv.innerHTML = `<div class="alert alert-warning">ไม่พบรายการที่คุณมีสิทธิ์เข้าถึง</div>`;
+            }
+        } catch (err) {
+            listDiv.innerHTML = `<div class="alert alert-danger">Error: ${err.message}</div>`;
+        }
+    }
+</script>
+
+</body>
+</html>

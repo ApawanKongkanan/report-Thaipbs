@@ -91,9 +91,15 @@ router.post("/",
                 OUTPUT INSERTED.police_station_id VALUES (@psn, @psp, @pst)`);
       const ps_id = psResult.recordset[0].police_station_id;
 
-      // --- 7. จัดการไฟล์และ JSON ---
+// --- 7. จัดการไฟล์และ JSON ---
+      // ดึงไฟล์จากฟิลด์ notice และ image_url ที่รับมาจาก upload.fields
+      const noticeFile = req.files?.notice?.[0];
       const imageFile = req.files?.image_url?.[0];
+
+      // สร้าง URL สำหรับเก็บใน Database
+      const noticeUrl = noticeFile ? `http://localhost:3000/uploads/${noticeFile.filename}` : "ไม่มีรายละเอียด";
       const imageUrl = imageFile ? `http://localhost:3000/uploads/${imageFile.filename}` : "no-image.jpg";
+
       const lastSeenJSON = JSON.stringify({ missing_date, missing_time, postal_code, province, district, subdistrict, missing_place });
       const characteristicsJSON = JSON.stringify({ hair_styles, hair_color, height_cm, skin_color, body_shape, image_url: imageUrl });
 
@@ -105,9 +111,12 @@ router.post("/",
         .input("ls", sql.NVarChar, lastSeenJSON)
         .input("chars", sql.NVarChar, characteristicsJSON)
         .input("chan", sql.NVarChar, inform_channels || "หน้าเว็บ")
-        .input("notice", sql.NVarChar, "ไม่มีรายละเอียด")
+        
+        // แก้ไขบรรทัดนี้: เปลี่ยนจาก "ไม่มีรายละเอียด" เป็นตัวแปร noticeUrl ที่สร้างไว้ข้างบน
+        .input("notice", sql.NVarChar, noticeUrl) 
+        
         .input("rel", sql.NVarChar, relation_to_missing || "ไม่ระบุ")
-        .input("staff_id", sql.Int, STAFF_ID_DEFAULT) // <--- ใส่ Hard-coded ID
+        .input("staff_id", sql.Int, STAFF_ID_DEFAULT)
         .input("owner_id", sql.Int, owner_id)
         .input("mp_id", sql.Int, mp_id)
         .input("ps_id", sql.Int, ps_id)
@@ -153,12 +162,13 @@ router.post("/",
 
 
 /*========== GET/api/mising-case ==========*/
+
 router.get("/", async (req, res) => {
   try {
     const pool = await sql.connect(dbConfig);
+    /*const result = await pool.request().query(`
 
-    const result = await pool.request().query(`
-      SELECT 
+      SELECT
         mc.case_id,
         mp.missing_name,
         mp.gender,
@@ -167,81 +177,146 @@ router.get("/", async (req, res) => {
         mc.missing_reason,
         mc.notice
       FROM MissingCase mc
-      JOIN MissingPerson mp 
+      JOIN MissingPerson mp
         ON mc.missingperson_id = mp.missingperson_id
       ORDER BY mc.case_id DESC
     `);
+*/
+// แก้ใน API สำหรับดึงลิสต์รายการทั้งหมด
+    // แก้ใน SQL Query ของ router.get("/")
+const result = await pool.request().query(`
+    SELECT
+        mc.*,
+        mp.missing_name, mp.gender, mp.age, mp.race,
+        co.owner_name,
+        cp.owner_phone
+    FROM MissingCase mc
+    JOIN MissingPerson mp ON mc.missingperson_id = mp.missingperson_id
+    JOIN CaseOwner co ON mc.owner_id = co.owner_id
+    LEFT JOIN CaseOwner_Phone cp ON co.owner_id = cp.owner_id
+    ORDER BY mc.case_id DESC  -- เปลี่ยนเป็น case_id แทน created_at
+`);
 
-    res.json({
-      success: true,
-      data: result.recordset
-    });
+      
+const formattedData = result.recordset.map(item => {
+    item.missing_person_image = null;
+    if (item.latest_characteristics) {
+        try {  
+            const chars = JSON.parse(item.latest_characteristics);
+            let rawImg = chars.image_url || "";
+            item.missing_person_image = rawImg.startsWith('http')
+                ? rawImg
 
-  } catch (err) {
-    console.error("GET ALL ERROR:", err);
-    res.status(500).json({
-      success: false,
-      error: err.message
-    });
-  }
+                : `http://localhost:3000/uploads/${rawImg}`;
+            item.skin_color = chars.skin_color || "-";
+            item.body_shape = chars.body_shape || "-";
+        } catch (e) {
+           
+            console.log("พบข้อมูลไม่ใช่ JSON ใน ID:", item.case_id);
+            item.body_shape = item.latest_characteristics;
+        }
+    }
+    
+    if (item.latest_last_seen_at) {
+        try {
+            const ls = JSON.parse(item.latest_last_seen_at);
+            item.province = ls.province || "-";
+        } catch (e) {
+            item.province = item.latest_last_seen_at; // ใส่ค่าดิบถ้าไม่ใช่ JSON
+        }
+    }
+
+    item.status = item.latest_status || "รับแจ้งเคส";
+    item.owner_phone = item.owner_phone || "-";
+    item.gender = item.gender || "-";
+    item.age = item.age || "-";
+    return item;
 });
+      
+        res.json({ success: true, data: formattedData });
+    } catch (err) {
+        console.error("GET LIST ERROR:", err);
+        res.status(500).json({ success: false, error: err.message });
+    }
+
+});
+
 
 
 
 /*========== GET /api/missing-persons/:id ==========*/
 router.get("/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
+    try {
+        const { id } = req.params;
+        const pool = await sql.connect(dbConfig);
+        const result = await pool.request()
+            .input("id", sql.Int, id)
+            .query(`
+                SELECT mc.*, mp.missing_name, mp.gender, mp.age, mp.race, mp.birthday,
+                       co.owner_name, cp.owner_phone, idd.id_number, idd.id_type,
+                       ps.police_station_name, ps.police_station_phone, ps.police_station_province
+                FROM MissingCase mc
+                JOIN MissingPerson mp ON mc.missingperson_id = mp.missingperson_id
+                JOIN CaseOwner co ON mc.owner_id = co.owner_id
+                LEFT JOIN CaseOwner_Phone cp ON co.owner_id = cp.owner_id
+                LEFT JOIN IdentityDocument idd ON mp.missingperson_id = idd.missingperson_id
+                LEFT JOIN PoliceStation ps ON mc.police_station_id = ps.police_station_id
+                WHERE mc.case_id = @id
+            `);
 
-    const pool = await sql.connect(dbConfig);
+        let item = result.recordset[0];
+        if (item) {
+           
+            if (item.latest_characteristics) {
+                try {
+                    const chars = JSON.parse(item.latest_characteristics);
+                    const fileName = (chars.image_url || "").split('/').pop();
+                    const finalPath = fileName ? `uploads/${fileName}` : "no-image.jpg";
+                    
+                    item.image_url = finalPath;
+                    item.missing_person_image = finalPath;
+                    
+                    
+                    item.skin_color = chars.skin_color || "-";
+                    item.body_shape = chars.body_shape || "-";
+                    item.hair_styles = chars.hair_styles || "-";
+                    item.hair_color = chars.hair_color || "-";
+                    item.height_cm  = chars.height_cm || "-";
+                } catch (e) { console.error("JSON Char Error:", e); }
+            }
 
-    const result = await pool.request()
-      .input("id", sql.Int, id)
-      .query(`
-        SELECT 
-          mc.case_id,
-          mp.missing_name,
-          mc.latest_status,
-          mp.gender,
-          mp.age,
-          mp.race,
+            if (item.latest_last_seen_at) {
+                try {
+                    const ls = JSON.parse(item.latest_last_seen_at);
+                    item.missing_date = ls.missing_date || "-";
+                    item.missing_time = ls.missing_time || "-";
+                    item.missing_place = ls.missing_place || "-";
+                    item.province = ls.province || "-";
+                    item.district = ls.district || "-";
+                    item.subdistrict = ls.subdistrict || "-";
+                    item.postal_code = ls.postal_code || "-";
+                } catch (e) { console.error("JSON Location Error:", e); }
+            }
 
-          mc.priority,
-          mc.missing_reason,
-          mc.notice,
-          mc.latest_last_seen_at,
-          mc.first_last_seen_at,
-          mc.latest_characteristics,
-          mc.inform_channels,
-          mc.relation_to_missing
+                if (item.notice) {
+                    const reportFileName = item.notice.split(/[\\/]/).pop(); 
+                    item.notice = `uploads/${reportFileName}`;
+                }
+       
+            item.ps_phone = item.police_station_phone || "-";
+            item.police_station_phone = item.police_station_phone || "-";
+            item.owner_phone = item.owner_phone || "-";
+            item.id_number = item.id_number || "-";
+            item.id_type = item.id_type || "-";
 
-        FROM MissingCase mc
-
-        JOIN MissingPerson mp 
-          ON mc.missingperson_id = mp.missingperson_id
-
-        WHERE mc.case_id = @id
-      `);
-
-    if (result.recordset.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "ไม่พบข้อมูล"
-      });
+            res.json({ success: true, data: item });
+        } else {
+            res.status(404).json({ success: false, message: "ไม่พบข้อมูล" });
+        }
+    } catch (err) {
+        console.error("GET DETAIL ERROR:", err);
+        res.status(500).json({ success: false, error: err.message });
     }
-
-    res.json({
-      success: true,
-      data: result.recordset[0]
-    });
-
-  } catch (err) {
-    console.error("GET BY ID ERROR:", err);
-    res.status(500).json({
-      success: false,
-      error: err.message
-    });
-  }
 });
 
 /*========== PUT /api/missing-persons/:id ==========*/
@@ -261,7 +336,6 @@ router.put("/:id", async (req, res) => {
 
     const pool = await sql.connect(dbConfig);
 
-    // 🔥 หา missingperson_id ก่อน
     const find = await pool.request()
       .input("id", sql.Int, id)
       .query(`
@@ -279,7 +353,6 @@ router.put("/:id", async (req, res) => {
 
     const missingperson_id = find.recordset[0].missingperson_id;
 
-    // 🔥 update MissingPerson
     await pool.request()
       .input("missingperson_id", sql.Int, missingperson_id)
       .input("missing_name", sql.NVarChar, missing_name || "")
@@ -296,7 +369,6 @@ router.put("/:id", async (req, res) => {
         WHERE missingperson_id = @missingperson_id
       `);
 
-    // 🔥 update MissingCase
     await pool.request()
       .input("id", sql.Int, id)
       .input("priority", sql.NVarChar, priority || "")
@@ -356,61 +428,26 @@ router.put("/:id/status", async (req, res) => {
   }
 });
 
-/*========== DELETE (Phase 1) ==========*/
-router.delete("/:id", async (req, res) => {
-  try {
-    const { id } = req.params; // case_id
-    const pool = await sql.connect(dbConfig);
-    const transaction = new sql.Transaction(pool);
-    await transaction.begin();
 
+/*========== เปลี่ยนจาก DELETE เป็น UPDATE STATUS ==========*/
+router.patch("/soft-delete/:id", async (req, res) => {
     try {
-      // 1. หา log_id ทั้งหมดที่ผูกกับ case_id นี้ก่อน
-      const logData = await transaction.request()
-        .input("case_id_find", sql.Int, id) // ใช้ชื่อตัวแปรที่ต่างกันเพื่อความชัดเจน
-        .query(`SELECT log_id FROM StatusLog WHERE case_id = @case_id_find`);
-      
-      const logIds = logData.recordset.map(row => row.log_id);
-
-      // ถ้ามี Log ให้ทำการลบตารางลูกของ Log ก่อน
-      if (logIds.length > 0) {
-        const idList = logIds.join(',');
-
-        // ลบข้อมูลลักษณะเด่นที่ผูกกับ log_id
-        await transaction.request()
-          .query(`DELETE FROM Missingperson_Character_Log WHERE log_id IN (${idList})`);
+        const { id } = req.params;
+        const pool = await sql.connect(dbConfig);
         
-        // ลบข้อมูลสถานที่ที่ผูกกับ log_id
-        await transaction.request()
-          .query(`DELETE FROM Last_Seen_Log WHERE log_id IN (${idList})`);
+        // เปลี่ยนสถานะเป็น 'ยกเลิกเคส' แทนการลบจริง
+        await pool.request()
+            .input("id", sql.Int, id)
+            .query(`
+                UPDATE MissingCase 
+                SET latest_status = N'ยกเลิกเคส' 
+                WHERE case_id = @id
+            `);
 
-        // ลบตัวแม่ของประวัติ (StatusLog)
-        await transaction.request()
-          .query(`DELETE FROM StatusLog WHERE log_id IN (${idList})`);
-      }
-
-      // 2. ลบ ReportedTips (ถ้ามี)
-      await transaction.request()
-        .input("case_id_tips", sql.Int, id)
-        .query(`DELETE FROM ReportedTips WHERE case_id = @case_id_tips`);
-
-      // 3. ลบตัวคดีหลัก (MissingCase) เป็นลำดับสุดท้าย
-      await transaction.request()
-        .input("case_id_main", sql.Int, id)
-        .query(`DELETE FROM MissingCase WHERE case_id = @case_id_main`);
-
-      await transaction.commit();
-      res.json({ success: true, message: `ลบข้อมูลคดี ID ${id} และประวัติที่เกี่ยวข้องทั้งหมดเรียบร้อยแล้ว` });
-
+        res.json({ success: true, message: "เปลี่ยนสถานะเคสเป็นยกเลิกเรียบร้อยแล้ว" });
     } catch (err) {
-      if (transaction) await transaction.rollback();
-      throw err;
+        res.status(500).json({ success: false, error: err.message });
     }
-
-  } catch (err) {
-    console.error("DELETE ERROR:", err);
-    res.status(500).json({ success: false, error: err.message });
-  }
 });
 
 

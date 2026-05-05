@@ -1,35 +1,35 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const sql = require('mssql');
-const { dbConfig } = require('../config/db');
+// ดึงค่าตามที่เขียนไว้ใน config/db.js
+const { sql, dbConfig } = require("../config/db");
 
-router.get("/", async (req, res) => {
+router.get("/stats", async (req, res) => {
     try {
-        const pool = await sql.connect(dbConfig);
+        // ใช้ dbConfig ที่ดึงมาจากไฟล์ config
+        const pool = await sql.connect(dbConfig); 
         
-        // ดึงสถิติตัวเลขจาก View (เขียนง่ายขึ้นมาก)
-        const stats = await pool.request().query(`
-            SELECT 
-                COUNT(*) as total_cases,
-                SUM(total_tips_received) as total_tips,
-                COUNT(CASE WHEN latest_status = N'พบตัวแล้ว' THEN 1 END) as found_cases
-            FROM vw_MissingPerson_Dashboard
+        const statusStats = await pool.request().query(`
+            SELECT latest_status as status, COUNT(*) as count 
+            FROM MissingCase 
+            GROUP BY latest_status
         `);
 
-        // ดึงรายการล่าสุด 5 เคสจาก View
-        const recentCases = await pool.request().query(`
-            SELECT TOP 5 
-                case_id, missing_name, latest_status, received_date, province 
-            FROM vw_MissingPerson_Dashboard 
-            ORDER BY received_date DESC
+        const priorityStats = await pool.request().query(`
+            SELECT priority, COUNT(*) as count 
+            FROM MissingCase 
+            GROUP BY priority
         `);
 
-        res.json({ 
-            success: true, 
-            summary: stats.recordset[0],
-            recent_cases: recentCases.recordset 
+        res.json({
+            success: true,
+            data: {
+                statusOverview: statusStats.recordset,
+                priorityOverview: priorityStats.recordset,
+                totalCases: statusStats.recordset.reduce((acc, curr) => acc + curr.count, 0)
+            }
         });
     } catch (err) {
+        console.error("Dashboard Stats Error:", err);
         res.status(500).json({ success: false, error: err.message });
     }
 });
