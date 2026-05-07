@@ -1,65 +1,1266 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>สรุปภาพรวม</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<style>
-body { background:#f4f6f9; }
-.main-container { margin-top:30px; }
-.card-box { background:#fff; border-radius:16px; padding:22px; box-shadow:0 5px 15px rgba(0,0,0,0.08); }
-.summary-title { font-size:14px; color:#6c757d; }
-.summary-value { font-size:28px; font-weight:700; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard - ศูนย์ข้อมูลคนหาย</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root {
+      --navy: #0b2c4d;
+      --navy-2: #123a63;
+      --blue: #4f83b6;
+      --light-bg: #f4f6f9;
+      --card-bg: #ffffff;
+      --muted: #6c757d;
+      --success: #198754;
+      --warning: #ffc107;
+      --danger: #dc3545;
+      --info: #0dcaf0;
+      --border: #dbe3ea;
+      --soft: #eef4fa;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      background: var(--light-bg);
+      font-family: Arial, Helvetica, sans-serif;
+      color: #1f2937;
+      opacity: 0;
+      transition: opacity .25s ease;
+    }
+
+    body.loaded {
+      opacity: 1;
+    }
+
+    .app-shell {
+      min-height: 100vh;
+      display: flex;
+    }
+
+    .sidebar {
+      width: 300px;
+      background: linear-gradient(180deg, var(--navy) 0%, #0f355b 100%);
+      color: #fff;
+      padding: 24px 18px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      box-shadow: 6px 0 20px rgba(11,44,77,.08);
+    }
+
+    .brand-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid rgba(255,255,255,.15);
+    }
+
+    .brand-box img {
+      width: 46px;
+      height: 46px;
+      object-fit: contain;
+      background: rgba(255,255,255,.08);
+      border-radius: 12px;
+      padding: 6px;
+    }
+
+    .brand-title {
+      line-height: 1.2;
+    }
+
+    .brand-title h1 {
+      font-size: 1rem;
+      margin: 0;
+      font-weight: 700;
+    }
+
+    .brand-title p {
+      margin: 2px 0 0;
+      font-size: .82rem;
+      opacity: .8;
+    }
+
+    .side-section-title {
+      font-size: .78rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      opacity: .75;
+      margin: 18px 0 10px;
+      font-weight: 700;
+    }
+
+    .nav-pills .nav-link {
+      color: rgba(255,255,255,.88);
+      border-radius: 14px;
+      padding: 12px 14px;
+      margin-bottom: 8px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all .18s ease;
+      border: 1px solid transparent;
+    }
+
+    .nav-pills .nav-link:hover {
+      background: rgba(255,255,255,.08);
+      color: #fff;
+    }
+
+    .nav-pills .nav-link.active {
+      background: #fff;
+      color: var(--navy);
+      border-color: #fff;
+      box-shadow: 0 8px 20px rgba(0,0,0,.12);
+    }
+
+    .filter-card {
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 18px;
+      padding: 16px;
+      margin-top: 14px;
+      backdrop-filter: blur(6px);
+    }
+
+    .filter-card label {
+      font-size: .9rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .filter-card .form-select {
+      border-radius: 12px;
+      border: 0;
+      min-height: 44px;
+      font-size: .95rem;
+    }
+
+    .filter-note {
+      font-size: .82rem;
+      color: rgba(255,255,255,.78);
+      margin-top: 10px;
+      line-height: 1.4;
+    }
+
+    .main {
+      flex: 1;
+      padding: 26px;
+      min-width: 0;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 22px;
+      flex-wrap: wrap;
+    }
+
+    .page-title h2 {
+      font-size: 1.9rem;
+      margin: 0 0 6px;
+      color: var(--navy);
+      font-weight: 800;
+    }
+
+    .page-title p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .soft-btn {
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--navy);
+      border-radius: 14px;
+      padding: 10px 14px;
+      font-weight: 600;
+      transition: .18s ease;
+    }
+
+    .soft-btn:hover {
+      background: var(--soft);
+    }
+
+    .dashboard-section {
+      display: none;
+      animation: fadeIn .22s ease;
+    }
+
+    .dashboard-section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 18px;
+      box-shadow: 0 8px 18px rgba(13,34,63,.05);
+      height: 100%;
+      transition: transform .16s ease, box-shadow .16s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 26px rgba(13,34,63,.08);
+    }
+
+    .stat-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: .95rem;
+      font-weight: 600;
+    }
+
+    .stat-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: var(--soft);
+      color: var(--navy);
+      font-size: 1rem;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--navy);
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .stat-sub {
+      font-size: .88rem;
+      color: var(--muted);
+    }
+
+    .panel-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 20px;
+      box-shadow: 0 8px 18px rgba(13,34,63,.05);
+      height: 100%;
+    }
+
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .panel-title {
+      margin: 0;
+      font-size: 1.12rem;
+      color: var(--navy);
+      font-weight: 800;
+    }
+
+    .panel-subtitle {
+      color: var(--muted);
+      font-size: .9rem;
+      margin: 4px 0 0;
+    }
+
+    .table-modern {
+      margin-bottom: 0;
+      vertical-align: middle;
+    }
+
+    .table-modern thead th {
+      color: var(--navy);
+      font-weight: 700;
+      border-bottom-width: 1px;
+      background: #f8fafc;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: .82rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .status-received { background: #e8f1ff; color: #114b9b; }
+    .status-checking { background: #e6f9fd; color: #0b7285; }
+    .status-wait-doc { background: #fff8dd; color: #946200; }
+    .status-pr { background: #efe7ff; color: #6f42c1; }
+    .status-follow { background: #e8f5e9; color: #2e7d32; }
+    .status-tip { background: #ffe9f0; color: #b4235a; }
+    .status-found { background: #d1e7dd; color: #146c43; }
+    .status-cancel { background: #f1f3f5; color: #495057; }
+    .status-dead { background: #fde2e1; color: #b02a37; }
+    .status-default { background: #edf2f7; color: #334155; }
+
+    .mini-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .mini-item {
+      padding: 14px 16px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+
+    .mini-item-title {
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 4px;
+    }
+
+    .mini-item-meta {
+      color: var(--muted);
+      font-size: .9rem;
+    }
+
+    .location-rank {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .location-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .location-name {
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 6px;
+    }
+
+    .bar-track {
+      width: 100%;
+      height: 12px;
+      border-radius: 999px;
+      background: #e9eef5;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--navy), var(--blue));
+      transition: width .35s ease;
+    }
+
+    .location-count {
+      font-weight: 800;
+      color: var(--navy);
+      min-width: 42px;
+      text-align: right;
+    }
+
+    .filters-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #fff;
+      border: 1px solid var(--border);
+      color: var(--navy);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: .85rem;
+      font-weight: 700;
+    }
+
+    .details-search {
+      border-radius: 14px;
+      min-height: 46px;
+    }
+
+    .empty-box {
+      min-height: 220px;
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      text-align: center;
+      border: 1px dashed var(--border);
+      border-radius: 18px;
+      background: #fcfdff;
+      padding: 20px;
+    }
+
+    .legend-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 999px;
+      display: inline-block;
+    }
+
+    @media (max-width: 991px) {
+      .app-shell {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        border-radius: 0 0 24px 24px;
+      }
+
+      .main {
+        padding: 18px;
+      }
+    }
+  </style>
 </head>
 <body>
-<script src="app.js"></script>
-<script>guardAdmin('');</script>
-<div id="appNavbar"></div>
-<div class="container main-container">
-  <div class="row g-3 mb-4" id="summary"></div>
-  <div class="row g-3 mb-4">
-    <div class="col-md-6"><div class="card-box"><canvas id="pie"></canvas></div></div>
-    <div class="col-md-6"><div class="card-box"><canvas id="bar"></canvas></div></div>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand-box">
+        <img src="LOGO ThaiPBS.png" alt="logo" onerror="this.style.display='none'">
+        <div class="brand-title">
+          <h1>ศูนย์ข้อมูลคนหาย</h1>
+          <p>Dashboard สำหรับเจ้าหน้าที่</p>
+        </div>
+      </div>
+
+      <div class="side-section-title">Navigation</div>
+      <ul class="nav nav-pills flex-column" id="dashboardNav">
+        <li class="nav-item">
+          <button class="nav-link active w-100 text-start" data-target="overviewSection">
+            <i class="fa-solid fa-chart-line"></i> Overview
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link w-100 text-start" data-target="locationSection">
+            <i class="fa-solid fa-location-dot"></i> Location
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link w-100 text-start" data-target="detailsSection">
+            <i class="fa-solid fa-table-list"></i> Details
+          </button>
+        </li>
+      </ul>
+
+      <div class="side-section-title">Filters</div>
+      <div class="filter-card">
+        <div class="mb-3">
+          <label for="yearFilter" class="form-label text-white">ปี</label>
+          <select class="form-select" id="yearFilter"></select>
+        </div>
+        <div class="mb-3">
+          <label for="monthFilter" class="form-label text-white">เดือน</label>
+          <select class="form-select" id="monthFilter">
+            <option value="all">ทั้งหมด</option>
+            <option value="0">มกราคม</option>
+            <option value="1">กุมภาพันธ์</option>
+            <option value="2">มีนาคม</option>
+            <option value="3">เมษายน</option>
+            <option value="4">พฤษภาคม</option>
+            <option value="5">มิถุนายน</option>
+            <option value="6">กรกฎาคม</option>
+            <option value="7">สิงหาคม</option>
+            <option value="8">กันยายน</option>
+            <option value="9">ตุลาคม</option>
+            <option value="10">พฤศจิกายน</option>
+            <option value="11">ธันวาคม</option>
+          </select>
+        </div>
+        <div class="mb-2">
+          <label for="weekdayFilter" class="form-label text-white">วัน</label>
+          <select class="form-select" id="weekdayFilter">
+            <option value="all">ทั้งหมด</option>
+            <option value="0">อาทิตย์</option>
+            <option value="1">จันทร์</option>
+            <option value="2">อังคาร</option>
+            <option value="3">พุธ</option>
+            <option value="4">พฤหัสบดี</option>
+            <option value="5">ศุกร์</option>
+            <option value="6">เสาร์</option>
+          </select>
+        </div>
+        <div class="filter-note">
+          เลือกช่วงเวลาที่ต้องการดูข้อมูลสรุปในแต่ละหน้า
+        </div>
+      </div>
+
+      <div class="side-section-title">Quick actions</div>
+      <div class="d-grid gap-2">
+        <button class="soft-btn" onclick="window.location.href='admin.html'">
+          <i class="fa-solid fa-arrow-left"></i> กลับหน้าเจ้าหน้าที่
+        </button>
+        <button class="soft-btn" id="refreshBtn">
+          <i class="fa-solid fa-rotate-right"></i> รีเฟรชข้อมูล
+        </button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="page-header">
+        <div class="page-title">
+          <h2>Case Management Dashboard</h2>
+          <p>ภาพรวมข้อมูลเคสคนหายสำหรับเจ้าหน้าที่ในระบบ</p>
+        </div>
+        <div class="header-actions">
+          <div class="filters-chip">
+            <i class="fa-solid fa-filter"></i>
+            <span id="activeFilterLabel">กำลังแสดง: ข้อมูลทั้งหมด</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- OVERVIEW -->
+      <section id="overviewSection" class="dashboard-section active">
+        <div class="row g-4 mb-4">
+          <div class="col-12 col-md-6 col-xl-3">
+            <div class="stat-card">
+              <div class="stat-top">
+                <div class="stat-label">จำนวนเคสทั้งหมด</div>
+                <div class="stat-icon"><i class="fa-solid fa-folder-open"></i></div>
+              </div>
+              <div class="stat-value" id="statTotalCases">0</div>
+              <div class="stat-sub">เคสที่ผ่านตัวกรองปัจจุบัน</div>
+            </div>
+          </div>
+
+          <div class="col-12 col-md-6 col-xl-3">
+            <div class="stat-card">
+              <div class="stat-top">
+                <div class="stat-label">จำนวนจังหวัด</div>
+                <div class="stat-icon"><i class="fa-solid fa-map-location-dot"></i></div>
+              </div>
+              <div class="stat-value" id="statProvinceCount">0</div>
+              <div class="stat-sub">พื้นที่ที่มีข้อมูลในระบบ</div>
+            </div>
+          </div>
+
+          <div class="col-12 col-md-6 col-xl-3">
+            <div class="stat-card">
+              <div class="stat-top">
+                <div class="stat-label">เบาะแสล่าสุด</div>
+                <div class="stat-icon"><i class="fa-solid fa-lightbulb"></i></div>
+              </div>
+              <div class="stat-value" id="statTipCount">0</div>
+              <div class="stat-sub">ข้อมูลเบาะแสใน local/ระบบ</div>
+            </div>
+          </div>
+
+          <div class="col-12 col-md-6 col-xl-3">
+            <div class="stat-card">
+              <div class="stat-top">
+                <div class="stat-label">อายุเฉลี่ย</div>
+                <div class="stat-icon"><i class="fa-solid fa-user-clock"></i></div>
+              </div>
+              <div class="stat-value" id="statAvgAge">0</div>
+              <div class="stat-sub">คำนวณจากเคสที่มีข้อมูลอายุ</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-4">
+          <div class="col-12 col-xl-7">
+            <div class="panel-card">
+              <div class="panel-head">
+                <div>
+                  <h3 class="panel-title">ภาพรวมเคสรายเดือน</h3>
+                  <p class="panel-subtitle">สรุปจำนวนเคสที่ถูกบันทึกในแต่ละเดือน</p>
+                </div>
+              </div>
+              <canvas id="monthlyChart" height="120"></canvas>
+            </div>
+          </div>
+
+          <div class="col-12 col-xl-5">
+            <div class="panel-card">
+              <div class="panel-head">
+                <div>
+                  <h3 class="panel-title">สัดส่วนสถานะเคส</h3>
+                  <p class="panel-subtitle">แสดงการกระจายของสถานะปัจจุบัน</p>
+                </div>
+              </div>
+              <canvas id="statusChart" height="180"></canvas>
+            </div>
+          </div>
+
+          <div class="col-12 col-xl-5">
+            <div class="panel-card">
+              <div class="panel-head">
+                <div>
+                  <h3 class="panel-title">เคสล่าสุด</h3>
+                  <p class="panel-subtitle">รายการล่าสุดตามวันที่ในระบบ</p>
+                </div>
+              </div>
+              <div id="latestCasesList" class="mini-list"></div>
+            </div>
+          </div>
+
+          <div class="col-12 col-xl-7">
+            <div class="panel-card">
+              <div class="panel-head">
+                <div>
+                  <h3 class="panel-title">รายการเคสล่าสุด</h3>
+                  <p class="panel-subtitle">ตารางสรุปข้อมูลที่สำคัญ</p>
+                </div>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-modern">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>ชื่อผู้สูญหาย</th>
+                      <th>จังหวัด</th>
+                      <th>สถานะ</th>
+                      <th>วันที่</th>
+                    </tr>
+                  </thead>
+                  <tbody id="overviewTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- LOCATION -->
+      <section id="locationSection" class="dashboard-section">
+        <div class="row g-4">
+          <div class="col-12 col-xl-7">
+            <div class="panel-card">
+              <div class="panel-head">
+                <div>
+                  <h3 class="panel-title">จำนวนเคสตามจังหวัด</h3>
+                  <p class="panel-subtitle">สรุปการกระจายตัวของข้อมูลตามพื้นที่</p>
+                </div>
+              </div>
+              <canvas id="provinceChart" height="140"></canvas>
+            </div>
+          </div>
+
+          <div class="col-12 col-xl-5">
+            <div class="panel-card">
+              <div class="panel-head">
+                <div>
+                  <h3 class="panel-title">อันดับจังหวัดที่พบมากที่สุด</h3>
+                  <p class="panel-subtitle">จัดอันดับจากจำนวนเคส</p>
+                </div>
+              </div>
+              <div id="locationRankList" class="location-rank"></div>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="panel-card">
+              <div class="panel-head">
+                <div>
+                  <h3 class="panel-title">สถานที่พบครั้งสุดท้าย</h3>
+                  <p class="panel-subtitle">รายละเอียดสถานที่จากข้อมูลเคส</p>
+                </div>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-modern">
+                  <thead>
+                    <tr>
+                      <th>เลขเคส</th>
+                      <th>ชื่อ</th>
+                      <th>สถานที่</th>
+                      <th>ตำบล/อำเภอ</th>
+                      <th>จังหวัด</th>
+                    </tr>
+                  </thead>
+                  <tbody id="locationTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- DETAILS -->
+      <section id="detailsSection" class="dashboard-section">
+        <div class="row g-4">
+          <div class="col-12">
+            <div class="panel-card">
+              <div class="panel-head">
+                <div>
+                  <h3 class="panel-title">รายละเอียดข้อมูลทั้งหมด</h3>
+                  <p class="panel-subtitle">ค้นหาและดูข้อมูลเคสแบบละเอียด</p>
+                </div>
+                <div style="min-width: 280px;">
+                  <input type="text" id="detailsSearchInput" class="form-control details-search" placeholder="ค้นหาด้วยชื่อ, จังหวัด, สถานะ, เลขเคส">
+                </div>
+              </div>
+
+              <div class="table-responsive">
+                <table class="table table-modern">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>ชื่อผู้สูญหาย</th>
+                      <th>อายุ</th>
+                      <th>จังหวัด</th>
+                      <th>หัวข้อ</th>
+                      <th>สถานะ</th>
+                      <th>วันที่</th>
+                    </tr>
+                  </thead>
+                  <tbody id="detailsTableBody"></tbody>
+                </table>
+              </div>
+
+              <div id="detailsEmptyBox" class="empty-box mt-3" style="display:none;">
+                ไม่พบข้อมูลที่ตรงกับเงื่อนไขการค้นหา
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
   </div>
-  <div class="card-box">
-    <table class="table table-hover">
-      <thead><tr><th>ชื่อ</th><th>สถานะ</th><th>เบาะแส</th></tr></thead>
-      <tbody id="table"></tbody>
-    </table>
-  </div>
-</div>
-<script>
-  renderNavbar({ mountId: 'appNavbar', basePath: '', active: 'dashboard' });
-  let pieChart, barChart;
-  async function loadData() {
-    const cases = await fetchCaseList();
-    const tips = getStoredTips();
-    render(cases, tips);
-  }
-  function render(cases, tips) {
-    const found = cases.filter(c => normalizeStatus(c.latest_status).includes('พบตัวบุคคลแล้ว')).length;
-    const waiting = cases.filter(c => normalizeStatus(c.latest_status) === 'รับเคส(บันทึกข้อมูลในระบบ)').length;
-    const progress = cases.length - found - waiting;
-    document.getElementById('summary').innerHTML = `
-      <div class="col-md-4"><div class="card-box text-center"><div class="summary-title">ทั้งหมด</div><div class="summary-value">${cases.length}</div></div></div>
-      <div class="col-md-4"><div class="card-box text-center text-warning"><div class="summary-title">รับเคสใหม่</div><div class="summary-value">${waiting}</div></div></div>
-      <div class="col-md-4"><div class="card-box text-center text-success"><div class="summary-title">พบตัวแล้ว</div><div class="summary-value">${found}</div></div></div>`;
-    document.getElementById('table').innerHTML = cases.map(c => {
-      const caseId = getCaseId(c);
-      const tipCount = tips.filter(t => String(t.caseId) === String(caseId)).length;
-      return `<tr><td>${c.missing_name || c.name || '-'}</td><td>${normalizeStatus(c.latest_status)}</td><td>${tipCount}</td></tr>`;
-    }).join('');
-    const pieCtx = document.getElementById('pie');
-    const barCtx = document.getElementById('bar');
-    pieChart?.destroy(); barChart?.destroy();
-    pieChart = new Chart(pieCtx, { type:'doughnut', data:{ labels:['รับเคสใหม่','กำลังดำเนินการ','พบตัวแล้ว'], datasets:[{ data:[waiting, progress, found], backgroundColor:['#ffc107','#0dcaf0','#198754'] }] } });
-    barChart = new Chart(barCtx, { type:'bar', data:{ labels:['เคสทั้งหมด','เบาะแสทั้งหมด'], datasets:[{ label:'จำนวน', data:[cases.length, tips.length], backgroundColor:['#0b2c4d','#4f83b6'] }] }, options:{ scales:{ y:{ beginAtZero:true } } } });
-  }
-  loadData();
-</script>
+
+  <script>
+    const API_URL = "http://localhost:3000/api/missing-persons";
+
+    let allCases = [];
+    let filteredCases = [];
+    let allTips = [];
+
+    let monthlyChartInstance = null;
+    let statusChartInstance = null;
+    let provinceChartInstance = null;
+
+    const monthNames = [
+      "มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน",
+      "กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"
+    ];
+
+    const weekdayNames = ["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัสบดี","ศุกร์","เสาร์"];
+
+    function parseDate(item) {
+      const raw =
+        item.missing_date ||
+        item.created_at ||
+        item.createdAt ||
+        item.date ||
+        item.tip_date ||
+        "";
+
+      const d = new Date(raw);
+      return isNaN(d.getTime()) ? null : d;
+    }
+
+    function getCaseId(item) {
+      return item.case_id ?? item.id ?? "-";
+    }
+
+    function getCaseName(item) {
+      return item.missing_name ?? item.name ?? "-";
+    }
+
+    function getCaseAge(item) {
+      const age = Number(item.age);
+      return Number.isFinite(age) ? age : null;
+    }
+
+    function getCaseProvince(item) {
+      return item.province || item.last_seen_province || item.missing_province || "-";
+    }
+
+    function getCasePlace(item) {
+      return item.missing_place || item.last_seen_place || item.place || "-";
+    }
+
+    function getCaseSubdistrict(item) {
+      return item.subdistrict || "-";
+    }
+
+    function getCaseDistrict(item) {
+      return item.district || "-";
+    }
+
+    function getCaseReason(item) {
+      return item.missing_reason || item.reason || "-";
+    }
+
+    function getCaseStatus(item) {
+      return item.latest_status || item.status || "รับเคส(บันทึกข้อมูลในระบบ)";
+    }
+
+    function getStatusClass(status) {
+      if (!status) return "status-default";
+      if (status.includes("รับเคส")) return "status-received";
+      if (status.includes("กำลังตรวจสอบ")) return "status-checking";
+      if (status.includes("รอเอกสาร")) return "status-wait-doc";
+      if (status.includes("ประชาสัมพันธ์")) return "status-pr";
+      if (status.includes("ติดตาม")) return "status-follow";
+      if (status.includes("เบาะแส")) return "status-tip";
+      if (status.includes("พบตัว")) return "status-found";
+      if (status.includes("ยกเลิก")) return "status-cancel";
+      if (status.includes("เสียชีวิต")) return "status-dead";
+      return "status-default";
+    }
+
+    function escapeHtml(text) {
+      return String(text ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    async function loadCases() {
+      try {
+        const res = await fetch(API_URL);
+        const result = await res.json();
+        const rows = Array.isArray(result) ? result : (result.data || []);
+        allCases = rows;
+      } catch (error) {
+        console.warn("โหลด API ไม่ได้ ใช้ localStorage แทน", error);
+        allCases = JSON.parse(localStorage.getItem("cases")) || [];
+      }
+
+      allTips = JSON.parse(localStorage.getItem("tips")) || [];
+      setupYearFilter();
+      applyFilters();
+    }
+
+    function setupYearFilter() {
+      const yearFilter = document.getElementById("yearFilter");
+      const years = [...new Set(
+        allCases
+          .map(parseDate)
+          .filter(Boolean)
+          .map(d => d.getFullYear())
+      )].sort((a, b) => b - a);
+
+      yearFilter.innerHTML = `<option value="all">ทั้งหมด</option>` +
+        years.map(y => `<option value="${y}">${y}</option>`).join("");
+    }
+
+    function applyFilters() {
+      const yearVal = document.getElementById("yearFilter").value;
+      const monthVal = document.getElementById("monthFilter").value;
+      const weekdayVal = document.getElementById("weekdayFilter").value;
+
+      filteredCases = allCases.filter(item => {
+        const d = parseDate(item);
+        if (!d) return yearVal === "all" && monthVal === "all" && weekdayVal === "all";
+
+        if (yearVal !== "all" && d.getFullYear() !== Number(yearVal)) return false;
+        if (monthVal !== "all" && d.getMonth() !== Number(monthVal)) return false;
+        if (weekdayVal !== "all" && d.getDay() !== Number(weekdayVal)) return false;
+
+        return true;
+      });
+
+      updateActiveFilterLabel();
+      renderOverview();
+      renderLocation();
+      renderDetails();
+    }
+
+    function updateActiveFilterLabel() {
+      const yearVal = document.getElementById("yearFilter").value;
+      const monthVal = document.getElementById("monthFilter").value;
+      const weekdayVal = document.getElementById("weekdayFilter").value;
+
+      const parts = [];
+      if (yearVal !== "all") parts.push(`ปี ${yearVal}`);
+      if (monthVal !== "all") parts.push(`เดือน ${monthNames[Number(monthVal)]}`);
+      if (weekdayVal !== "all") parts.push(`วัน${weekdayNames[Number(weekdayVal)]}`);
+
+      document.getElementById("activeFilterLabel").textContent =
+        parts.length ? `กำลังแสดง: ${parts.join(" / ")}` : "กำลังแสดง: ข้อมูลทั้งหมด";
+    }
+
+    function renderOverview() {
+      const totalCases = filteredCases.length;
+      const provinceCount = new Set(filteredCases.map(getCaseProvince)).size;
+      const ages = filteredCases.map(getCaseAge).filter(v => v !== null);
+      const avgAge = ages.length ? Math.round(ages.reduce((a, b) => a + b, 0) / ages.length) : 0;
+
+      const visibleCaseIds = new Set(filteredCases.map(getCaseId).map(String));
+      const tipCount = allTips.filter(t => visibleCaseIds.has(String(t.caseId))).length;
+
+      document.getElementById("statTotalCases").textContent = totalCases;
+      document.getElementById("statProvinceCount").textContent = totalCases ? provinceCount : 0;
+      document.getElementById("statTipCount").textContent = tipCount;
+      document.getElementById("statAvgAge").textContent = avgAge;
+
+      renderMonthlyChart();
+      renderStatusChart();
+      renderLatestCases();
+      renderOverviewTable();
+    }
+
+    function renderMonthlyChart() {
+      const counts = new Array(12).fill(0);
+      filteredCases.forEach(item => {
+        const d = parseDate(item);
+        if (d) counts[d.getMonth()]++;
+      });
+
+      const ctx = document.getElementById("monthlyChart");
+      if (monthlyChartInstance) monthlyChartInstance.destroy();
+
+      monthlyChartInstance = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: monthNames,
+          datasets: [{
+            label: "จำนวนเคส",
+            data: counts,
+            backgroundColor: "#4f83b6",
+            borderRadius: 12,
+            borderSkipped: false
+          }]
+        },
+        options: {
+          responsive: true,
+          animation: { duration: 500 },
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { color: "#4b5563" }
+            },
+            y: {
+              beginAtZero: true,
+              ticks: { precision: 0, color: "#4b5563" },
+              grid: { color: "#e5e7eb" }
+            }
+          }
+        }
+      });
+    }
+
+    function renderStatusChart() {
+      const map = {};
+      filteredCases.forEach(item => {
+        const status = getCaseStatus(item);
+        map[status] = (map[status] || 0) + 1;
+      });
+
+      const labels = Object.keys(map);
+      const values = Object.values(map);
+
+      const palette = [
+        "#0b2c4d", "#4f83b6", "#198754", "#ffc107",
+        "#dc3545", "#0dcaf0", "#6f42c1", "#fd7e14",
+        "#6c757d"
+      ];
+
+      const ctx = document.getElementById("statusChart");
+      if (statusChartInstance) statusChartInstance.destroy();
+
+      statusChartInstance = new Chart(ctx, {
+        type: "doughnut",
+        data: {
+          labels,
+          datasets: [{
+            data: values,
+            backgroundColor: palette.slice(0, labels.length),
+            borderColor: "#fff",
+            borderWidth: 3
+          }]
+        },
+        options: {
+          responsive: true,
+          animation: { duration: 500 },
+          plugins: {
+            legend: {
+              position: "bottom",
+              labels: {
+                usePointStyle: true,
+                padding: 18
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function renderLatestCases() {
+      const container = document.getElementById("latestCasesList");
+      const latest = [...filteredCases]
+        .sort((a, b) => {
+          const da = parseDate(a)?.getTime() || 0;
+          const db = parseDate(b)?.getTime() || 0;
+          return db - da;
+        })
+        .slice(0, 5);
+
+      if (!latest.length) {
+        container.innerHTML = `<div class="empty-box">ยังไม่มีข้อมูลในช่วงเวลาที่เลือก</div>`;
+        return;
+      }
+
+      container.innerHTML = latest.map(item => {
+        const d = parseDate(item);
+        return `
+          <div class="mini-item">
+            <div class="mini-item-title">${escapeHtml(getCaseName(item))}</div>
+            <div class="mini-item-meta">
+              ${escapeHtml(getCaseProvince(item))} • ${d ? d.toLocaleDateString("th-TH") : "-"}<br>
+              <span class="status-badge ${getStatusClass(getCaseStatus(item))}">
+                ${escapeHtml(getCaseStatus(item))}
+              </span>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderOverviewTable() {
+      const tbody = document.getElementById("overviewTableBody");
+      const rows = [...filteredCases]
+        .sort((a, b) => (parseDate(b)?.getTime() || 0) - (parseDate(a)?.getTime() || 0))
+        .slice(0, 8);
+
+      if (!rows.length) {
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-4">ไม่มีข้อมูล</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = rows.map(item => {
+        const d = parseDate(item);
+        return `
+          <tr>
+            <td>${escapeHtml(getCaseId(item))}</td>
+            <td>${escapeHtml(getCaseName(item))}</td>
+            <td>${escapeHtml(getCaseProvince(item))}</td>
+            <td>
+              <span class="status-badge ${getStatusClass(getCaseStatus(item))}">
+                ${escapeHtml(getCaseStatus(item))}
+              </span>
+            </td>
+            <td>${d ? d.toLocaleDateString("th-TH") : "-"}</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function renderLocation() {
+      renderProvinceChart();
+      renderLocationRank();
+      renderLocationTable();
+    }
+
+    function renderProvinceChart() {
+      const provinceMap = {};
+      filteredCases.forEach(item => {
+        const province = getCaseProvince(item);
+        provinceMap[province] = (provinceMap[province] || 0) + 1;
+      });
+
+      const entries = Object.entries(provinceMap)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10);
+
+      const ctx = document.getElementById("provinceChart");
+      if (provinceChartInstance) provinceChartInstance.destroy();
+
+      provinceChartInstance = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: entries.map(e => e[0]),
+          datasets: [{
+            label: "จำนวนเคส",
+            data: entries.map(e => e[1]),
+            backgroundColor: "#0b2c4d",
+            borderRadius: 12,
+            borderSkipped: false
+          }]
+        },
+        options: {
+          indexAxis: "y",
+          responsive: true,
+          animation: { duration: 500 },
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            x: {
+              beginAtZero: true,
+              ticks: { precision: 0, color: "#4b5563" },
+              grid: { color: "#e5e7eb" }
+            },
+            y: {
+              ticks: { color: "#4b5563" },
+              grid: { display: false }
+            }
+          }
+        }
+      });
+    }
+
+    function renderLocationRank() {
+      const container = document.getElementById("locationRankList");
+      const provinceMap = {};
+
+      filteredCases.forEach(item => {
+        const province = getCaseProvince(item);
+        provinceMap[province] = (provinceMap[province] || 0) + 1;
+      });
+
+      const entries = Object.entries(provinceMap).sort((a, b) => b[1] - a[1]).slice(0, 8);
+      const max = entries[0]?.[1] || 1;
+
+      if (!entries.length) {
+        container.innerHTML = `<div class="empty-box">ไม่มีข้อมูลจังหวัด</div>`;
+        return;
+      }
+
+      container.innerHTML = entries.map(([name, count]) => `
+        <div class="location-row">
+          <div>
+            <div class="location-name">${escapeHtml(name)}</div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width:${(count / max) * 100}%"></div>
+            </div>
+          </div>
+          <div class="location-count">${count}</div>
+        </div>
+      `).join("");
+    }
+
+    function renderLocationTable() {
+      const tbody = document.getElementById("locationTableBody");
+      const rows = [...filteredCases]
+        .sort((a, b) => (parseDate(b)?.getTime() || 0) - (parseDate(a)?.getTime() || 0))
+        .slice(0, 15);
+
+      if (!rows.length) {
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-4">ไม่มีข้อมูล</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = rows.map(item => `
+        <tr>
+          <td>${escapeHtml(getCaseId(item))}</td>
+          <td>${escapeHtml(getCaseName(item))}</td>
+          <td>${escapeHtml(getCasePlace(item))}</td>
+          <td>${escapeHtml(getCaseSubdistrict(item))} / ${escapeHtml(getCaseDistrict(item))}</td>
+          <td>${escapeHtml(getCaseProvince(item))}</td>
+        </tr>
+      `).join("");
+    }
+
+    function renderDetails() {
+      const input = document.getElementById("detailsSearchInput");
+      const keyword = input.value.trim().toLowerCase();
+
+      const rows = filteredCases.filter(item => {
+        if (!keyword) return true;
+        const text = [
+          getCaseId(item),
+          getCaseName(item),
+          getCaseProvince(item),
+          getCaseReason(item),
+          getCaseStatus(item)
+        ].join(" ").toLowerCase();
+
+        return text.includes(keyword);
+      });
+
+      const tbody = document.getElementById("detailsTableBody");
+      const empty = document.getElementById("detailsEmptyBox");
+
+      if (!rows.length) {
+        tbody.innerHTML = "";
+        empty.style.display = "grid";
+        return;
+      }
+
+      empty.style.display = "none";
+      tbody.innerHTML = rows.map(item => {
+        const d = parseDate(item);
+        return `
+          <tr>
+            <td>${escapeHtml(getCaseId(item))}</td>
+            <td>${escapeHtml(getCaseName(item))}</td>
+            <td>${getCaseAge(item) ?? "-"}</td>
+            <td>${escapeHtml(getCaseProvince(item))}</td>
+            <td>${escapeHtml(getCaseReason(item))}</td>
+            <td>
+              <span class="status-badge ${getStatusClass(getCaseStatus(item))}">
+                ${escapeHtml(getCaseStatus(item))}
+              </span>
+            </td>
+            <td>${d ? d.toLocaleDateString("th-TH") : "-"}</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function bindEvents() {
+      document.querySelectorAll("#dashboardNav .nav-link").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll("#dashboardNav .nav-link").forEach(el => el.classList.remove("active"));
+          btn.classList.add("active");
+
+          const target = btn.getAttribute("data-target");
+          document.querySelectorAll(".dashboard-section").forEach(section => {
+            section.classList.toggle("active", section.id === target);
+          });
+        });
+      });
+
+      document.getElementById("yearFilter").addEventListener("change", applyFilters);
+      document.getElementById("monthFilter").addEventListener("change", applyFilters);
+      document.getElementById("weekdayFilter").addEventListener("change", applyFilters);
+      document.getElementById("detailsSearchInput").addEventListener("input", renderDetails);
+      document.getElementById("refreshBtn").addEventListener("click", loadCases);
+    }
+
+    bindEvents();
+    loadCases();
+
+    window.addEventListener("load", () => {
+      document.body.classList.add("loaded");
+    });
+  </script>
 </body>
 </html>
