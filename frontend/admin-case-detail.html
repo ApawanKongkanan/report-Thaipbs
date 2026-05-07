@@ -4,372 +4,193 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>รายละเอียดเคสคนหาย</title>
-
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
   <style>
-    body {
-      background: #f4f6f9;
-    }
-
-    .detail-card {
-      border: none;
-      border-radius: 18px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-      margin-bottom: 24px;
-    }
-
-    .section-title {
-      color: #0b2c4d;
-      font-weight: 700;
-      margin-bottom: 16px;
-    }
-
-    .label-text {
-      font-weight: 600;
-      color: #0b2c4d;
-    }
-
-    .status-badge {
-      display: inline-block;
-      padding: 6px 14px;
-      border-radius: 999px;
-      font-size: 0.95rem;
-      font-weight: 600;
-    }
-
-    .status-default { background: #e2e3e5; color: #41464b; }
-    .status-waiting { background: #fff3cd; color: #856404; }
-    .status-progress { background: #cff4fc; color: #055160; }
-    .status-found { background: #d1e7dd; color: #0f5132; }
-
-    .info-box {
-      background: #f8f9fa;
-      border-radius: 14px;
-      padding: 18px;
-      height: 100%;
-    }
-
-    .preview-img {
-      max-width: 220px;
-      border-radius: 16px;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.12);
-    }
-
-    .progress {
-      height: 22px;
-      border-radius: 999px;
-      background: #e9ecef;
-    }
-
-    .progress-bar {
-      font-weight: 600;
-    }
-
-    .empty-box {
+    body { background:#f4f6f9; }
+    .detail-card { border:none; border-radius:18px; box-shadow:0 8px 20px rgba(0,0,0,.08); margin-bottom:24px; }
+    .section-title { color:#0b2c4d; font-weight:700; margin-bottom:16px; }
+    .label-text { font-weight:600; color:#0b2c4d; }
+    .status-badge { display:inline-block; padding:6px 14px; border-radius:999px; font-size:.95rem; font-weight:600; }
+    .status-default { background:#e2e3e5; color:#41464b; }
+    .status-waiting { background:#fff3cd; color:#856404; }
+    .status-progress { background:#cff4fc; color:#055160; }
+    .status-found { background:#d1e7dd; color:#0f5132; }
+    .status-cancel { background:#e2e3e5; color:#41464b; }
+    .status-danger { background:#f8d7da; color:#842029; }
+    .info-box { background:#f8f9fa; border-radius:14px; padding:18px; height:100%; }
+    .case-image-box { background:#f8f9fa; border-radius:14px; padding:18px; text-align:center; height:100%; }
+    .case-image-box {
+      min-height: 240px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       background: #fff;
-      border-radius: 18px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-      padding: 40px 24px;
-      text-align: center;
-      color: #6c757d;
+      border: 1px solid #dee2e6;
+      border-radius: 14px;
+      padding: 12px;
+    }
+    .case-image-box img {
+      display: block;
+      width: auto;
+      max-width: 100%;
+      height: auto;
+      max-height: 420px;
+      object-fit: contain;
+      border-radius: 10px;
+      background: #fff;
+      cursor: zoom-in;
+    }
+    .image-preview-modal img {
+      display: block;
+      width: auto;
+      max-width: 100%;
+      height: auto;
+      max-height: 80vh;
+      object-fit: contain;
+      background: #fff;
+      border-radius: 12px;
+      margin: 0 auto;
     }
   </style>
 </head>
 <body>
-    <script>
-        if (localStorage.getItem("isAdminLoggedIn") !== "true") {
-          alert("กรุณาเข้าสู่ระบบแอดมินก่อน");
-          window.location.href = "login.html";
-        }
-      </script>
+<script src="app.js"></script>
+<script>guardAdmin('');</script>
+<div id="appNavbar"></div>
+<div class="container my-5" id="pageContent">
+  <div class="detail-card card p-4">กำลังโหลดรายละเอียดเคส...</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  renderNavbar({ mountId: 'appNavbar', basePath: '', active: 'admin' });
+  const params = new URLSearchParams(window.location.search);
+  const caseId = params.get('id');
 
-<!-- ================= NAVBAR ================= -->
-<nav class="navbar navbar-expand-lg navbar-dark" style="background:#0b2c4d;">
-    <div class="container-fluid">
-  
-      <!-- LOGO -->
-      <a class="navbar-brand d-flex align-items-center gap-2"
-         href="Homepage.html">
-        <img src="LOGO ThaiPBS.png" height="40">
-        <span class="fw-bold">ศูนย์ข้อมูลคนหาย</span>
-      </a>
-  
-      <!-- TOGGLE BUTTON -->
-      <button class="navbar-toggler" type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#mainMenu">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-  
-      <!-- MENU -->
-      <div class="collapse navbar-collapse justify-content-end" id="mainMenu">
-        <ul class="navbar-nav align-items-lg-center gap-2">
-  
-          <li class="nav-item">
-            <a class="nav-link" href="Homepage.html">หน้าหลัก</a>
-          </li>
-  
-          <li class="nav-item">
-            <a class="nav-link" href="report-missing-step/report-missing-step.html">แจ้งคนหาย</a>
-          </li>
-  
-          <li class="nav-item">
-            <a class="nav-link" href="tip-form.html">แจ้งเบาะแส</a>
-          </li>
-          
-          <li class="nav-item">
-            <a class="nav-link" href="track-case.html">ติดตามเคส</a>
-          </li>
-  
-          <li class="nav-item">
-            <a class="nav-link" href="admin.html">สำหรับเจ้าหน้าที่</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link active" href="admin-case-detail.html">รายละเอียดเคสคนหาย</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="https://app.powerbi.com/groups/me/reports/d7af4b19-90dc-4bd7-b843-e0efe99cf21c/09b51a57525fde1c4fb5?experience=power-bi" target="_blank">
-              Power BI Dashboard
-            </a>
-          </li>
-          <button type="button" class="btn btn-outline-danger" onclick="logoutAdmin()">
-            ออกจากระบบ
-          </button>
-  
-        </ul>
+  function renderTips(caseId) {
+    const tips = getStoredTips().filter(item => String(item.caseId) === String(caseId));
+    if (tips.length === 0) {
+      return '<div class="text-muted">ยังไม่มีข้อมูลเบาะแส</div>';
+    }
+    return tips.map((tip, index) => `
+      <div class="border rounded p-3 mb-2 bg-light">
+        <div class="fw-semibold mb-1">เบาะแสที่ ${index + 1}</div>
+        <div><span class="label-text">ผู้แจ้ง:</span> ${tip.tipster_name || '-'}</div>
+        <div><span class="label-text">เบอร์โทร:</span> ${tip.tipster_phone || '-'}</div>
+        <div><span class="label-text">สถานที่:</span> ${tip.tip_location || '-'}</div>
+        <div><span class="label-text">วันที่:</span> ${tip.tip_date || '-'} ${tip.tip_time || ''}</div>
+        <div><span class="label-text">รายละเอียด:</span> ${tip.tip_detail || '-'}</div>
+      </div>`).join('');
+  }
+
+  async function loadCaseDetail() {
+    const pageContent = document.getElementById('pageContent');
+    const item = await fetchCaseById(caseId);
+    if (!item) {
+      pageContent.innerHTML = '<div class="card detail-card p-4 text-danger">ไม่พบข้อมูลเคส</div>';
+      return;
+    }
+    const meta = getStatusMeta(item.latest_status);
+    const imageUrl = getCaseImageUrl(item);
+
+    pageContent.innerHTML = `
+      <div class="card detail-card p-4">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
+          <div>
+            <div class="text-muted small">เลขเคส: ${getCaseId(item)}</div>
+            <h3 class="mb-1">${item.missing_title || ''} ${item.missing_name || item.name || '-'}</h3>
+            <div class="text-muted">หัวข้อ: ${item.missing_reason || item.reason || '-'} | ความเร่งด่วน: ${item.priority || '-'}</div>
+          </div>
+          <div><span class="status-badge ${meta.badgeClass}">${meta.value}</span></div>
+        </div>
+        <div class="mb-4">
+          <div class="d-flex justify-content-between mb-2"><span class="label-text">ความคืบหน้าของเคส</span><span class="label-text">${meta.progress}%</span></div>
+          <div class="progress"><div class="progress-bar ${meta.progressClass}" role="progressbar" style="width:${meta.progress}%">${meta.progress}%</div></div>
+        </div>
+        <div class="d-flex gap-2 flex-wrap mb-4">
+          <a href="tip-form.html?case_id=${getCaseId(item)}" class="btn btn-primary">แจ้งเบาะแส</a>
+          <a href="admin.html" class="btn btn-outline-secondary">กลับหน้ารายการเคส</a>
+        </div>
+      </div>
+
+      <div class="card detail-card p-4">
+        <h4 class="section-title">รูปผู้สูญหาย</h4>
+        <div class="case-image-box">
+          ${imageUrl
+            ? `<img src="${imageUrl}" alt="รูปผู้สูญหาย" onclick="openImagePreview('${imageUrl}')">`
+            : `<div class="text-muted">ไม่มีรูปภาพ</div>`}
+        </div>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-lg-6">
+          <div class="card detail-card p-4">
+            <h4 class="section-title">ข้อมูลผู้สูญหาย</h4>
+            <div class="row g-3">
+              <div class="col-md-6"><span class="label-text">เพศ:</span> ${item.gender || '-'}</div>
+              <div class="col-md-6"><span class="label-text">วันเกิด:</span> ${item.birthday || '-'}</div>
+              <div class="col-md-6"><span class="label-text">อายุ:</span> ${item.age || '-'}</div>
+              <div class="col-md-6"><span class="label-text">สัญชาติ:</span> ${item.race || '-'}</div>
+              <div class="col-md-6"><span class="label-text">ประเภทบัตร:</span> ${item.id_type || '-'}</div>
+              <div class="col-md-6"><span class="label-text">เลขบัตร:</span> ${item.id_number || '-'}</div>
+              <div class="col-md-6"><span class="label-text">สีผิว:</span> ${item.skin_color || '-'}</div>
+              <div class="col-md-6"><span class="label-text">รูปร่าง:</span> ${item.body_shape || '-'}</div>
+              <div class="col-md-6"><span class="label-text">ทรงผม:</span> ${item.hair_styles || '-'}</div>
+              <div class="col-md-6"><span class="label-text">สีผม:</span> ${item.hair_color || '-'}</div>
+              <div class="col-md-6"><span class="label-text">ส่วนสูง:</span> ${item.height_cm || '-'} cm</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="card detail-card p-4">
+            <h4 class="section-title">ข้อมูลการแจ้ง</h4>
+            <div class="row g-3">
+              <div class="col-md-6"><span class="label-text">วันที่หาย:</span> ${item.missing_date || '-'}</div>
+              <div class="col-md-6"><span class="label-text">เวลาที่หาย:</span> ${item.missing_time || '-'}</div>
+              <div class="col-12"><span class="label-text">สถานที่:</span> ${item.missing_place || '-'}</div>
+              <div class="col-md-6"><span class="label-text">จังหวัด:</span> ${item.province || '-'}</div>
+              <div class="col-md-6"><span class="label-text">รหัสไปรษณีย์:</span> ${item.postal_code || '-'}</div>
+            </div>
+            <hr>
+            <h4 class="section-title">ข้อมูลผู้แจ้ง</h4>
+            <div class="row g-3">
+              <div class="col-md-6"><span class="label-text">ชื่อผู้แจ้ง:</span> ${item.owner_title || ''} ${item.owner_name || '-'}</div>
+              <div class="col-md-6"><span class="label-text">เบอร์โทร:</span> ${item.owner_phone || '-'}</div>
+              <div class="col-md-6"><span class="label-text">ความสัมพันธ์:</span> ${item.relation_to_missing || '-'}</div>
+              <div class="col-md-6"><span class="label-text">ติดต่อมาจาก:</span> ${item.inform_channels || '-'}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card detail-card p-4">
+        <h4 class="section-title">เบาะแสที่เกี่ยวข้อง</h4>
+        ${renderTips(getCaseId(item))}
+      </div>`;
+  }
+
+  loadCaseDetail();
+</script>
+<div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content image-preview-modal">
+      <div class="modal-header">
+        <h5 class="modal-title">ดูรูปภาพ</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <img id="previewImage" src="" alt="Preview">
       </div>
     </div>
-  </nav>
-
-  <div class="container my-5" id="pageContent">
-    <div class="empty-box">
-      <div class="spinner-border text-primary mb-3" role="status"></div>
-      <div>กำลังโหลดรายละเอียดเคส...</div>
-    </div>
   </div>
-
-  <script>
-    const API = "http://localhost:3000/api/missing-persons";
-    const params = new URLSearchParams(window.location.search);
-    const caseId = params.get("id");
-
-    function getStatusClass(status) {
-      if (!status) return "status-default";
-      if (status.includes("รับแจ้ง")) return "status-waiting";
-      if (status.includes("กำลังตรวจสอบ") || status.includes("ประชาสัมพันธ์")) return "status-progress";
-      if (status.includes("พบเบาะแส") || status.includes("พบแล้ว")) return "status-found";
-      return "status-default";
-    }
-
-    function getProgressPercent(status) {
-      if (!status) return 10;
-      if (status.includes("รับแจ้ง")) return 25;
-      if (status.includes("กำลังตรวจสอบ")) return 50;
-      if (status.includes("ประชาสัมพันธ์")) return 75;
-      if (status.includes("พบเบาะแส") || status.includes("พบแล้ว")) return 100;
-      return 10;
-    }
-
-    function getProgressColorClass(percent) {
-      if (percent < 50) return "bg-warning";
-      if (percent < 100) return "bg-info";
-      return "bg-success";
-    }
-
-    function renderCaseDetail(item) {
-      const pageContent = document.getElementById("pageContent");
-
-      const status = item.latest_status || "รับแจ้งเคส";
-      const progress = getProgressPercent(status);
-      const statusClass = getStatusClass(status);
-      const progressClass = getProgressColorClass(progress);
-
-      const imageUrl = item.image_url
-        ? `http://localhost:3000/${String(item.image_url).replace(/^\/+/, "")}`
-        : null;
-
-      const noticeUrl = item.notice
-        ? `http://localhost:3000/${String(item.notice).replace(/^\/+/, "")}`
-        : null;
-
-      pageContent.innerHTML = `
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
-          <div>
-            <h2 class="section-title mb-1">รายละเอียดเคสคนหาย</h2>
-            <div class="text-muted">เลขเคส: ${item.case_id || "-"}</div>
-          </div>
-
-          <div class="d-flex gap-2 flex-wrap">
-            <a href="admin.html" class="btn btn-outline-secondary">
-              <i class="fa-solid fa-arrow-left"></i> กลับไปหน้ารายการเคส
-            </a>
-            <a href="tip-form.html?case_id=${item.case_id}" class="btn btn-primary">
-              <i class="fa-solid fa-lightbulb"></i> แจ้งเบาะแสให้เคสนี้
-            </a>
-          </div>
-        </div>
-
-        <div class="card detail-card p-4 mb-4">
-          <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
-            <div>
-              <h3 class="mb-1">${item.missing_title || ""} ${item.missing_name || "-"}</h3>
-              <div class="text-muted">
-                หัวข้อ: ${item.missing_reason || "-"} | ความเร่งด่วน: ${item.priority || "-"}
-              </div>
-            </div>
-
-            <div>
-              <span class="status-badge ${statusClass}">${status}</span>
-            </div>
-          </div>
-
-          <div class="mb-2 d-flex justify-content-between">
-            <span class="label-text">ความคืบหน้าเคส</span>
-            <span class="label-text">${progress}%</span>
-          </div>
-          <div class="progress">
-            <div class="progress-bar ${progressClass}" role="progressbar" style="width: ${progress}%;">
-              ${progress}%
-            </div>
-          </div>
-        </div>
-
-        <div class="row g-4">
-          <div class="col-lg-6">
-            <div class="card detail-card p-4">
-              <h4 class="section-title">ข้อมูลผู้สูญหาย</h4>
-              <div class="row g-3">
-                <div class="col-md-6"><span class="label-text">ชื่อ:</span> ${item.missing_name || "-"}</div>
-                <div class="col-md-6"><span class="label-text">เพศ:</span> ${item.gender || "-"}</div>
-                <div class="col-md-6"><span class="label-text">วันเกิด:</span> ${item.birthday || "-"}</div>
-                <div class="col-md-6"><span class="label-text">อายุ:</span> ${item.age || "-"}</div>
-                <div class="col-md-6"><span class="label-text">สัญชาติ:</span> ${item.race || "-"}</div>
-                <div class="col-md-6"><span class="label-text">ประเภทบัตร:</span> ${item.id_type || "-"}</div>
-                <div class="col-md-12"><span class="label-text">เลขบัตร:</span> ${item.id_number || "-"}</div>
-              </div>
-
-              <hr>
-
-              <h5 class="mb-3">ลักษณะบุคคล</h5>
-              <div class="row g-3">
-                <div class="col-md-6"><span class="label-text">สีผิว:</span> ${item.skin_color || "-"}</div>
-                <div class="col-md-6"><span class="label-text">รูปร่าง:</span> ${item.body_shape || "-"}</div>
-                <div class="col-md-6"><span class="label-text">ทรงผม:</span> ${item.hair_styles || "-"}</div>
-                <div class="col-md-6"><span class="label-text">สีผม:</span> ${item.hair_color || "-"}</div>
-                <div class="col-md-6"><span class="label-text">ส่วนสูง:</span> ${item.height_cm ? item.height_cm + " cm" : "-"}</div>
-              </div>
-
-              <div class="mt-4 text-center">
-                <div class="label-text mb-2">รูปผู้สูญหาย</div>
-                ${
-                  imageUrl
-                    ? `<img src="${imageUrl}" alt="รูปผู้สูญหาย" class="preview-img">`
-                    : `<div class="text-muted">- ไม่มีรูป -</div>`
-                }
-              </div>
-            </div>
-          </div>
-
-          <div class="col-lg-6">
-            <div class="card detail-card p-4 mb-4">
-              <h4 class="section-title">ข้อมูลผู้แจ้ง</h4>
-              <div class="row g-3">
-                <div class="col-md-12"><span class="label-text">ชื่อผู้แจ้ง:</span> ${item.owner_name || "-"}</div>
-                <div class="col-md-6"><span class="label-text">เบอร์โทร:</span> ${item.owner_phone || "-"}</div>
-                <div class="col-md-6"><span class="label-text">ความสัมพันธ์:</span> ${item.relation_to_missing || "-"}</div>
-                <div class="col-md-12"><span class="label-text">ช่องทางการแจ้ง:</span> ${item.inform_channels || "-"}</div>
-              </div>
-            </div>
-
-            <div class="card detail-card p-4 mb-4">
-              <h4 class="section-title">ข้อมูลสถานที่พบครั้งสุดท้าย</h4>
-              <div class="row g-3">
-                <div class="col-md-6"><span class="label-text">วันที่หาย:</span> ${item.missing_date || "-"}</div>
-                <div class="col-md-6"><span class="label-text">เวลาที่หาย:</span> ${item.missing_time || "-"}</div>
-                <div class="col-md-12"><span class="label-text">สถานที่:</span> ${item.missing_place || "-"}</div>
-                <div class="col-md-6"><span class="label-text">ตำบล:</span> ${item.subdistrict || "-"}</div>
-                <div class="col-md-6"><span class="label-text">อำเภอ:</span> ${item.district || "-"}</div>
-                <div class="col-md-6"><span class="label-text">จังหวัด:</span> ${item.province || "-"}</div>
-                <div class="col-md-6"><span class="label-text">รหัสไปรษณีย์:</span> ${item.postal_code || "-"}</div>
-              </div>
-            </div>
-
-            <div class="card detail-card p-4 mb-4">
-              <h4 class="section-title">ข้อมูลสถานีตำรวจ</h4>
-              <div class="row g-3">
-                <div class="col-md-12"><span class="label-text">ชื่อสถานีตำรวจ:</span> ${item.police_station_name || "-"}</div>
-                <div class="col-md-6"><span class="label-text">เบอร์โทร:</span> ${item.ps_phone || "-"}</div>
-                <div class="col-md-6"><span class="label-text">จังหวัด:</span> ${item.police_station_province || item.province || "-"}</div>
-              </div>
-
-              <div class="mt-4">
-                <div class="label-text mb-2">เอกสารใบแจ้งความ</div>
-                ${
-                  noticeUrl
-                    ? `<a href="${noticeUrl}" target="_blank" class="btn btn-outline-primary btn-sm">
-                        <i class="fa-solid fa-file-lines"></i> เปิดเอกสารใบแจ้งความ
-                      </a>`
-                    : `<div class="text-muted">- ไม่มีเอกสาร -</div>`
-                }
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
-    }
-
-    async function loadCaseDetail() {
-      const pageContent = document.getElementById("pageContent");
-
-      if (!caseId) {
-        pageContent.innerHTML = `
-          <div class="empty-box">
-            <i class="fa-solid fa-circle-exclamation fa-2x mb-3"></i>
-            <h4 class="mb-2">ไม่พบหมายเลขเคส</h4>
-            <p class="mb-3">กรุณาเลือกเคสจากหน้า admin ก่อน</p>
-            <a href="admin.html" class="btn btn-primary">กลับไปหน้า admin</a>
-          </div>
-        `;
-        return;
-      }
-
-      try {
-        const res = await fetch(`${API}/${caseId}`);
-        const result = await res.json();
-        const item = result.data || result;
-
-        if (!item || (!item.case_id && !item.missing_name)) {
-          throw new Error("ไม่พบข้อมูลเคส");
-        }
-
-        renderCaseDetail(item);
-      } catch (error) {
-        console.error("LOAD CASE DETAIL ERROR:", error);
-        pageContent.innerHTML = `
-          <div class="empty-box">
-            <i class="fa-solid fa-triangle-exclamation fa-2x mb-3"></i>
-            <h4 class="mb-2">ไม่สามารถโหลดรายละเอียดเคสได้</h4>
-            <p class="mb-3">กรุณาตรวจสอบว่า backend เปิดอยู่และมีข้อมูลเคสนี้จริง</p>
-            <a href="admin.html" class="btn btn-primary">กลับไปหน้า admin</a>
-          </div>
-        `;
-      }
-    }
-
-    loadCaseDetail();
-    function logoutAdmin() {
-
-localStorage.removeItem("isAdminLoggedIn");
-
-localStorage.removeItem("adminUsername");
-
-window.location.href = "login.html";
-
-}
-  </script>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</div>
+<script>
+  function openImagePreview(src) {
+    const preview = document.getElementById("previewImage");
+    preview.src = src;
+    const modal = new bootstrap.Modal(document.getElementById("imagePreviewModal"));
+    modal.show();
+  }
+</script>
 </body>
 </html>
