@@ -66,26 +66,63 @@
     </form>
   </div>
 
-  <script>
-    const ADMIN_USERNAME = "admin";
-    const ADMIN_PASSWORD = "1234";
+<script>
+document.getElementById("loginForm").addEventListener("submit", async function (e) {
 
-    document.getElementById("loginForm").addEventListener("submit", function (e) {
-      e.preventDefault();
+  e.preventDefault();
 
-      const username = document.getElementById("username").value.trim();
-      const password = document.getElementById("password").value.trim();
-      const loginError = document.getElementById("loginError");
+  const username = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value.trim();
 
-      if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-        localStorage.setItem("isAdminLogin", "true");
-        localStorage.setItem("adminUsername", username);
-        window.location.href = "dashboard.html";
-      } else {
-        loginError.classList.remove("d-none");
-      }
+  const loginError = document.getElementById("loginError");
+
+  try {
+
+    const res = await fetch("http://localhost:3000/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        username,
+        password
+      })
     });
-  </script>
+
+    const result = await res.json();
+
+    if (result.success) {
+
+      localStorage.setItem("isAdminLogin", "true");
+
+      localStorage.setItem(
+        "adminUser",
+        JSON.stringify(result.user)
+      );
+
+      localStorage.setItem(
+        "adminUsername",
+        result.user.username
+      );
+
+      window.location.href = "admin.html";
+
+    } else {
+
+      loginError.classList.remove("d-none");
+
+    }
+
+  } catch (err) {
+
+    console.error(err);
+
+    loginError.classList.remove("d-none");
+
+  }
+
+});
+</script>
 
 </body>
 </html>

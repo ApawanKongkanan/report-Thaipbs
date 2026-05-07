@@ -35,21 +35,77 @@ router.post("/",
         missing_title, missing_name, gender, birthday, age, race,
         id_number, id_type, // สำหรับ IdentityDocument
         missing_reason, priority,
-        owner_name, owner_phone, relation_to_missing,
+        owner_title,owner_name, owner_phone, owner_id_card,relation_to_missing,
         missing_date, missing_time, missing_place,
         postal_code, province, district, subdistrict,
         hair_styles, hair_color, height_cm, skin_color, body_shape,
         police_station_name, ps_phone, // สำหรับ PoliceStation
         inform_channels,
-        role 
+        role,
+        user_id
       } = req.body;
 
       // --- 2. Phase 1: Hard-coded Staff Data ---
       // กำหนดค่าสมมติให้เป็นเจ้าหน้าที่ระบบกลาง ID 1
+      // ===============================
+// AUTO CREATE RELATIVE ACCOUNT
+// ===============================
+
+let finalUserId = user_id || null;
+
+if (!finalUserId && owner_phone) {
+
+  // หา user จากเบอร์โทร
+  const findUser = await transaction.request()
+    .input("phone", sql.NVarChar, owner_phone)
+    .query(`
+      SELECT user_id
+      FROM Users
+      WHERE username = @phone
+    `);
+
+  // ถ้ามีอยู่แล้ว
+  if (findUser.recordset.length > 0) {
+
+    finalUserId =
+      findUser.recordset[0].user_id;
+
+  } else {
+
+    // ใช้ 4 ตัวท้ายบัตรประชาชนเป็นรหัสผ่าน
+    const password = owner_id_card
+      ? owner_id_card.slice(-4)
+      : owner_phone.slice(-4);
+
+    // สร้าง account ญาติอัตโนมัติ
+    const createUser = await transaction.request()
+      .input("username", sql.NVarChar, owner_phone)
+      .input("password", sql.NVarChar, password)
+      .query(`
+        INSERT INTO Users
+        (
+          username,
+          password_hash,
+          role
+        )
+        OUTPUT INSERTED.user_id
+        VALUES
+        (
+          @username,
+          @password,
+          'relative'
+        )
+      `);
+
+    finalUserId =
+      createUser.recordset[0].user_id;
+
+  }
+}
       const STAFF_ID_DEFAULT = 1; 
       const STAFF_NAME_DEFAULT = 'เจ้าหน้าที่ศูนย์รับแจ้ง (System)';
 
-      const initialStatus = (role === 'admin') ? 'รับแจ้ง' : 'รอรับเรื่อง';
+      const initialStatus = 'กำลังตรวจสอบ';
 
       // --- 3. Insert MissingPerson ---
       const personResult = await transaction.request()
@@ -74,12 +130,18 @@ router.post("/",
 
       // --- 5. Insert CaseOwner & Phone ---
       const ownerResult = await transaction.request()
+        .input("otitle", sql.NVarChar, owner_title || "ไม่ระบุ")
         .input("oname", sql.NVarChar, owner_name)
-        .query(`INSERT INTO CaseOwner (owner_title, owner_name) OUTPUT INSERTED.owner_id VALUES (N'ไม่ระบุ', @oname)`);
+        .query(`INSERT INTO CaseOwner (owner_title, owner_name) OUTPUT INSERTED.owner_id VALUES (@otitle, @oname)`);
       const owner_id = ownerResult.recordset[0].owner_id;
       if (owner_phone) {
-        await transaction.request().input("oid", sql.Int, owner_id).input("p", sql.NVarChar, owner_phone)
-          .query(`INSERT INTO CaseOwner_Phone (owner_id, owner_phone) VALUES (@oid, @p)`);
+        await transaction.request()
+  .input("oid", sql.Int, owner_id)
+  .input("p", sql.NVarChar, owner_phone)
+  .query(`
+    INSERT INTO CaseOwner_Phone (owner_id, owner_phone)
+    VALUES (@oid, @p)
+  `);
       }
 
       // --- 6. Insert PoliceStation ---
@@ -120,17 +182,56 @@ router.post("/",
         .input("owner_id", sql.Int, owner_id)
         .input("mp_id", sql.Int, mp_id)
         .input("ps_id", sql.Int, ps_id)
-        .query(`INSERT INTO MissingCase (priority, latest_status, missing_reason, staff_id, latest_last_seen_at, first_last_seen_at, latest_characteristics, relation_to_missing, inform_channels, notice, owner_id, missingperson_id, police_station_id) 
-                OUTPUT INSERTED.case_id VALUES (@priority, @status, @reason, @staff_id, @ls, @ls, @chars, @rel, @chan, @notice, @owner_id, @mp_id, @ps_id)`);
+        .input("uid", sql.Int, finalUserId)
+
+        .query(`
+  INSERT INTO MissingCase
+  (
+    priority,
+    latest_status,
+    missing_reason,
+    staff_id,
+    latest_last_seen_at,
+    first_last_seen_at,
+    latest_characteristics,
+    relation_to_missing,
+    inform_channels,
+    notice,
+    owner_id,
+    missingperson_id,
+    police_station_id,
+    user_id
+  )
+  OUTPUT INSERTED.case_id
+  VALUES
+  (
+    @priority,
+    @status,
+    @reason,
+    @staff_id,
+    @ls,
+    @ls,
+    @chars,
+    @rel,
+    @chan,
+    @notice,
+    @owner_id,
+    @mp_id,
+    @ps_id,
+    @uid
+  )
+`);
       const case_id = caseResult.recordset[0].case_id;
 
       // --- 9. Insert StatusLog (ใช้ Staff Name Hard-coded) ---
       const logResult = await transaction.request()
         .input("case_id", sql.Int, case_id)
         .input("status", sql.NVarChar, initialStatus)
-        .input("logged_by", sql.NVarChar, STAFF_NAME_DEFAULT) // <--- ใส่ Hard-coded Name
-        .query(`INSERT INTO StatusLog (case_id, description, case_status, logged_by) 
-                OUTPUT INSERTED.log_id VALUES (@case_id, N'บันทึกรับแจ้งครั้งแรก', @status, @logged_by)`);
+        .input("logged_by", sql.NVarChar, STAFF_NAME_DEFAULT)
+        .input("uid", sql.Int, finalUserId)
+        
+        .query(`INSERT INTO StatusLog (case_id, description, case_status, logged_by, user_id) 
+                OUTPUT INSERTED.log_id VALUES (@case_id, N'บันทึกรับแจ้งครั้งแรก', @status, @logged_by, @uid)`);
       const log_id = logResult.recordset[0].log_id;
 
       // --- 10. Insert Character Log ---
@@ -188,6 +289,7 @@ const result = await pool.request().query(`
     SELECT
         mc.*,
         mp.missing_name, mp.gender, mp.age, mp.race,
+        co.owner_title,
         co.owner_name,
         cp.owner_phone
     FROM MissingCase mc
@@ -226,7 +328,7 @@ const formattedData = result.recordset.map(item => {
         }
     }
 
-    item.status = item.latest_status || "รับแจ้งเคส";
+    item.status = item.latest_status || "กำลังตรวจสอบ";
     item.owner_phone = item.owner_phone || "-";
     item.gender = item.gender || "-";
     item.age = item.age || "-";
@@ -253,7 +355,7 @@ router.get("/:id", async (req, res) => {
             .input("id", sql.Int, id)
             .query(`
                 SELECT mc.*, mp.missing_name, mp.gender, mp.age, mp.race, mp.birthday,
-                       co.owner_name, cp.owner_phone, idd.id_number, idd.id_type,
+                       co.owner_title,co.owner_name, cp.owner_phone, idd.id_number, idd.id_type,
                        ps.police_station_name, ps.police_station_phone, ps.police_station_province
                 FROM MissingCase mc
                 JOIN MissingPerson mp ON mc.missingperson_id = mp.missingperson_id
@@ -401,10 +503,11 @@ router.put("/:id", async (req, res) => {
 router.put("/:id/status", async (req, res) => {
   try {
     const { id } = req.params;
-    const { status } = req.body;
+    const { status, logged_by, user_id } = req.body;
 
     const pool = await sql.connect(dbConfig);
 
+        // UPDATE STATUS จริง
     await pool.request()
       .input("id", sql.Int, id)
       .input("status", sql.NVarChar, status)
@@ -413,6 +516,31 @@ router.put("/:id/status", async (req, res) => {
         SET latest_status = @status
         WHERE case_id = @id
       `);
+
+
+await pool.request()
+  .input("case_id", sql.Int, id)
+  .input("status", sql.NVarChar, status)
+  .input("by", sql.NVarChar, logged_by || "admin")
+  .input("uid", sql.Int, user_id || null)
+  .query(`
+    INSERT INTO StatusLog
+    (
+      case_id,
+      description,
+      case_status,
+      logged_by,
+      user_id
+    )
+    VALUES
+    (
+      @case_id,
+      N'อัปเดตสถานะเคส',
+      @status,
+      @by,
+      @uid
+    )
+  `);
 
     res.json({
       success: true,

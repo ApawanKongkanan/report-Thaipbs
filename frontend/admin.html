@@ -38,7 +38,12 @@
 <body>
 
 <script>
-const isAdmin = localStorage.getItem("isAdminLogin");
+
+  const isAdmin =
+  localStorage.getItem("isAdminLogin");
+
+const adminUser =
+  JSON.parse(localStorage.getItem("adminUser"));
 
 if (isAdmin !== "true") {
 
@@ -129,7 +134,17 @@ function getStatusClass(status) {
 }
 
 function viewCaseDetail(id) {
-  window.location.href = "login.html";
+
+  window.location.href =
+    `case-detail.html?id=${id}`;
+
+}
+
+function editCase(id) {
+
+  window.location.href =
+    `edit-case.html?id=${id}`;
+
 }
 
 async function loadCases() {
@@ -143,8 +158,6 @@ async function loadCases() {
     rows = JSON.parse(localStorage.getItem("cases")) || [];
   }
 
-  const tips = JSON.parse(localStorage.getItem("tips")) || [];
-
   const table = document.getElementById("caseTable");
   table.innerHTML = "";
 
@@ -154,15 +167,14 @@ async function loadCases() {
   }
 
   rows.forEach(item => {
-    const caseId = item.case_id || item.id;
 
-    const caseTips = tips.filter(t => t.caseId == caseId);
+  const caseId =
+    item.case_id || item.id;
 
-    let status = "รอรับเรื่อง";
-    if (caseTips.length === 1) status = "พบเบาะแส";
-    if (caseTips.length >= 2) status = "กำลังดำเนินการ";
+  let status =
+    item.latest_status || "รอรับเรื่อง";
 
-    table.innerHTML += `
+  table.innerHTML += `
       <tr>
         <td>${caseId}</td>
         <td>${item.missing_name || item.name || "-"}</td>
@@ -174,11 +186,22 @@ async function loadCases() {
           </span>
         </td>
         <td>
-          <button class="btn btn-info btn-sm text-white"
-            onclick="viewCaseDetail(${caseId})">
-            รายละเอียด
-          </button>
-        </td>
+
+  <div class="d-flex gap-2 justify-content-center flex-wrap">
+
+    <button class="btn btn-info btn-sm text-white"
+      onclick="viewCaseDetail(${caseId})">
+      รายละเอียด
+    </button>
+
+    <button class="btn btn-primary btn-sm"
+      onclick="editCase(${caseId})">
+      แก้ไข
+    </button>
+
+  </div>
+
+</td>
       </tr>
     `;
   });
@@ -187,6 +210,7 @@ async function loadCases() {
 function logoutAdmin() {
   localStorage.removeItem("isAdminLogin");
   localStorage.removeItem("adminUsername");
+  localStorage.removeItem("adminUser");
   window.location.href = "Homepage.html";
 }
 

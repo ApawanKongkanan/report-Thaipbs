@@ -29,16 +29,24 @@ router.post("/", async (req, res) => {
         await transaction.begin();
 
         // แกะค่าจาก data (ซึ่งคือ req.body)
-        const { 
-            reporter_name, 
-            reporter_phone, 
-            details, 
-            location_found 
-        } = data;
+const reporter_title =
+    data.reporter_title || data.tipster_title;
+
+const reporter_name =
+    data.reporter_name || data.tipster_name;
+
+const reporter_phone =
+    data.reporter_phone || data.tipster_phone;
+
+const details =
+    data.details || data.tip_detail;
+
+const location_found =
+    data.location_found || data.tip_location;
 
         // 1. บันทึกข้อมูลผู้แจ้ง (Reporter)
         const reporterResult = await transaction.request()
-            .input("title", sql.NVarChar, data.reporter_title || 'คุณ')
+            .input("title", sql.NVarChar, reporter_title || 'คุณ')
             .input("name", sql.NVarChar, reporter_name || 'ไม่ประสงค์ออกนาม')
             .query(`INSERT INTO Reporter (reporter_title, reporter_name) 
                     OUTPUT INSERTED.reporter_id VALUES (@title, @name)`);
@@ -58,12 +66,19 @@ router.post("/", async (req, res) => {
             .input("case_id", sql.Int, case_id)
             .input("desc", sql.NVarChar, (details || 'แจ้งเบาะแสใหม่') + (location_found ? ` สถานที่: ${location_found}` : '')) 
             .input("status", sql.NVarChar, 'ได้รับเบาะแส')
-            .input("by", sql.NVarChar, 'Reporter: ' + (reporter_name || 'Anonymous'))
+            .input("by", sql.NVarChar, `ผู้แจ้งเบาะแส: ${reporter_name || 'Anonymous'}`)
             .query(`INSERT INTO StatusLog (case_id, description, case_status, logged_by) 
                     OUTPUT INSERTED.log_id 
                     VALUES (@case_id, @desc, @status, @by)`);
         
         const log_id = logResult.recordset[0].log_id;
+        await transaction.request()
+  .input("case_id", sql.Int, case_id)
+  .query(`
+    UPDATE MissingCase
+    SET latest_status = N'มีเบาะแส'
+    WHERE case_id = @case_id
+  `);
 
         // 4. บันทึกความสัมพันธ์การแจ้งเบาะแส (ReportedTips)
         await transaction.request()

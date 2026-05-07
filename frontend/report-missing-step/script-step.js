@@ -290,7 +290,47 @@ function generateSummary() {
   document.getElementById("summaryBox").innerHTML = html;
 }
 
+/*************************
+ * OCR HELPER FUNCTION
+ *************************/
+async function extractPoliceReport(imageFile) {
 
+  try {
+
+    const formData = new FormData();
+
+    formData.append("file", imageFile);
+
+    const response = await fetch(
+  "https://police-ocr-api.onrender.com/api/extract-report",
+  {
+    method: "POST",
+    body: formData
+  }
+);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+
+    console.log("แยกข้อมูลสำเร็จ:", result);
+
+    return result.data;
+
+  } catch (error) {
+
+    console.error(
+      "เกิดข้อผิดพลาดในการสกัดข้อมูล:",
+      error
+    );
+
+    alert("ไม่สามารถอ่านข้อมูลได้ กรุณาลองใหม่อีกครั้ง");
+
+  }
+
+}
 /*************************
  * MAIN EVENT LISTENERS
  *************************/
@@ -400,93 +440,69 @@ document.addEventListener("DOMContentLoaded", () => {
       window.print();
     });
   }
-
-  // --- OCR Scan Logic ---
-  const scanBtn = document.getElementById("scanBtn");
-  const noticeInput = document.getElementById("noticeInput");
-  const scanSpinner = document.getElementById("scanSpinner");
-
-  if (scanBtn) {
-    scanBtn.addEventListener("click", async () => {
-      const file = noticeInput.files[0];
-      if (!file) { alert("กรุณาเลือกไฟล์ก่อนครับ"); return; }
-
-      if (scanSpinner) scanSpinner.style.display = "block";
-      scanBtn.disabled = true;
-
-      try {
-        const data = await extractPoliceReport(file); 
-        if (data) {
-          if (data.police_station) document.querySelector("input[name='police_station_name']").value = data.police_station;
-          if (data.missing_name) document.querySelector("input[name='missing_name']").value = data.missing_name;
-          alert("สแกนสำเร็จ!");
-        }
-      } catch (e) {
-        console.error(e);
-      } finally {
-        if (scanSpinner) scanSpinner.style.display = "none";
-        scanBtn.disabled = false;
-      }
-    });
-  }
-  // 1. รายชื่อสถานีตำรวจตัวอย่าง (คุณสามารถเพิ่ม สน. อื่นๆ เข้าไปใน List นี้ได้เลย)
-  const policeStations = [
-    "สน.ชนะสงคราม", "สน.ดุสิต", "สน.ทุ่งมหาเมฆ", "สน.บางรัก", "สน.พญาไท", 
-    "สน.ห้วยขวาง", "สน.ลุมพินี", "สน.ทองหล่อ", "สน.ดินแดง", "สน.เตาปูน"
-  ];
-
-  // 2. สร้างระบบ Autocomplete โดยไม่แก้ HTML
-  const psInput = document.querySelector("input[name='police_station_name']");
-  if (psInput) {
-    // สร้าง <datalist> ขึ้นมาในอากาศด้วย JS
-    const dataList = document.createElement("datalist");
-    dataList.id = "policeList";
-    
-    // เอาชื่อ สน. ใส่เข้าไปใน list
-    policeStations.forEach(name => {
-      const option = document.createElement("option");
-      option.value = name;
-      dataList.appendChild(option);
-    });
-
-    // ยัด datalist ลงไปในหน้าเว็บ
-    document.body.appendChild(dataList);
-
-    // เชื่อม input เข้ากับ datalist
-    psInput.setAttribute("list", "policeList");
-    
-    // แถม: ล้างค่าช่องเบอร์โทร สน. เมื่อเลือก สน. ใหม่ (ถ้าอยากทำระบบดึงเบอร์ออโต้ในอนาคต)
-    psInput.addEventListener("change", (e) => {
-      console.log("เลือกสถานี:", e.target.value);
-    });
-  }
-
-  // Start at step 1
-  showStep(currentStep);
-});
-
-/*************************
- * OCR HELPER FUNCTION
+  /*************************
+ * OCR EVENT
  *************************/
-async function extractPoliceReport(imageFile) {
-  try {
-    const formData = new FormData();
-    formData.append("file", imageFile); 
 
-    const response = await fetch("https://police-ocr-api.onrender.com/api/extract-report", {
-      method: "POST",
-      body: formData,
-    });
+const noticeInput = document.getElementById("noticeInput");
+const scanBtn = document.getElementById("scanBtn");
+const scanSpinner = document.getElementById("scanSpinner");
 
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+if (scanBtn && noticeInput) {
 
-    const result = await response.json();
-    console.log("OCR Result:", result);
-    return result.data; 
+  scanBtn.addEventListener("click", async () => {
 
-  } catch (error) {
-    console.error("OCR Error:", error);
-    alert("ไม่สามารถเชื่อมต่อระบบสแกนได้: " + error.message);
-    return null;
-  }
+    const file = noticeInput.files[0];
+
+    if (!file) {
+      alert("กรุณาเลือกไฟล์ก่อน");
+      return;
+    }
+
+    try {
+
+      scanSpinner.style.display = "block";
+
+      console.log("เริ่ม OCR");
+
+      const data = await extractPoliceReport(file);
+
+      console.log("OCR RESULT:", data);
+
+      if (!data) {
+        alert("ไม่พบข้อมูล");
+        return;
+      }
+
+      // autofill
+      if (data.full_name) {
+        document.querySelector("input[name='missing_name']").value =
+          data.full_name;
+      }
+
+      if (data.police_station) {
+        document.querySelector("input[name='police_station_name']").value =
+          data.police_station;
+      }
+
+      alert("สแกนสำเร็จ");
+
+    } catch (err) {
+
+      console.error(err);
+
+      alert("สแกนไม่สำเร็จ");
+
+    } finally {
+
+      scanSpinner.style.display = "none";
+
+    }
+
+  });
+
 }
+ 
+showStep(currentStep);
+
+});

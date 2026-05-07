@@ -1,3 +1,4 @@
+require("dotenv").config();
 // Framework สำหรับสร้าง Web Server บน Node.js
 const express = require("express");
 // อนุญาตให้ Frontend เรียก API จากคนละ port / domain ได้
@@ -32,21 +33,24 @@ app.use(express.urlencoded({ extended: true }));
 // เชื่อมต่อ Frontend ของเพื่อน
 // ชี้ไปที่โฟลเดอร์ front-end ที่อยู่นอกโฟลเดอร์ back-end
 app.use("/uploads", express.static("uploads"));
-app.use(express.static(path.join(__dirname, "../front-end")));
+app.use(express.static(path.join(__dirname, "../frontend")));
 
 const missingRoutes = require("./routes/missing.routes");
 const reportRoutes = require('./routes/report.routes');
 const dashboardRoutes = require('./routes/dashboard.routes');
-const authRoutes = require('./routes/auth'); 
+const authRoutes = require('./routes/auth');
+//const ocrRoutes = require("./routes/ocr.routes"); 
+
 
 app.use("/api/missing-persons", missingRoutes);
 app.use('/api/reports', upload.any(),reportRoutes);           // สำหรับจัดการเบาะแส
 app.use('/api/dashboard', dashboardRoutes);     // สำหรับจัดการหน้า Dashboard
 app.use('/api/auth', authRoutes);
+//app.use("/api", ocrRoutes);
 
 // ถ้าเปิดหน้าแรก http://localhost:3000
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "../front-end/Homepage.html"));
+  res.sendFile(path.join(__dirname, "../frontend/Homepage.html"));
 });
 
 app.listen(3000, () => {
