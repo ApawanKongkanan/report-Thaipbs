@@ -11,7 +11,18 @@ router.post("/register", async (req, res) => {
         await pool.request()
             .input("user", sql.NVarChar, username)
             .input("pass", sql.NVarChar, password)
-            .query("INSERT INTO Users (username, password_hash, role) VALUES (@user, @pass, 'relative')");
+            .query(`
+  INSERT INTO Users
+  (
+    username,
+    password_hash
+  )
+  VALUES
+  (
+    @user,
+    @pass
+  )
+`);
 
         res.status(201).json({ success: true, message: "ลงทะเบียนสำเร็จ" });
     } catch (err) {
@@ -28,7 +39,14 @@ router.post("/login", async (req, res) => {
         const result = await pool.request()
             .input("user", sql.NVarChar, username)
             .input("pass", sql.NVarChar, password)
-            .query("SELECT user_id, username, role FROM Users WHERE username = @user AND password_hash = @pass");
+            .query(`
+  SELECT
+    user_id,
+    username
+  FROM Users
+  WHERE username = @user
+    AND password_hash = @pass
+`);
 
         if (result.recordset.length > 0) {
             res.json({ success: true, user: result.recordset[0] });

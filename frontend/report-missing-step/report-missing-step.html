@@ -3,75 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
 <title>แจ้งคนหาย (Step by Step)</title>
-
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link rel="stylesheet" href="../style.css">
-
 <style>
   .step { display: none; }
   .step.active { display: block; }
-
-  main.container {
-    font-size: 18px;
-  }
-
-  main.container h2 {
-    font-size: 2.2rem;
-    font-weight: 700;
-  }
-
-  main.container h4 {
-    font-size: 1.6rem;
-    font-weight: 600;
-  }
-
-  main.container .form-label {
-    font-size: 1.15rem;
-  }
-
-  main.container .form-control,
-  main.container .form-select,
-  main.container textarea {
-    font-size: 1.1rem;
-    padding: 10px 12px;
-  }
-
-  main.container .btn {
-    font-size: 1.15rem;
-    padding: 10px 22px;
-  }
+  main.container { font-size: 18px; }
+  main.container h2 { font-size: 2.2rem; font-weight: 700; }
+  main.container h4 { font-size: 1.6rem; font-weight: 600; }
+  main.container .form-label { font-size: 1.05rem; }
 </style>
 </head>
-
 <body class="bg-light">
-
-<div id="header"></div>
-
+<div id="appNavbar"></div>
 <main class="container my-5">
-
   <h2 class="mb-3">แบบฟอร์มแจ้งคนหาย</h2>
   <p class="text-muted">ขั้นตอนที่ <span id="stepNumber">1</span> จาก 5</p>
-
   <div class="progress mb-4" style="height: 20px;">
-    <div
-      id="progressBar"
-      class="progress-bar progress-bar-striped progress-bar-animated"
-      role="progressbar"
-      style="width: 0%; transition: width 0.5s ease;"
-    >
-      0%
-    </div>
+    <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%; transition: width 0.5s ease;">0%</div>
   </div>
-
   <form id="reportForm" enctype="multipart/form-data">
-
-    <!-- STEP 1 -->
     <section class="step active" data-step="1">
       <h4>1. ข้อมูลการแจ้งคนหาย</h4>
-
       <div class="mb-3">
         <label class="form-label">หัวข้อการแจ้ง</label>
         <select class="form-select" name="missing_reason" required>
@@ -85,7 +40,6 @@
           <option value="อื่น ๆ">อื่น ๆ</option>
         </select>
       </div>
-
       <div class="mb-3">
         <label class="form-label">ความเร่งด่วน</label>
         <select class="form-select" name="priority" required>
@@ -97,7 +51,6 @@
       </div>
     </section>
 
-    <!-- STEP 2 -->
     <section class="step" data-step="2">
       <h4>2. ข้อมูลผู้แจ้ง</h4>
       <div class="row">
@@ -112,13 +65,11 @@
             <option value="เด็กหญิง">เด็กหญิง</option>
           </select>
         </div>
-      
         <div class="col-md-9 mb-3">
           <label class="form-label">ชื่อ-สกุลผู้แจ้ง</label>
           <input type="text" class="form-control" name="owner_name" required>
         </div>
       </div>
-
       <div class="mb-3">
         <label class="form-label">ความสัมพันธ์กับคนหาย</label>
         <select class="form-select" id="relationship" name="relation_to_missing" required>
@@ -134,35 +85,15 @@
           <option value="other">อื่น ๆ</option>
         </select>
       </div>
-
       <div class="mb-3" id="otherRelationshipBox" style="display:none;">
         <label class="form-label">กรุณาระบุความสัมพันธ์</label>
-        <input
-          type="text"
-          class="form-control"
-          id="otherRelationship"
-          name="other_relationship"
-          placeholder="ระบุความสัมพันธ์"
-        >
+        <input type="text" class="form-control" id="otherRelationship" name="other_relationship" placeholder="ระบุความสัมพันธ์">
       </div>
-
       <div class="mb-3">
         <label class="form-label">เบอร์โทรศัพท์</label>
-        <input
-          type="tel"
-          class="form-control"
-          name="owner_phone"
-          required
-          pattern="^[0-9]{10}$"
-          maxlength="10"
-          inputmode="numeric"
-          placeholder="เช่น 0812345678"
-        >
-        <div class="invalid-feedback">
-          กรุณากรอกเบอร์โทรศัพท์ให้ครบ 10 หลัก (ตัวเลขเท่านั้น)
-        </div>
+        <input type="tel" class="form-control" name="owner_phone" required pattern="^[0-9]{10}$" maxlength="10" inputmode="numeric" placeholder="เช่น 0812345678">
+        <div class="invalid-feedback">กรุณากรอกเบอร์โทรศัพท์ให้ครบ 10 หลัก</div>
       </div>
-
       <div class="mb-3">
         <label class="form-label">ติดต่อมาจากไหน</label>
         <select class="form-select" id="contactChannel" name="inform_channels" required>
@@ -171,351 +102,109 @@
           <option value="line">Line</option>
           <option value="web">Web</option>
           <option value="phone">เบอร์โทร</option>
+          <option value="มูลนิธิ">มูลนิธิ/หน่วยงาน</option>
           <option value="other">อื่น ๆ</option>
         </select>
       </div>
-
       <div class="mb-3" id="otherContactChannelBox" style="display:none;">
         <label class="form-label">กรุณาระบุช่องทางติดต่อ</label>
-        <input
-          type="text"
-          class="form-control"
-          id="otherContactChannel"
-          name="other_contact_channel"
-          placeholder="ระบุช่องทางติดต่อ"
-        >
+        <input type="text" class="form-control" id="otherContactChannel" name="other_contact_channel" placeholder="ระบุช่องทางติดต่อ">
       </div>
     </section>
 
-    <!-- STEP 3 -->
     <section class="step" data-step="3">
       <h4>3. วันที่และสถานที่พบเห็นครั้งสุดท้าย</h4>
-
       <div class="row">
-        <div class="col-md-4 mb-3">
-          <label class="form-label">วันที่หาย</label>
-          <input type="date" class="form-control" name="missing_date" required>
-        </div>
-
-        <div class="col-md-4 mb-3">
-          <label class="form-label">เวลาที่หาย</label>
-          <input type="time" class="form-control" name="missing_time" required>
-        </div>
-
-        <div class="col-md-4 mb-3">
-          <label class="form-label">สถานที่ที่คาดว่าพบเจอครั้งสุดท้าย</label>
-          <input type="text" class="form-control" name="missing_place" required>
-        </div>
+        <div class="col-md-4 mb-3"><label class="form-label">วันที่หาย</label><input type="date" class="form-control" name="missing_date" required></div>
+        <div class="col-md-4 mb-3"><label class="form-label">เวลาที่หาย</label><input type="time" class="form-control" name="missing_time" required></div>
+        <div class="col-md-4 mb-3"><label class="form-label">สถานที่ที่คาดว่าพบเจอครั้งสุดท้าย</label><input type="text" class="form-control" name="missing_place" required></div>
       </div>
-
       <div class="row">
-        <div class="col-md-3 mb-3">
-          <label class="form-label">รหัสไปรษณีย์ (ถ้าทราบ)</label>
-          <input type="text" class="form-control postcode" name="postal_code" maxlength="5">
-        </div>
-
-        <div class="col-md-3 mb-3">
-          <label class="form-label">ตำบล (ถ้าทราบ)</label>
-          <input type="text" class="form-control subdistrict" name="subdistrict">
-        </div>
-
-        <div class="col-md-3 mb-3">
-          <label class="form-label">อำเภอ (ถ้าทราบ)</label>
-          <input type="text" class="form-control district" name="district">
-        </div>
-
-        <div class="col-md-3 mb-3">
-          <label class="form-label">จังหวัด</label>
-          <input type="text" class="form-control province" name="province" placeholder="เช่น กรุงเทพมหานคร">
-        </div>
+        <div class="col-md-3 mb-3"><label class="form-label">รหัสไปรษณีย์</label><input type="text" class="form-control postcode" name="postal_code" maxlength="5"></div>
+        <div class="col-md-3 mb-3"><label class="form-label">ตำบล</label><input type="text" class="form-control subdistrict" name="subdistrict"></div>
+        <div class="col-md-3 mb-3"><label class="form-label">อำเภอ</label><input type="text" class="form-control district" name="district"></div>
+        <div class="col-md-3 mb-3"><label class="form-label">จังหวัด</label><input type="text" class="form-control province" name="province"></div>
       </div>
-
       <h4 class="mt-4">ข้อมูลผู้สูญหาย</h4>
-
       <div class="row">
         <div class="col-md-3 mb-3">
           <label class="form-label">คำนำหน้า</label>
           <select class="form-select" name="missing_title" required>
             <option value="">-- เลือก --</option>
-            <option value="นาย">นาย</option>
-            <option value="นาง">นาง</option>
-            <option value="นางสาว">นางสาว</option>
-            <option value="เด็กชาย">เด็กชาย</option>
-            <option value="เด็กหญิง">เด็กหญิง</option>
+            <option value="นาย">นาย</option><option value="นาง">นาง</option><option value="นางสาว">นางสาว</option><option value="เด็กชาย">เด็กชาย</option><option value="เด็กหญิง">เด็กหญิง</option>
           </select>
         </div>
-
-        <div class="col-md-9 mb-3">
-          <label class="form-label">ชื่อ-สกุล</label>
-          <input type="text" class="form-control" name="missing_name" required>
-        </div>
+        <div class="col-md-9 mb-3"><label class="form-label">ชื่อ-สกุล</label><input type="text" class="form-control" name="missing_name" required></div>
       </div>
-
       <div class="row">
-        <div class="col-md-3 mb-3">
-          <label class="form-label">เพศ</label>
-          <select class="form-select" name="gender" required>
-            <option value="">-- เลือก --</option>
-            <option value="ชาย">ชาย</option>
-            <option value="หญิง">หญิง</option>
-            <option value="อื่น ๆ">อื่น ๆ</option>
-          </select>
-        </div>
-
-        <div class="col-md-3 mb-3">
-          <label class="form-label">วันเกิด</label>
-          <input type="date" class="form-control" name="birthday" required>
-        </div>
-
-        <div class="col-md-2 mb-3">
-          <label class="form-label">อายุ</label>
-          <input type="number" class="form-control" name="age" min="0" max="120">
-        </div>
-
-        <div class="col-md-4 mb-3">
-          <label class="form-label">สัญชาติ</label>
-          <input type="text" class="form-control" name="race">
-        </div>
+        <div class="col-md-3 mb-3"><label class="form-label">เพศ</label><select class="form-select" name="gender" required><option value="">-- เลือก --</option><option value="ชาย">ชาย</option><option value="หญิง">หญิง</option><option value="อื่น ๆ">อื่น ๆ</option></select></div>
+        <div class="col-md-3 mb-3"><label class="form-label">วันเกิด</label><input type="date" class="form-control" name="birthday" required></div>
+        <div class="col-md-2 mb-3"><label class="form-label">อายุ</label><input type="number" class="form-control" name="age" min="0" max="120"></div>
+        <div class="col-md-4 mb-3"><label class="form-label">สัญชาติ</label><input type="text" class="form-control" name="race"></div>
       </div>
-
-      <div class="mb-3">
-        <label class="form-label">ประเภทบัตร</label>
-        <select class="form-select" name="id_type">
-          <option value="บัตรประชาชน">บัตรประชาชน</option>
-          <option value="พาสปอร์ต">พาสปอร์ต</option>
-          <option value="อื่น ๆ">อื่น ๆ</option>
-        </select>
-      </div>
-
-      <div class="mb-3">
-        <label class="form-label">เลขบัตร</label>
-        <input
-          type="text"
-          class="form-control"
-          name="id_number"
-          maxlength="13"
-          pattern="[0-9]{13}"
-          placeholder="ถ้าไม่ทราบให้เว้นว่าง"
-        >
-        <div class="form-text">
-          กรอก 13 หลัก (ถ้าจำไม่ได้สามารถเว้นว่างได้)
-        </div>
-      </div>
-
+      <div class="mb-3"><label class="form-label">ประเภทบัตร</label><select class="form-select" name="id_type"><option value="บัตรประชาชน">บัตรประชาชน</option><option value="พาสปอร์ต">พาสปอร์ต</option><option value="อื่น ๆ">อื่น ๆ</option></select></div>
+      <div class="mb-3"><label class="form-label">เลขบัตร</label><input type="text" class="form-control" name="id_number" maxlength="13" pattern="[0-9]{13}" placeholder="ถ้าไม่ทราบให้เว้นว่าง"></div>
       <h4 class="mt-4">ลักษณะบุคคล</h4>
-
-      <div class="mb-3">
-        <label class="form-label">แนบรูปผู้สูญหาย</label>
-        <input type="file" class="form-control" name="image_url" accept="image/*">
-      </div>
-
+      <div class="mb-3"><label class="form-label">แนบรูปผู้สูญหาย</label><input type="file" class="form-control" name="image_url" accept="image/*"></div>
       <div class="row">
-        <div class="col-md-2 mb-3">
-          <label class="form-label">สีผิว</label>
-          <select class="form-select" name="skin_color" required>
-            <option value="">-- เลือก --</option>
-            <option value="ขาว">ขาว</option>
-            <option value="ขาวเหลือง">ขาวเหลือง</option>
-            <option value="สองสี">สองสี</option>
-            <option value="คล้ำ">คล้ำ</option>
-            <option value="ดำ">ดำ</option>
-          </select>
-        </div>
-
-        <div class="col-md-2 mb-3">
-          <label class="form-label">รูปร่าง</label>
-          <select class="form-select" name="body_shape" required>
-            <option value="">-- เลือก --</option>
-            <option value="ผอม">ผอม</option>
-            <option value="สมส่วน">สมส่วน</option>
-            <option value="ท้วม">ท้วม</option>
-            <option value="อ้วน">อ้วน</option>
-            <option value="ล่ำสัน">ล่ำสัน</option>
-          </select>
-        </div>
-
-        <div class="col-md-3 mb-3">
-          <label class="form-label">ลักษณะทรงผม</label>
-          <input type="text" class="form-control" name="hair_styles" required>
-        </div>
-
-        <div class="col-md-2 mb-3">
-          <label class="form-label">สีผม</label>
-          <select class="form-select" id="hairColor" name="hair_color" required>
-            <option value="">-- เลือก --</option>
-            <option value="ดำ">ดำ</option>
-            <option value="น้ำตาล">น้ำตาล</option>
-            <option value="ทอง">ทอง</option>
-            <option value="เทา">เทา</option>
-            <option value="other">อื่น ๆ</option>
-          </select>
-        </div>
-
-        <div class="col-md-2 mb-3">
-          <label class="form-label">ส่วนสูง</label>
-          <div class="input-group">
-            <input
-              type="number"
-              class="form-control"
-              name="height_cm"
-              min="50"
-              max="250"
-              placeholder="0"
-              required
-            >
-            <span class="input-group-text">cm</span>
-          </div>
-        </div>
-
-        <div class="col-12 mb-3" id="otherHairColorBox" style="display:none;">
-          <label class="form-label">ระบุสีผม</label>
-          <input
-            type="text"
-            class="form-control"
-            id="otherHairColor"
-            name="other_hair_color"
-            placeholder="เช่น น้ำตาลแดง / บลอนด์เข้ม"
-          >
-        </div>
+        <div class="col-md-2 mb-3"><label class="form-label">สีผิว</label><select class="form-select" name="skin_color" required><option value="">-- เลือก --</option><option value="ขาว">ขาว</option><option value="ขาวเหลือง">ขาวเหลือง</option><option value="สองสี">สองสี</option><option value="คล้ำ">คล้ำ</option><option value="ดำ">ดำ</option></select></div>
+        <div class="col-md-2 mb-3"><label class="form-label">รูปร่าง</label><select class="form-select" name="body_shape" required><option value="">-- เลือก --</option><option value="ผอม">ผอม</option><option value="สมส่วน">สมส่วน</option><option value="ท้วม">ท้วม</option><option value="อ้วน">อ้วน</option><option value="ล่ำสัน">ล่ำสัน</option></select></div>
+        <div class="col-md-3 mb-3"><label class="form-label">ลักษณะทรงผม</label><input type="text" class="form-control" name="hair_styles" required></div>
+        <div class="col-md-2 mb-3"><label class="form-label">สีผม</label><select class="form-select" id="hairColor" name="hair_color" required><option value="">-- เลือก --</option><option value="ดำ">ดำ</option><option value="น้ำตาล">น้ำตาล</option><option value="ทอง">ทอง</option><option value="เทา">เทา</option><option value="other">อื่น ๆ</option></select></div>
+        <div class="col-md-2 mb-3"><label class="form-label">ส่วนสูง</label><div class="input-group"><input type="number" class="form-control" name="height_cm" min="50" max="250" required><span class="input-group-text">cm</span></div></div>
+        <div class="col-12 mb-3" id="otherHairColorBox" style="display:none;"><label class="form-label">ระบุสีผม</label><input type="text" class="form-control" id="otherHairColor" name="other_hair_color"></div>
       </div>
     </section>
 
-    <!-- STEP 4 -->
     <section class="step" data-step="4">
       <h4>4. รายละเอียดการแจ้งความ</h4>
+      <div class="mb-3"><label class="form-label">เอกสารใบแจ้งความ</label><input type="file" class="form-control" name="notice" accept=".pdf,.jpg,.jpeg,.png"></div>
+      <div class="mt-3">
 
-      <div class="mb-3">
-        <label class="form-label">เอกสารใบแจ้งความ</label>
-        <div class="input-group mb-2">
-      <input type="file" class="form-control" id="noticeInput" name="notice" accept=".jpg,.jpeg,.png">
-      <!-- เพิ่มปุ่มสำหรับกด Scan -->
-      <button class="btn btn-outline-primary" type="button" id="scanBtn">
-        <i class="fa-solid fa-magnifying-glass"></i> สแกนข้อมูลอัตโนมัติ
-      </button>
-    </div>
-    <div id="scanSpinner" class="text-primary mt-2" style="display:none;">
-      <span class="spinner-border spinner-border-sm"></span> กำลังประมวลผล...
-    </div>
+  <button
+    type="button"
+    class="btn btn-primary"
+    id="scanNoticeBtn"
+  >
+    <i class="fa-solid fa-magnifying-glass"></i>
+    สแกนข้อมูลอัตโนมัติ
+  </button>
+
+  <div
+    id="scanSpinner"
+    class="mt-2 text-primary"
+    style="display:none;"
+  >
+    <i class="fa-solid fa-spinner fa-spin"></i>
+    กำลังประมวลผล...
   </div>
 
+</div>
       <h4>ข้อมูลสถานีตำรวจ</h4>
-
-      <div class="mb-3">
-        <label class="form-label">ชื่อสถานีตำรวจ</label>
-        <input type="text" class="form-control" name="police_station_name" required>
-      </div>
-
-      <div class="mb-3">
-        <label class="form-label">เบอร์โทรสถานี</label>
-        <input type="tel" class="form-control" name="ps_phone" placeholder="เช่น 021234567">
-      </div>
-
-      <div class="alert alert-secondary mt-3 mb-0">
-        จังหวัดของสถานีตำรวจตอนนี้จะอิงจากช่อง “จังหวัด” ในสถานที่พบเห็นครั้งสุดท้าย
-      </div>
+      <div class="mb-3"><label class="form-label">ชื่อสถานีตำรวจ</label><input type="text" class="form-control" name="police_station_name" required></div>
+      <div class="mb-3"><label class="form-label">เบอร์โทรสถานี</label><input type="tel" class="form-control" name="ps_phone"></div>
+      <div class="alert alert-secondary mt-3 mb-0">จังหวัดของสถานีตำรวจจะอิงจากช่องจังหวัดของสถานที่พบเห็นครั้งสุดท้าย</div>
     </section>
 
-    <!-- STEP 5 -->
     <section class="step" data-step="5">
       <h4 class="mb-4">5. ตรวจสอบข้อมูลก่อนส่ง</h4>
-
       <div id="summaryBox"></div>
-
       <div class="form-check mt-3">
-        <input
-          class="form-check-input"
-          type="checkbox"
-          id="confirmCheck"
-          required
-        >
-        <label class="form-check-label" for="confirmCheck">
-          ข้าพเจ้ายืนยันว่าข้อมูลทั้งหมดถูกต้อง
-        </label>
-
-        <div class="invalid-feedback">
-          กรุณาติ๊กยืนยันก่อนส่งข้อมูล
-        </div>
+        <input class="form-check-input" type="checkbox" id="confirmCheck" required>
+        <label class="form-check-label" for="confirmCheck">ข้าพเจ้ายืนยันว่าข้อมูลทั้งหมดถูกต้อง</label>
       </div>
-
-      <div class="text-center my-4">
-        <button type="button" class="btn btn-secondary" id="pdfBtn">
-          <i class="fa-solid fa-file-pdf"></i> พิมพ์ออกมาเป็น PDF
-        </button>
-      </div>
+      <div class="text-center my-4"><button type="button" class="btn btn-secondary" id="pdfBtn"><i class="fa-solid fa-file-pdf"></i> พิมพ์ออกมาเป็น PDF</button></div>
     </section>
 
     <div class="d-flex justify-content-between mt-4">
-      <button
-        type="button"
-        class="btn btn-secondary"
-        onclick="prevStep()"
-        id="prevBtn"
-        style="visibility:hidden">
-        ย้อนกลับ
-      </button>
-
-      <button
-        type="button"
-        class="btn btn-primary"
-        id="nextBtn">
-        ถัดไป
-      </button>
+      <button type="button" class="btn btn-secondary" onclick="prevStep()" id="prevBtn" style="visibility:hidden">ย้อนกลับ</button>
+      <button type="button" class="btn btn-primary" id="nextBtn">ถัดไป</button>
     </div>
-
   </form>
 </main>
-
-<script>
-fetch("../partials/header.html")
-  .then(res => res.text())
-  .then(html => {
-    document.getElementById("header").innerHTML = html;
-
-    // 🔥 สำคัญมาก: ต้องเรียกหลัง inject HTML
-    renderNavbar();
-  })
-  .catch(err => console.error("โหลด header ไม่ได้", err));
-</script>
-
+<script src="../app.js"></script>
+<script>renderNavbar({ mountId: 'appNavbar', basePath: '../', active: 'report' });</script>
 <script src="script-step.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-  function renderNavbar() {
-    const isAdmin = localStorage.getItem("isAdminLogin");
-  
-    const authBtn = document.getElementById("authBtn");
-    const dashboardMenu = document.getElementById("dashboardMenu");
-  
-    if (!authBtn || !dashboardMenu) return;
-  
-    if (isAdmin === "true") {
-      authBtn.innerHTML = `
-        <button class="btn btn-outline-danger" onclick="logoutAdmin()">
-          ออกจากระบบ
-        </button>
-      `;
-  
-      dashboardMenu.innerHTML = `
-        <a class="nav-link" href="../dashboard.html">สรุปภาพรวม</a>
-      `;
-    } else {
-      authBtn.innerHTML = `
-        <button class="btn btn-outline-light rounded-pill"
-          onclick="window.location.href='../login.html'">
-          <i class="fa-solid fa-user"></i> เข้าสู่ระบบ
-        </button>
-      `;
-  
-      dashboardMenu.innerHTML = "";
-    }
-  }
-  
-  function logoutAdmin() {
-    localStorage.removeItem("isAdminLogin");
-    window.location.href = "../Homepage.html";
-  }
-  
-
-  </script>
 </body>
 </html>

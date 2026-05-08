@@ -3,18 +3,15 @@ const router = express.Router();
 const { sql, dbConfig } = require("../config/db");
 const multer = require("multer");
 const path = require("path");
-// ===============================
-// ตั้งค่า multer รับไฟล์ที่อัปโหลดจาก client
-// ===============================
 const storage = multer.diskStorage({
-  //ทุกไฟล์ที่อัปโหลด → เก็บไว้ในโฟลเดอร์ uploads/
+
   destination: function (req, file, cb) {
     cb(null, "uploads/");
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + path.extname(file.originalname));
   },
-});
+  });
 //สร้างตัวจัดการ upload
 const upload = multer({ storage: storage });
 
@@ -41,23 +38,52 @@ router.post("/",
         hair_styles, hair_color, height_cm, skin_color, body_shape,
         police_station_name, ps_phone, // สำหรับ PoliceStation
         inform_channels,
-        role,
         user_id
       } = req.body;
 
       // --- 2. Phase 1: Hard-coded Staff Data ---
       // กำหนดค่าสมมติให้เป็นเจ้าหน้าที่ระบบกลาง ID 1
       // ===============================
+      // ===============================
 // AUTO CREATE RELATIVE ACCOUNT
 // ===============================
 
-let finalUserId = user_id || null;
+// แปลง user_id ให้เป็น int
+let finalUserId =
+  user_id ? parseInt(user_id) : null;
 
-if (!finalUserId && owner_phone) {
+// ตัด space เบอร์โทร
+const cleanPhone =
+  owner_phone
+    ? owner_phone.trim()
+    : null;
+
+// ความสัมพันธ์ที่อนุญาตให้มี account ญาติ
+const allowedRelations = [
+  "บิดา / มารดา",
+  "บุตร / ธิดา",
+  "พี่ / น้อง",
+  "ญาติ",
+  "คู่สมรส / แฟน"
+];
+
+// เช็คว่าสามารถสร้าง account ได้ไหม
+const canCreateUser =
+  allowedRelations.includes(
+    relation_to_missing?.trim()
+  );
+
+if (
+  !finalUserId &&
+  cleanPhone &&
+  canCreateUser
+) {
 
   // หา user จากเบอร์โทร
   const findUser = await transaction.request()
-    .input("phone", sql.NVarChar, owner_phone)
+
+    .input("phone", sql.NVarChar, cleanPhone)
+
     .query(`
       SELECT user_id
       FROM Users
@@ -75,25 +101,26 @@ if (!finalUserId && owner_phone) {
     // ใช้ 4 ตัวท้ายบัตรประชาชนเป็นรหัสผ่าน
     const password = owner_id_card
       ? owner_id_card.slice(-4)
-      : owner_phone.slice(-4);
+      : cleanPhone.slice(-4);
 
     // สร้าง account ญาติอัตโนมัติ
     const createUser = await transaction.request()
-      .input("username", sql.NVarChar, owner_phone)
+
+      .input("username", sql.NVarChar, cleanPhone)
+
       .input("password", sql.NVarChar, password)
+
       .query(`
         INSERT INTO Users
         (
           username,
-          password_hash,
-          role
+          password_hash
         )
         OUTPUT INSERTED.user_id
         VALUES
         (
           @username,
-          @password,
-          'relative'
+          @password
         )
       `);
 
@@ -132,12 +159,13 @@ if (!finalUserId && owner_phone) {
       const ownerResult = await transaction.request()
         .input("otitle", sql.NVarChar, owner_title || "ไม่ระบุ")
         .input("oname", sql.NVarChar, owner_name)
-        .query(`INSERT INTO CaseOwner (owner_title, owner_name) OUTPUT INSERTED.owner_id VALUES (@otitle, @oname)`);
+        .input("uid", sql.Int, finalUserId)
+        .query(`INSERT INTO CaseOwner (owner_title, owner_name, user_id) OUTPUT INSERTED.owner_id VALUES (@otitle, @oname, @uid)`);
       const owner_id = ownerResult.recordset[0].owner_id;
       if (owner_phone) {
         await transaction.request()
   .input("oid", sql.Int, owner_id)
-  .input("p", sql.NVarChar, owner_phone)
+  .input("p", sql.NVarChar, cleanPhone)
   .query(`
     INSERT INTO CaseOwner_Phone (owner_id, owner_phone)
     VALUES (@oid, @p)
@@ -228,10 +256,9 @@ if (!finalUserId && owner_phone) {
         .input("case_id", sql.Int, case_id)
         .input("status", sql.NVarChar, initialStatus)
         .input("logged_by", sql.NVarChar, STAFF_NAME_DEFAULT)
-        .input("uid", sql.Int, finalUserId)
         
-        .query(`INSERT INTO StatusLog (case_id, description, case_status, logged_by, user_id) 
-                OUTPUT INSERTED.log_id VALUES (@case_id, N'บันทึกรับแจ้งครั้งแรก', @status, @logged_by, @uid)`);
+        .query(`INSERT INTO StatusLog (case_id, description, case_status, logged_by) 
+                OUTPUT INSERTED.log_id VALUES (@case_id, N'บันทึกรับแจ้งครั้งแรก', @status, @logged_by)`);
       const log_id = logResult.recordset[0].log_id;
 
       // --- 10. Insert Character Log ---
@@ -251,7 +278,7 @@ if (!finalUserId && owner_phone) {
                 VALUES (@lid, @d, @t, @p, @sub, @dist, @prov)`);
 
       await transaction.commit();
-      res.status(201).json({ success: true, message: "บันทึกสำเร็จ" });
+      res.status(201).json({ success: true, message: "บันทึกสำเร็จ", case_id: case_id});
 
     } catch (err) {
       if (transaction) await transaction.rollback();
@@ -343,7 +370,132 @@ const formattedData = result.recordset.map(item => {
 
 });
 
+/*========== GET CASE BY USER ID ==========*/
+router.get("/user/:userId", async (req, res) => {
 
+  try {
+
+    const { userId } = req.params;
+
+    const pool =
+      await sql.connect(dbConfig);
+
+    const result =
+      await pool.request()
+
+        .input("uid", sql.Int, userId)
+
+        .query(`
+          SELECT TOP 1
+            mc.*,
+            mp.missing_name,
+            mp.gender,
+            mp.age,
+            mp.race,
+            co.owner_name,
+            cp.owner_phone
+
+          FROM MissingCase mc
+
+          JOIN MissingPerson mp
+            ON mc.missingperson_id = mp.missingperson_id
+
+          JOIN CaseOwner co
+            ON mc.owner_id = co.owner_id
+
+          LEFT JOIN CaseOwner_Phone cp
+            ON co.owner_id = cp.owner_id
+
+          WHERE mc.user_id = @uid
+
+          ORDER BY mc.case_id DESC
+        `);
+if (result.recordset.length === 0) {
+
+  return res.status(404).json({
+    success: false,
+    message: "ไม่พบข้อมูล"
+  });
+
+}
+
+let item = result.recordset[0];
+
+// ===============================
+// ดึงเบาะแสล่าสุด
+// ===============================
+
+const tipsResult =
+  await pool.request()
+
+    .input("caseId", sql.Int, item.case_id)
+
+    .query(`
+      SELECT
+        reporter_id,
+        log_id
+      FROM ReportedTips
+      WHERE case_id = @caseId
+    `);
+
+item.tips =
+  tipsResult.recordset || [];
+    // parse image
+    if (item.latest_characteristics) {
+
+      try {
+
+        const chars =
+          JSON.parse(item.latest_characteristics);
+
+        item.image_url =
+          chars.image_url || null;
+
+      } catch (e) {}
+
+    }
+
+    // parse location
+    if (item.latest_last_seen_at) {
+
+      try {
+
+        const ls =
+          JSON.parse(item.latest_last_seen_at);
+
+        item.missing_date =
+          ls.missing_date || "-";
+
+        item.missing_time =
+          ls.missing_time || "-";
+
+        item.missing_place =
+          ls.missing_place || "-";
+
+        item.province =
+          ls.province || "-";
+
+      } catch (e) {}
+
+    }
+
+    res.json({
+      success: true,
+      data: item
+    });
+
+  } catch (err) {
+
+    console.error(err);
+
+    res.status(500).json({
+      success: false,
+      error: err.message
+    });
+
+  }
+
+});
 
 
 /*========== GET /api/missing-persons/:id ==========*/
@@ -503,7 +655,7 @@ router.put("/:id", async (req, res) => {
 router.put("/:id/status", async (req, res) => {
   try {
     const { id } = req.params;
-    const { status, logged_by, user_id } = req.body;
+    const { status, logged_by } = req.body;
 
     const pool = await sql.connect(dbConfig);
 
@@ -522,23 +674,20 @@ await pool.request()
   .input("case_id", sql.Int, id)
   .input("status", sql.NVarChar, status)
   .input("by", sql.NVarChar, logged_by || "admin")
-  .input("uid", sql.Int, user_id || null)
   .query(`
     INSERT INTO StatusLog
     (
       case_id,
       description,
       case_status,
-      logged_by,
-      user_id
+      logged_by
     )
     VALUES
     (
       @case_id,
       N'อัปเดตสถานะเคส',
       @status,
-      @by,
-      @uid
+      @by
     )
   `);
 
@@ -558,7 +707,7 @@ await pool.request()
 
 
 /*========== เปลี่ยนจาก DELETE เป็น UPDATE STATUS ==========*/
-router.patch("/soft-delete/:id", async (req, res) => {
+/*router.patch("/soft-delete/:id", async (req, res) => {
     try {
         const { id } = req.params;
         const pool = await sql.connect(dbConfig);
@@ -576,7 +725,7 @@ router.patch("/soft-delete/:id", async (req, res) => {
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
     }
-});
+});*/
 
 
 

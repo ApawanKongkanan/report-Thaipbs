@@ -65,7 +65,7 @@ const location_found =
         const logResult = await transaction.request()
             .input("case_id", sql.Int, case_id)
             .input("desc", sql.NVarChar, (details || 'แจ้งเบาะแสใหม่') + (location_found ? ` สถานที่: ${location_found}` : '')) 
-            .input("status", sql.NVarChar, 'ได้รับเบาะแส')
+            .input("status", sql.NVarChar, 'พบเบาะแสครั้งที่ 1')
             .input("by", sql.NVarChar, `ผู้แจ้งเบาะแส: ${reporter_name || 'Anonymous'}`)
             .query(`INSERT INTO StatusLog (case_id, description, case_status, logged_by) 
                     OUTPUT INSERTED.log_id 
@@ -76,7 +76,7 @@ const location_found =
   .input("case_id", sql.Int, case_id)
   .query(`
     UPDATE MissingCase
-    SET latest_status = N'มีเบาะแส'
+    SET latest_status = N'พบเบาะแสครั้งที่ 1'
     WHERE case_id = @case_id
   `);
 
