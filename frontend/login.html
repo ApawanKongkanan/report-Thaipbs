@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>เข้าสู่ระบบ</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #0b2c4d, #1e4d7a);
+      min-height: 100vh;
+    }
+
+    .login-wrap {
+      max-width: 760px;
+    }
+
+    .main-card {
+      border: none;
+      border-radius: 24px;
+      box-shadow: 0 16px 40px rgba(0,0,0,.18);
+      overflow: hidden;
+    }
+
+    .brand-title {
+      color: #0b2c4d;
+      font-weight: 700;
+    }
+
+    .role-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .role-card {
+      border: 1px solid #dbe3ee;
+      border-radius: 20px;
+      padding: 22px;
+      background: #fff;
+      cursor: pointer;
+      transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+      height: 100%;
+    }
+
+    .role-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(11,44,77,.08);
+    }
+
+    .role-card.active {
+      border-color: #0b2c4d;
+      box-shadow: 0 14px 28px rgba(11,44,77,.14);
+      background: #f7fbff;
+    }
+
+    .role-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      color: #fff;
+      margin-bottom: 14px;
+    }
+
+    .role-icon.admin { background: #0b2c4d; }
+    .role-icon.family { background: #198754; }
+
+    .form-panel {
+      display: none;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity .25s ease, transform .25s ease;
+    }
+
+    .form-panel.show {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .back-link {
+      color: #5f6f82;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .back-link:hover {
+      color: #0b2c4d;
+    }
+
+    .helper-text {
+      color: #6b7280;
+      font-size: .95rem;
+    }
+
+    @media (max-width: 768px) {
+      .role-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container py-5">
+    <div class="login-wrap mx-auto">
+      <div class="text-center text-white mb-4">
+        <img src="LOGO ThaiPBS.png" height="60" alt="logo" class="mb-3">
+        <h2 class="fw-bold mb-2">เข้าสู่ระบบ</h2>
+        <p class="mb-0">เลือกก่อนว่าต้องการเข้าสู่ระบบในบทบาทใด</p>
+      </div>
+
+      <div class="card main-card p-4 p-md-5">
+        <div id="roleChooser">
+          <div class="text-center mb-4">
+            <h3 class="brand-title mb-2">เลือกประเภทผู้ใช้งาน</h3>
+            <p class="text-muted mb-0">เมื่อเลือกแล้ว ระบบจะแสดงฟอร์มเข้าสู่ระบบที่เหมาะกับการใช้งานของคุณ</p>
+          </div>
+
+          <div class="role-grid">
+            <button type="button" class="role-card text-start" id="chooseAdmin">
+              <span class="role-icon admin"><i class="fa-solid fa-user-shield"></i></span>
+              <h4 class="h5 mb-2">ระบบแอดมิน</h4>
+              <p class="text-muted mb-0">สำหรับจัดการข้อมูลเคส ดูแดชบอร์ด แก้ไขข้อมูล และตรวจสอบรายละเอียดทั้งหมด</p>
+            </button>
+
+            <button type="button" class="role-card text-start" id="chooseFamily">
+              <span class="role-icon family"><i class="fa-solid fa-people-roof"></i></span>
+              <h4 class="h5 mb-2">ระบบญาติ</h4>
+              <p class="text-muted mb-0">สำหรับติดตามเคส โดยใช้เลขเคสและเบอร์โทรของผู้แจ้ง เพื่อดูข้อมูลเฉพาะเคสของตนเอง</p>
+            </button>
+          </div>
+        </div>
+
+        <div id="adminPanel" class="form-panel mt-4">
+          <a href="#" class="back-link" data-back><i class="fa-solid fa-arrow-left"></i> กลับไปเลือกประเภทผู้ใช้งาน</a>
+          <div class="text-center mt-3 mb-4">
+            <h3 class="brand-title mb-1">เข้าสู่ระบบสำหรับ Admin</h3>
+            <p class="text-muted mb-0">กรอกชื่อผู้ใช้และรหัสผ่านสำหรับผู้ดูแลระบบ</p>
+          </div>
+          <form id="adminLoginForm">
+            <div class="mb-3">
+              <label class="form-label">Username</label>
+              <input type="text" class="form-control" id="adminUsername" autocomplete="username" required>
+              <div class="helper-text mt-1">ใช้ชื่อฟิลด์ให้ตรงกับฐานข้อมูลตาราง Users คือ username</div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Password</label>
+              <input type="password" class="form-control" id="adminPassword" autocomplete="current-password" required>
+            </div>
+            <div id="adminLoginError" class="alert alert-danger d-none py-2">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</div>
+            <div class="d-grid">
+              <button type="submit" class="btn btn-primary"><i class="fa-solid fa-right-to-bracket"></i> เข้าสู่ระบบ Admin</button>
+            </div>
+          </form>
+        </div>
+
+        <div id="familyPanel" class="form-panel mt-4">
+          <a href="#" class="back-link" data-back><i class="fa-solid fa-arrow-left"></i> กลับไปเลือกประเภทผู้ใช้งาน</a>
+          <div class="text-center mt-3 mb-4">
+            <h3 class="brand-title mb-1">เข้าสู่ระบบสำหรับญาติผู้แจ้ง</h3>
+            <p class="text-muted mb-0">กรอกเลขเคสและเบอร์โทรของผู้แจ้งเพื่อเข้าดูการติดตามเคส</p>
+          </div>
+          <form id="familyLoginForm">
+            <div class="mb-3">
+              <label class="form-label">เลขเคส</label>
+              <input type="text" class="form-control" id="familyCaseId" inputmode="numeric" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">เบอร์โทรศัพท์ผู้แจ้ง</label>
+              <input type="tel" class="form-control" id="familyPhone" maxlength="10" placeholder="เช่น 0812345678" inputmode="numeric" required>
+            </div>
+            <div id="familyLoginError" class="alert alert-danger d-none py-2">ไม่พบข้อมูลที่ตรงกัน กรุณาตรวจสอบเลขเคสและเบอร์โทรศัพท์อีกครั้ง</div>
+            <div class="d-grid">
+              <button type="submit" class="btn btn-success"><i class="fa-solid fa-user-check"></i> เข้าสู่ระบบญาติผู้แจ้ง</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="text-center mt-4">
+        <a href="Homepage.html" class="btn btn-outline-light rounded-pill">กลับหน้าหลัก</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    const ADMIN_USERNAME = "admin";
+    const ADMIN_PASSWORD = "1234";
+
+    const roleChooser = document.getElementById("roleChooser");
+    const adminPanel = document.getElementById("adminPanel");
+    const familyPanel = document.getElementById("familyPanel");
+    const chooseAdminBtn = document.getElementById("chooseAdmin");
+    const chooseFamilyBtn = document.getElementById("chooseFamily");
+
+    function hidePanels() {
+      adminPanel.classList.remove("show");
+      familyPanel.classList.remove("show");
+      chooseAdminBtn.classList.remove("active");
+      chooseFamilyBtn.classList.remove("active");
+    }
+
+    function showPanel(type) {
+      hidePanels();
+      roleChooser.style.display = "none";
+
+      if (type === "admin") {
+        chooseAdminBtn.classList.add("active");
+        adminPanel.classList.add("show");
+      }
+
+      if (type === "family") {
+        chooseFamilyBtn.classList.add("active");
+        familyPanel.classList.add("show");
+      }
+    }
+
+    function backToChooser(event) {
+      event.preventDefault();
+      hidePanels();
+      roleChooser.style.display = "block";
+    }
+
+    chooseAdminBtn.addEventListener("click", () => showPanel("admin"));
+    chooseFamilyBtn.addEventListener("click", () => showPanel("family"));
+    document.querySelectorAll("[data-back]").forEach(el => el.addEventListener("click", backToChooser));
+
+    document.getElementById("adminLoginForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const username = document.getElementById("adminUsername").value.trim();
+      const password = document.getElementById("adminPassword").value.trim();
+      const error = document.getElementById("adminLoginError");
+      error.classList.add("d-none");
+
+      if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+        clearFamilyAuth();
+        localStorage.setItem("isAdminLogin", "true");
+        localStorage.setItem("adminUsername", username);
+        window.location.href = "admin.html";
+      } else {
+        error.classList.remove("d-none");
+      }
+    });
+
+    document.getElementById("familyLoginForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const caseId = document.getElementById("familyCaseId").value.trim();
+      const phone = document.getElementById("familyPhone").value.trim();
+      const error = document.getElementById("familyLoginError");
+      error.classList.add("d-none");
+
+      const caseItem = await fetchCaseById(caseId);
+      if (caseItem && String(caseItem.owner_phone || "") === phone) {
+        clearAdminAuth();
+        localStorage.setItem("isFamilyLogin", "true");
+        localStorage.setItem("familyCaseId", String(getCaseId(caseItem)));
+        localStorage.setItem("familyOwnerPhone", phone);
+        window.location.href = `track-case.html?case_id=${getCaseId(caseItem)}`;
+        return;
+      }
+
+      error.classList.remove("d-none");
+    });
+  </script>
+</body>
+</html>
