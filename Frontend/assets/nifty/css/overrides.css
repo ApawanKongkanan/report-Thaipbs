@@ -1,0 +1,40 @@
+/* ==========================================================================
+   ThaiPBS Center — Global readability + interaction polish
+   Loaded after bootstrap.min.css / nifty.min.css on every page.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1) Darker secondary/tertiary text for readability.
+   Scoped to .content (the light-background main content area) only, so the
+   header and sidebar — which sit on a dark navy background and already use
+   their own appropriately light-coloured text via --nf-mainnav-secondary-color
+   / --nf-header-* — are left untouched.
+   -------------------------------------------------------------------------- */
+.content {
+    --bs-secondary-color: #495057;
+    --bs-tertiary-color: #5a6169;
+}
+
+/* --------------------------------------------------------------------------
+   2) Hover "pop out" effect for card-style containers, so whatever the
+   cursor points at is easy to focus on. Kept gentle (small lift + soft
+   navy-tinted shadow matching the template) so it doesn't feel jarring on
+   cards that contain forms.
+   -------------------------------------------------------------------------- */
+.card, .kpi-box, .urgent-case-card, .case-result-card {
+    transition: transform 0.2s ease, box-shadow 0.25s ease;
+}
+.card:hover, .kpi-box:hover, .urgent-case-card:hover, .case-result-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(36, 68, 127, 0.16);
+    position: relative;
+    z-index: 2;
+}
+
+/* Table rows: a lift would break row alignment, so use a colour-accent pop instead */
+.table-hover > tbody > tr {
+    transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+.table-hover > tbody > tr:hover {
+    box-shadow: inset 4px 0 0 var(--bs-primary);
+}

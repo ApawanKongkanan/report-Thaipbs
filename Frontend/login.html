@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="th" data-bs-theme="light" data-scheme="navy">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เข้าสู่ระบบ - Thai PBS Missing Person</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/nifty/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/nifty/css/nifty.min.css">
+    <link rel="stylesheet" href="assets/nifty/css/overrides.css">
+    <style>
+        .login-header { background-color: var(--bs-primary); padding: 30px; text-align: center; color: white; border-radius: var(--bs-card-border-radius) var(--bs-card-border-radius) 0 0; }
+        .login-header h3 { margin: 0; font-weight: 600; font-size: 22px; }
+        .brand-icon { font-size: 32px; margin-bottom: 10px; color: #ffffff; }
+    </style>
+</head>
+<body class="out-quart">
+
+   <!-- PAGE CONTAINER -->
+   <div id="root" class="root front-container">
+
+      <!-- CONTENTS -->
+      <section id="content" class="content">
+         <div class="content__boxed w-100 min-vh-100 d-flex flex-column align-items-center justify-content-center">
+            <div class="content__wrap" style="max-width: 420px; width: 100%;">
+
+               <!-- Login card -->
+               <div class="card shadow-lg">
+                  <div class="login-header">
+                     <div class="brand-icon"><i class="fa-solid fa-layer-group"></i></div>
+                     <h3>Thai PBS Center</h3>
+                     <p class="m-0 text-white-50 fs-7">ระบบจัดการและติดตามข้อมูลคนหาย</p>
+                  </div>
+                  <div class="card-body p-4">
+
+                     <form id="loginForm" class="mt-2">
+                        <div class="mb-3">
+                           <label for="role" class="form-label fw-bold"><i class="fa-solid fa-user-shield me-2"></i>ประเภทผู้ใช้งาน</label>
+                           <select id="role" class="form-select" required>
+                              <option value="relative" selected>ญาติผู้สูญหาย</option>
+                              <option value="admin">เจ้าหน้าที่</option>
+                           </select>
+                        </div>
+
+                        <div class="mb-3">
+                           <label for="username" class="form-label fw-bold"><i class="fa-solid fa-id-card me-2"></i>บัญชีผู้ใช้</label>
+                           <input type="text" id="username" class="form-control" placeholder="เบอร์โทร / เลขบัตรฯ / ไอดีเจ้าหน้าที่" required>
+                        </div>
+
+                        <div class="mb-4">
+                           <label for="password" class="form-label fw-bold"><i class="fa-solid fa-lock me-2"></i>รหัสผ่าน</label>
+                           <input type="password" id="password" class="form-control" placeholder="กรอกรหัสผ่านของคุณ" required>
+                        </div>
+
+                        <div class="d-grid mt-4">
+                           <button class="btn btn-primary btn-lg" type="submit">
+                              <i class="fa-solid fa-right-to-bracket me-2"></i> เข้าสู่ระบบ
+                           </button>
+                        </div>
+                     </form>
+
+                  </div>
+               </div>
+
+            </div>
+         </div>
+      </section>
+   </div>
+   <!-- END - PAGE CONTAINER -->
+
+<script>
+    // 1. เปลี่ยนข้อความในช่องกรอก ตามประเภทผู้ใช้งาน
+    document.getElementById("role").addEventListener("change", function() {
+        const role = this.value;
+        const usernameInput = document.getElementById("username");
+        const passwordContainer = document.getElementById("password").closest('.mb-4');
+        const passwordInput = document.getElementById("password");
+
+        if (role === "relative") {
+            usernameInput.placeholder = "เบอร์โทรศัพท์ (ตัวเลข 10 หลัก)";
+
+            // แสดงช่องรหัสผ่านกลับมา
+            passwordContainer.style.display = "block";
+            passwordInput.required = true;
+            passwordInput.placeholder = "เลข 4 ตัวท้ายของเบอร์โทรศัพท์";
+            passwordInput.type = "text"; // เปลี่ยนเป็น text จะได้เห็นว่าพิมพ์เลขอะไร (ออปชันเสริม)
+        } else {
+            usernameInput.placeholder = "username";
+
+            passwordContainer.style.display = "block";
+            passwordInput.required = true;
+            passwordInput.placeholder = "password";
+            passwordInput.type = "password"; // ของแอดมินปิดเป็นจุดๆ เหมือนเดิม
+        }
+    });
+
+    // สั่งให้ทำงาน 1 ครั้งตอนโหลดหน้าเว็บ
+    document.getElementById("role").dispatchEvent(new Event('change'));
+
+    // 2. จัดการเมื่อกดปุ่ม "เข้าสู่ระบบ"
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+        const role = document.getElementById("role").value;
+
+        try {
+            const response = await fetch(`${window.location.origin}/api/login`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password, role })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                localStorage.setItem("userId", data.user.user_id);
+                localStorage.setItem("userRole", data.user.role);
+                localStorage.setItem("userName", data.user.name);
+
+                window.location.href = "Homepage.html";
+            } else {
+                alert("❌ เข้าสู่ระบบไม่สำเร็จ: " + data.message);
+            }
+        } catch (err) {
+            console.error("Login Error:", err);
+            alert("🌐 ไม่สามารถติดต่อเซิร์ฟเวอร์หลังบ้านได้");
+        }
+    });
+</script>
+
+    <script src="assets/nifty/vendors/popperjs/popper.min.js"></script>
+    <script src="assets/nifty/vendors/bootstrap/bootstrap.min.js"></script>
+    <script src="assets/nifty/js/nifty.min.js"></script>
+</body>
+</html>

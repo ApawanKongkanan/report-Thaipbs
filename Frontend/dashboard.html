@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="th" data-bs-theme="light" data-scheme="navy">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>สถิติและข้อมูลบุคคลสูญหาย - Thai PBS Center</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/nifty/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/nifty/css/nifty.min.css">
+    <link rel="stylesheet" href="assets/nifty/css/overrides.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        .kpi-box { text-align: center; padding: 15px; border-radius: 8px; background: var(--bs-tertiary-bg); border: 1px solid var(--bs-border-color); height: 100%; display: flex; flex-direction: column; justify-content: center; }
+        .kpi-title { font-size: 13px; color: var(--bs-secondary-color); font-weight: 600; margin-bottom: 5px; }
+        .kpi-value { font-size: 32px; font-weight: 700; color: var(--bs-primary); margin: 0; line-height: 1; }
+
+        .filter-label { font-size: 13px; font-weight: 600; color: var(--bs-secondary-color); margin-bottom: 5px; }
+
+        .tab-pane { display: none; animation: fadeIn 0.4s; }
+        .tab-pane.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .chart-container-lg { position: relative; height: 350px; width: 100%; }
+        .chart-container-md { position: relative; height: 250px; width: 100%; }
+    </style>
+</head>
+<body class="out-quart">
+
+   <!-- PAGE CONTAINER -->
+   <div id="root" class="root mn--max">
+
+      <!-- HEADER -->
+      <header class="header header--primary">
+         <div class="header__inner">
+            <div class="header__brand">
+               <div class="brand-wrap">
+                  <a href="Homepage.html" class="brand-img stretched-link">
+                     <i class="fa-solid fa-layer-group fs-3" style="color: var(--nf-brand-color);"></i>
+                  </a>
+                  <div class="brand-title">Thai PBS Center</div>
+               </div>
+            </div>
+
+            <div class="header__content">
+               <div class="header__content-start">
+                  <button type="button" class="nav-toggler header__btn btn btn-icon btn-sm" aria-label="Nav Toggler">
+                     <i class="fa-solid fa-bars"></i>
+                  </button>
+                  <div class="vr mx-1 d-none d-md-block"></div>
+                  <h5 class="m-0 d-none d-md-block text-body-secondary fw-normal">สถิติและข้อมูลบุคคลสูญหาย</h5>
+               </div>
+
+               <div class="header__content-end">
+                  <div class="dropdown">
+                     <button class="header__btn btn btn-icon btn-sm" type="button" data-bs-toggle="dropdown" aria-label="User dropdown" aria-expanded="false">
+                        <i class="fa-solid fa-circle-user fs-4"></i>
+                     </button>
+                     <div class="dropdown-menu dropdown-menu-end">
+                        <div class="d-flex align-items-center border-bottom px-3 py-2">
+                           <div class="flex-grow-1">
+                              <h6 class="mb-0">เจ้าหน้าที่ (ผู้ดูแลระบบ)</h6>
+                              <small class="text-body-secondary">Thai PBS Center</small>
+                           </div>
+                        </div>
+                        <a href="login.html" class="dropdown-item" onclick="localStorage.clear();">
+                           <i class="fa-solid fa-right-from-bracket fs-6 me-2"></i> ออกจากระบบ
+                        </a>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </header>
+      <!-- END - HEADER -->
+
+      <!-- MAIN NAVIGATION -->
+      <nav id="mainnav-container" class="mainnav mainnav--primary">
+         <div class="mainnav__inner">
+            <div class="mainnav__top-content scrollable-content pb-5">
+
+               <!-- Profile Widget -->
+               <div id="_dm-mainnavProfile" class="mainnav__widget my-3 hv-outline-parent">
+                  <div class="mininav-toggle text-center py-2">
+                     <img class="mainnav__avatar img-md rounded-circle hv-oc" src="assets/nifty/img/profile-photos/1.png" alt="รูปโปรไฟล์">
+                  </div>
+                  <div class="mininav-content collapse d-mn-max">
+                     <span data-popper-arrow class="arrow"></span>
+                     <div class="d-grid">
+                        <button class="mainnav-widget-toggle d-block btn border-0 p-2" data-bs-toggle="collapse" data-bs-target="#usernav" aria-expanded="false" aria-controls="usernav">
+                           <span class="dropdown-toggle d-flex justify-content-center align-items-center">
+                              <h5 class="mb-0 me-3">เจ้าหน้าที่ (ผู้ดูแลระบบ)</h5>
+                           </span>
+                           <small class="text-body-secondary">ผู้ดูแลระบบ</small>
+                        </button>
+
+                        <div id="usernav" class="nav flex-column collapse">
+                           <a href="#" class="nav-link d-flex justify-content-between align-items-center">
+                              <span><i class="fa-solid fa-envelope fs-5 me-2"></i><span class="ms-1">ข้อความ</span></span>
+                              <span class="badge bg-danger rounded-pill">14</span>
+                           </a>
+                           <a href="#" class="nav-link">
+                              <i class="fa-solid fa-user fs-5 me-2"></i>
+                              <span class="ms-1">โปรไฟล์</span>
+                           </a>
+                           <a href="#" class="nav-link">
+                              <i class="fa-solid fa-gear fs-5 me-2"></i>
+                              <span class="ms-1">ตั้งค่า</span>
+                           </a>
+                           <a href="#" class="nav-link">
+                              <i class="fa-solid fa-lock fs-5 me-2"></i>
+                              <span class="ms-1">ล็อกหน้าจอ</span>
+                           </a>
+                           <a href="login.html" class="nav-link" onclick="localStorage.clear();">
+                              <i class="fa-solid fa-right-from-bracket fs-5 me-2"></i>
+                              <span class="ms-1">ออกจากระบบ</span>
+                           </a>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <!-- End - Profile widget -->
+
+               <div class="mainnav__categoriy py-3">
+                  <h6 class="mainnav__caption mt-0 fw-bold">เมนูหลัก</h6>
+                  <ul class="mainnav__menu nav flex-column">
+                     <li class="nav-item">
+                        <a href="Homepage.html" class="nav-link mininav-toggle"><i class="fa-solid fa-house fs-5 me-2"></i>
+                           <span class="nav-label mininav-content ms-1">
+                              <span data-popper-arrow class="arrow"></span>
+                              หน้าแรก
+                           </span>
+                        </a>
+                     </li>
+
+                     <li class="nav-item">
+                        <a href="track.html" class="nav-link mininav-toggle"><i class="fa-solid fa-magnifying-glass fs-5 me-2"></i>
+                           <span class="nav-label mininav-content ms-1">
+                              <span data-popper-arrow class="arrow"></span>
+                              ติดตามคนหาย
+                           </span>
+                        </a>
+                     </li>
+
+                     <li class="nav-item">
+                        <a href="add-case.html" class="nav-link mininav-toggle"><i class="fa-solid fa-plus fs-5 me-2"></i>
+                           <span class="nav-label mininav-content ms-1">
+                              <span data-popper-arrow class="arrow"></span>
+                              เพิ่มเคส
+                           </span>
+                        </a>
+                     </li>
+
+                     <li class="nav-item">
+                        <a href="add-clue.html" class="nav-link mininav-toggle"><i class="fa-solid fa-bell fs-5 me-2"></i>
+                           <span class="nav-label mininav-content ms-1">
+                              <span data-popper-arrow class="arrow"></span>
+                              แจ้งเบาะแส
+                           </span>
+                        </a>
+                     </li>
+
+                     <li class="nav-item">
+                        <a href="dashboard.html" class="nav-link mininav-toggle active"><i class="fa-solid fa-chart-pie fs-5 me-2"></i>
+                           <span class="nav-label mininav-content ms-1">
+                              <span data-popper-arrow class="arrow"></span>
+                              แดชบอร์ด
+                           </span>
+                        </a>
+                     </li>
+                  </ul>
+               </div>
+            </div>
+         </div>
+      </nav>
+      <!-- END - MAIN NAVIGATION -->
+
+      <!-- CONTENTS -->
+      <section id="content" class="content">
+
+         <div class="content__boxed">
+            <div class="content__wrap py-4">
+
+               <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                  <h1 class="page-title m-0">สถิติและข้อมูลบุคคลสูญหาย</h1>
+                  <div class="fw-bold text-primary fs-6"><i class="fa-solid fa-circle-user fs-5 align-middle me-1"></i> เจ้าหน้าที่วิเคราะห์ข้อมูล</div>
+               </div>
+
+               <div class="card mb-4">
+                  <div class="card-body d-flex flex-wrap gap-3 align-items-end">
+                     <div class="fw-bold text-primary d-none d-md-block"><i class="fa-solid fa-filter"></i> ตัวกรอง:</div>
+                     <div style="min-width: 150px;">
+                        <div class="filter-label">ปีที่รับแจ้ง</div>
+                        <select class="form-select form-select-sm"><option>ทั้งหมด</option><option>2567</option><option>2568</option><option>2569</option></select>
+                     </div>
+                     <div style="min-width: 150px;">
+                        <div class="filter-label">จังหวัด</div>
+                        <select class="form-select form-select-sm"><option>ทั่วประเทศไทย</option><option>กรุงเทพมหานคร</option><option>เชียงใหม่</option></select>
+                     </div>
+                     <div style="min-width: 150px;">
+                        <div class="filter-label">เดือน</div>
+                        <select class="form-select form-select-sm"><option>ทุกเดือน</option><option>มกราคม</option><option>กุมภาพันธ์</option></select>
+                     </div>
+                     <div class="ms-auto d-flex gap-2">
+                        <button class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-rotate-right"></i> ล้างค่า</button>
+                        <button class="btn btn-primary btn-sm"><i class="fa-solid fa-search"></i> ค้นหา</button>
+                     </div>
+                  </div>
+               </div>
+
+               <ul class="nav nav-tabs" id="dashboardTabs">
+                  <li class="nav-item">
+                     <button class="nav-link active" onclick="switchTab('overview', this)"><i class="fa-solid fa-chart-bar me-2"></i>ภาพรวม</button>
+                  </li>
+                  <li class="nav-item">
+                     <button class="nav-link" onclick="switchTab('location', this)"><i class="fa-solid fa-map-location-dot me-2"></i>พื้นที่และแผนที่</button>
+                  </li>
+                  <li class="nav-item">
+                     <button class="nav-link" onclick="switchTab('details', this)"><i class="fa-solid fa-table-list me-2"></i>ข้อมูลรายเคส</button>
+                  </li>
+               </ul>
+
+               <div id="overview" class="tab-pane active pt-4">
+
+                  <div class="row g-3 mb-4">
+                     <div class="col"><div class="kpi-box border-start border-4 border-primary"><div class="kpi-title">บุคคลสูญหายทั้งหมด (คน)</div><div class="kpi-value">200</div></div></div>
+                     <div class="col"><div class="kpi-box border-start border-4 border-success"><div class="kpi-title">พบแล้ว (คน)</div><div class="kpi-value text-success">147</div></div></div>
+                     <div class="col"><div class="kpi-box border-start border-4" style="border-color: #ec4899 !important;"><div class="kpi-title">เพศหญิง (คน)</div><div class="kpi-value" style="color: #ec4899;">95</div></div></div>
+                     <div class="col"><div class="kpi-box border-start border-4 border-info"><div class="kpi-title">เพศชาย (คน)</div><div class="kpi-value text-info">90</div></div></div>
+                     <div class="col"><div class="kpi-box border-start border-4" style="border-color: #a855f7 !important;"><div class="kpi-title">LGBTQ+ (คน)</div><div class="kpi-value" style="color: #a855f7;">15</div></div></div>
+                     <div class="col"><div class="kpi-box border-start border-4 border-warning"><div class="kpi-title">อายุเฉลี่ยของบุคคลสูญหาย (ปี)</div><div class="kpi-value text-warning">48.3</div></div></div>
+                  </div>
+
+                  <div class="row g-4">
+                     <div class="col-lg-8">
+                        <div class="card h-100">
+                           <div class="card-header border-0"><h3 class="h4 m-0">แนวโน้มจำนวนบุคคลสูญหายและผู้ที่พบแล้วรายปี</h3></div>
+                           <div class="card-body chart-container-lg"><canvas id="trendChart"></canvas></div>
+                        </div>
+                     </div>
+
+                     <div class="col-lg-4">
+                        <div class="card h-100">
+                           <div class="card-header border-0"><h3 class="h4 m-0">สัดส่วนผู้แจ้งเหตุ</h3></div>
+                           <div class="card-body">
+                              <div class="chart-container-lg" style="height: 250px;"><canvas id="reporterChart"></canvas></div>
+                              <div class="mt-4 row text-center">
+                                 <div class="col-4"><h5 class="fw-bold text-danger m-0">72</h5><small class="text-body-secondary">เจ้าหน้าที่ตำรวจ</small></div>
+                                 <div class="col-4"><h5 class="fw-bold text-primary m-0">65</h5><small class="text-body-secondary">มูลนิธิกระจกเงา</small></div>
+                                 <div class="col-4"><h5 class="fw-bold text-warning m-0">63</h5><small class="text-body-secondary">ญาติ/บุคคลทั่วไป</small></div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+
+                     <div class="col-lg-7">
+                        <div class="card h-100">
+                           <div class="card-header border-0"><h3 class="h4 m-0">สาเหตุการสูญหายสูงสุด</h3></div>
+                           <div class="card-body" style="position: relative; height: 340px;"><canvas id="reasonChart"></canvas></div>
+                        </div>
+                     </div>
+
+                     <div class="col-lg-5">
+                        <div class="card h-100">
+                           <div class="card-header border-0"><h3 class="h4 m-0">กลุ่มอายุของบุคคลสูญหาย</h3></div>
+                           <div class="card-body chart-container-md"><canvas id="ageChart"></canvas></div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+
+               <div id="location" class="tab-pane pt-4">
+                  <div class="row g-4">
+                     <div class="col-lg-4">
+                        <div class="card h-100">
+                           <div class="card-header border-0"><h3 class="h4 m-0">10 อันดับจังหวัดที่มีบุคคลสูญหายสูงสุด</h3></div>
+                           <div class="card-body" style="height: 550px; position: relative;"><canvas id="provinceChart"></canvas></div>
+                        </div>
+                     </div>
+                     <div class="col-lg-8">
+                        <div class="card p-2 h-100">
+                           <div id="map" style="width: 100%; height: 600px; min-height: 400px; border-radius: 8px;"></div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+
+               <div id="details" class="tab-pane pt-4">
+                  <div class="card">
+                     <div class="card-body">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+                           <h3 class="h4 m-0">ตารางข้อมูลรายเคสทั้งหมด</h3>
+                           <div class="d-flex gap-2 w-100 w-md-auto">
+                              <input type="text" class="form-control form-control-sm" id="tableSearchInput" placeholder="ค้นหา รหัส, จังหวัด..." oninput="filterCasesTable(this.value)">
+                              <button class="btn btn-outline-success btn-sm text-nowrap"><i class="fa-solid fa-file-excel"></i> ส่งออกข้อมูล</button>
+                           </div>
+                        </div>
+                        <p class="text-body-secondary small mb-3"><i class="fa-solid fa-circle-info"></i> คลิกที่แถวเพื่อดูรายละเอียดเพิ่มเติมของแต่ละเคส</p>
+
+                        <div class="table-responsive" style="max-height: 550px; overflow-y: auto;">
+                           <table class="table table-hover">
+                              <thead class="sticky-top">
+                                 <tr>
+                                    <th>รหัสเคส</th>
+                                    <th class="text-nowrap">วันที่รับแจ้ง</th>
+                                    <th>เพศ</th>
+                                    <th>อายุ (ปี)</th>
+                                    <th>จังหวัด</th>
+                                    <th>สาเหตุ</th>
+                                    <th>สถานะ</th>
+                                 </tr>
+                              </thead>
+                              <tbody id="rawCasesBody"></tbody>
+                           </table>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+
+            </div>
+         </div>
+
+         <!-- Modal: รายละเอียดเคส (คลิกจากตาราง) -->
+         <div class="modal fade" id="caseDetailModal" tabindex="-1" aria-labelledby="caseDetailModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+               <div class="modal-content">
+                  <div class="modal-header">
+                     <h5 class="modal-title fw-bold" id="caseDetailModalLabel"><i class="fa-solid fa-folder-open me-2"></i>รายละเอียดเคสหมายเลข <span id="modalCaseId"></span></h5>
+                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="ปิด"></button>
+                  </div>
+                  <div class="modal-body" id="modalCaseBody"></div>
+                  <div class="modal-footer">
+                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">ปิด</button>
+                  </div>
+               </div>
+            </div>
+         </div>
+
+      </section>
+   </div>
+   <!-- END - PAGE CONTAINER -->
+
+   <!-- SCROLL TO TOP BUTTON -->
+   <div class="scroll-container">
+      <a href="#root" class="scroll-page ratio ratio-1x1" aria-label="Scroll button"></a>
+   </div>
+
+   <!-- JAVASCRIPTS -->
+   <script src="assets/nifty/vendors/popperjs/popper.min.js"></script>
+   <script src="assets/nifty/vendors/bootstrap/bootstrap.min.js"></script>
+   <script src="assets/nifty/js/nifty.min.js"></script>
+
+    <script>
+        let map;
+        let mapInitialized = false;
+
+        // ฟังก์ชันสลับ Tab
+        function switchTab(tabId, btnElement) {
+            document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            document.querySelectorAll('#dashboardTabs .nav-link').forEach(el => el.classList.remove('active'));
+            btnElement.classList.add('active');
+            if (tabId === 'location' && !mapInitialized) {
+                setTimeout(initMap, 100);
+                mapInitialized = true;
+            }
+        }
+
+        // ตั้งค่าสีกลาง (Theme Colors)
+        if (typeof Chart !== 'undefined') { Chart.defaults.font.family = "'Ubuntu', 'Segoe UI', Tahoma, sans-serif"; }
+        const colors = { primary: '#24447f', success: '#57a805', danger: '#e45240', warning: '#fa9f1b', info: '#0db7f0', muted: '#b6bbc2' };
+
+        document.addEventListener('DOMContentLoaded', function() {
+          try {
+            // 1. กราฟเส้น (แนวโน้มรายปี) - แกน X = ปี พ.ศ., แกน Y = จำนวนบุคคล (คน)
+            new Chart(document.getElementById('trendChart'), {
+                type: 'line',
+                data: {
+                    labels: ['2563', '2564', '2565', '2566', '2567', '2568'],
+                    datasets: [
+                        { label: 'รับแจ้งทั้งหมด', data: [15, 38, 42, 45, 40, 20], borderColor: colors.primary, backgroundColor: 'rgba(36, 68, 127, 0.1)', fill: true, tension: 0.4 },
+                        { label: 'พบแล้ว', data: [5, 18, 15, 12, 18, 10], borderColor: colors.success, backgroundColor: 'transparent', borderDash: [5, 5], tension: 0.4 }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } },
+                    scales: {
+                        x: { title: { display: true, text: 'ปี (พ.ศ.)' } },
+                        y: { title: { display: true, text: 'จำนวนบุคคล (คน)' }, beginAtZero: true }
+                    }
+                }
+            });
+
+            // 2. โดนัท (สัดส่วนผู้แจ้งเหตุ) - ไม่มีแกน
+            new Chart(document.getElementById('reporterChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['เจ้าหน้าที่ตำรวจ', 'มูลนิธิกระจกเงา', 'ญาติ/บุคคลทั่วไป'],
+                    datasets: [{ data: [72, 65, 63], backgroundColor: [colors.danger, colors.primary, colors.warning], borderWidth: 0 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { position: 'bottom' } } }
+            });
+
+            // 3. กราฟแท่งแนวนอน (สาเหตุการสูญหาย) - แกน X = จำนวนบุคคล (คน), แกน Y = สาเหตุ
+            new Chart(document.getElementById('reasonChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['พลัดหลงจากบ้าน', 'ถูกลักพาตัว', 'ปัญหาสื่อออนไลน์', 'ป่วย/สมองเสื่อม', 'ถูกล่อลวง', 'ปัญหาครอบครัว'],
+                    datasets: [{ label: 'จำนวนบุคคล (คน)', data: [37, 33, 28, 28, 28, 24], backgroundColor: colors.warning }]
+                },
+                options: {
+                    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                    layout: { padding: { left: 5, right: 15 } },
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { title: { display: true, text: 'จำนวนบุคคล (คน)' }, grid: { display: false } },
+                        y: { ticks: { autoSkip: false }, afterFit: (axis) => { axis.width = 130; } }
+                    }
+                }
+            });
+
+            // 4. พายชาร์ท (กลุ่มอายุของบุคคลสูญหาย แจกแจงตามช่วงวัย)
+            new Chart(document.getElementById('ageChart'), {
+                type: 'pie',
+                data: {
+                    labels: ['เด็กเล็ก (0-5 ปี)', 'เด็กโต (6-11 ปี)', 'มัธยม (12-17 ปี)', 'มหาวิทยาลัย (18-22 ปี)', 'วัยทำงาน (23-59 ปี)', 'ผู้สูงอายุ (60 ปีขึ้นไป)'],
+                    datasets: [{ label: 'จำนวนบุคคล (คน)', data: [12, 18, 25, 20, 83, 42], backgroundColor: [colors.info, colors.success, colors.warning, colors.primary, colors.muted, colors.danger] }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } } }
+            });
+
+            // 5. แผนภูมิแท่งแนวนอนซ้อนทับ (10 อันดับจังหวัด) - แกน X = จำนวนบุคคล (คน), แกน Y = จังหวัด
+            new Chart(document.getElementById('provinceChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['กรุงเทพมหานคร', 'นครปฐม', 'เชียงใหม่', 'อุดรธานี', 'ระยอง', 'สุราษฎร์ธานี', 'ชลบุรี', 'นนทบุรี', 'พิษณุโลก', 'น่าน'],
+                    datasets: [
+                        { label: 'พบแล้ว', data: [80, 75, 65, 70, 85, 70, 60, 50, 40, 30], backgroundColor: colors.success },
+                        { label: 'ยังไม่พบ', data: [20, 15, 20, 10, 5, 20, 15, 10, 10, 5], backgroundColor: colors.danger }
+                    ]
+                },
+                options: {
+                    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } },
+                    scales: {
+                        x: { stacked: true, title: { display: true, text: 'จำนวนบุคคล (คน)' } },
+                        y: { stacked: true, afterFit: (axis) => { axis.width = 110; } }
+                    }
+                }
+            });
+
+          } catch (e) {
+            console.error('การสร้างกราฟล้มเหลว (อาจเกิดจากปัญหาการเชื่อมต่อเครือข่าย):', e);
+          }
+        });
+
+        // หมายเหตุ: การสร้างกราฟทั้งหมดอยู่ใน try/catch ด้วยกัน เพื่อไม่ให้ปัญหาการโหลด Chart.js
+        // (เช่น เครือข่ายขัดข้อง) ส่งผลกระทบต่อการแสดงตารางข้อมูลด้านล่าง ซึ่งเป็นคนละส่วนกัน
+        // ฟังก์ชันโหลดแผนที่ (Map)
+        function initMap() {
+            if (typeof L === 'undefined') {
+                document.getElementById('map').innerHTML = '<div class="d-flex align-items-center justify-content-center h-100 text-body-secondary"><i class="fa-solid fa-triangle-exclamation me-2"></i> ไม่สามารถโหลดแผนที่ได้ กรุณาตรวจสอบการเชื่อมต่อเครือข่าย</div>';
+                return;
+            }
+            map = L.map('map').setView([13.7563, 100.5018], 5);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+            }).addTo(map);
+            L.marker([13.7563, 100.5018]).addTo(map).bindPopup("<b>กรุงเทพมหานคร</b><br>มีผู้แจ้งเหตุ 100 คน");
+            L.marker([18.7883, 98.9853]).addTo(map).bindPopup("<b>เชียงใหม่</b><br>มีผู้แจ้งเหตุ 85 คน");
+            L.marker([12.9236, 100.8825]).addTo(map).bindPopup("<b>ชลบุรี (พัทยา)</b><br>มีผู้แจ้งเหตุ 75 คน");
+        }
+
+        // ---------- ตารางข้อมูลรายเคส (คลิกดูรายละเอียด) ----------
+        const rawCases = [
+            { id: '002', date: '8 ก.ค. 2563', gender: 'หญิง', age: 10, province: 'สุโขทัย', reason: 'มีอาการทางสมอง/ป่วย', status: 'พบแล้ว',
+              name: 'ด.ญ. (สงวนชื่อ) อายุ 10 ปี', reporter: 'มารดา', relation: 'บิดา/มารดา', lastSeen: 'ตลาดสดเทศบาล อ.เมือง จ.สุโขทัย', station: 'สภ.เมืองสุโขทัย', notes: 'พบตัวปลอดภัยหลังพลัดหลงในตลาดเป็นเวลา 2 วัน' },
+            { id: '016', date: '23 พ.ย. 2563', gender: 'ชาย', age: 45, province: 'ชัยภูมิ', reason: 'ล่อลวงเพื่อทางเพศ/แรงงาน', status: 'พบแล้ว',
+              name: 'นาย (สงวนชื่อ) อายุ 45 ปี', reporter: 'ภรรยา', relation: 'สามี/ภรรยา', lastSeen: 'สถานีขนส่งจังหวัดชัยภูมิ', station: 'สภ.เมืองชัยภูมิ', notes: 'ประสานตำรวจต่างจังหวัดจนพบตัว ปลอดภัยดี' },
+            { id: '034', date: '15 ก.พ. 2564', gender: 'หญิง', age: 75, province: 'เชียงใหม่', reason: 'หลงลืม/อัลไซเมอร์', status: 'ยังไม่พบ',
+              name: 'นาง (สงวนชื่อ) อายุ 75 ปี', reporter: 'บุตร/ธิดา', relation: 'บุตร/ธิดา', lastSeen: 'ตลาดวโรรส อ.เมือง จ.เชียงใหม่', station: 'สภ.เมืองเชียงใหม่', notes: 'อยู่ระหว่างประสานหน่วยกู้ภัยค้นหาในพื้นที่ใกล้เคียง' },
+            { id: '045', date: '10 เม.ย. 2564', gender: 'ชาย', age: 15, province: 'กรุงเทพมหานคร', reason: 'หนีออกจากบ้าน', status: 'พบเบาะแส',
+              name: 'ด.ช. (สงวนชื่อ) อายุ 15 ปี', reporter: 'บิดา/มารดา', relation: 'บิดา/มารดา', lastSeen: 'ห้างสรรพสินค้าย่านลาดพร้าว กรุงเทพฯ', station: 'สน.ลาดพร้าว', notes: 'มีผู้พบเห็นล่าสุดบริเวณสถานีรถไฟฟ้า อยู่ระหว่างตรวจสอบ' },
+            { id: '027', date: '16 เม.ย. 2564', gender: 'หญิง', age: 45, province: 'บุรีรัมย์', reason: 'ถูกลักพาตัว', status: 'พบแล้ว',
+              name: 'นาง (สงวนชื่อ) อายุ 45 ปี', reporter: 'พี่น้อง', relation: 'พี่น้อง', lastSeen: 'ตลาดนัดชุมชน อ.เมือง จ.บุรีรัมย์', station: 'สภ.เมืองบุรีรัมย์', notes: 'เจ้าหน้าที่ช่วยเหลือออกมาได้อย่างปลอดภัย ผู้ต้องหาถูกจับกุมแล้ว' },
+            { id: '058', date: '2 ก.ย. 2565', gender: 'LGBTQ+', age: 22, province: 'ชลบุรี', reason: 'ปัญหาการใช้สื่อโซเชียล', status: 'ยังไม่พบ',
+              name: '(สงวนชื่อ) อายุ 22 ปี', reporter: 'เพื่อน', relation: 'เพื่อน', lastSeen: 'ย่านพัทยาใต้ อ.บางละมุง จ.ชลบุรี', station: 'สภ.เมืองพัทยา', notes: 'ขาดการติดต่อหลังนัดพบบุคคลที่รู้จักผ่านสื่อสังคมออนไลน์' },
+            { id: '063', date: '19 ธ.ค. 2565', gender: 'ชาย', age: 8, province: 'นครราชสีมา', reason: 'พลัดหลงออกจากบ้าน', status: 'พบแล้ว',
+              name: 'ด.ช. (สงวนชื่อ) อายุ 8 ปี', reporter: 'บิดา/มารดา', relation: 'บิดา/มารดา', lastSeen: 'สวนสาธารณะเทศบาลนครราชสีมา', station: 'สภ.เมืองนครราชสีมา', notes: 'พลัดหลงจากครอบครัวขณะเที่ยวงานเทศกาล พบตัวภายในเวลาไม่ถึง 3 ชั่วโมง' }
+        ];
+
+        function statusBadge(status) {
+            if (status === 'พบแล้ว') return '<span class="badge bg-success">พบแล้ว</span>';
+            if (status === 'พบเบาะแส') return '<span class="badge bg-warning text-dark">พบเบาะแส</span>';
+            return '<span class="badge bg-danger">ยังไม่พบ</span>';
+        }
+
+        function renderCasesTable(data) {
+            const tbody = document.getElementById('rawCasesBody');
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-body-secondary py-4">ไม่พบข้อมูลที่ตรงกับคำค้นหา</td></tr>';
+                return;
+            }
+            tbody.innerHTML = data.map(c => {
+                const i = rawCases.indexOf(c);
+                return `<tr role="button" style="cursor:pointer;" onclick="showCaseDetail(${i})">
+                    <td class="fw-bold">${c.id}</td><td class="text-nowrap">${c.date}</td><td>${c.gender}</td><td>${c.age}</td><td>${c.province}</td>
+                    <td>${c.reason}</td><td>${statusBadge(c.status)}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        function filterCasesTable(query) {
+            const q = query.trim().toLowerCase();
+            if (!q) { renderCasesTable(rawCases); return; }
+            const filtered = rawCases.filter(c =>
+                c.id.toLowerCase().includes(q) || c.province.toLowerCase().includes(q) || c.reason.toLowerCase().includes(q)
+            );
+            renderCasesTable(filtered);
+        }
+
+        function showCaseDetail(i) {
+            const c = rawCases[i];
+            document.getElementById('modalCaseId').textContent = c.id;
+            document.getElementById('modalCaseBody').innerHTML = `
+                <div class="row g-3">
+                    <div class="col-md-6"><div class="text-body-secondary small">ชื่อ (สงวนสิทธิ์บางส่วนเพื่อความเป็นส่วนตัว)</div><div class="fw-bold">${c.name}</div></div>
+                    <div class="col-md-6"><div class="text-body-secondary small">สถานะปัจจุบัน</div><div>${statusBadge(c.status)}</div></div>
+                    <div class="col-md-4"><div class="text-body-secondary small">เพศ</div><div class="fw-bold">${c.gender}</div></div>
+                    <div class="col-md-4"><div class="text-body-secondary small">อายุ</div><div class="fw-bold">${c.age} ปี</div></div>
+                    <div class="col-md-4"><div class="text-body-secondary small">วันที่รับแจ้ง</div><div class="fw-bold">${c.date}</div></div>
+                    <div class="col-md-6"><div class="text-body-secondary small">จังหวัดที่พบเห็นล่าสุด</div><div class="fw-bold">${c.province}</div></div>
+                    <div class="col-md-6"><div class="text-body-secondary small">สถานีตำรวจที่รับผิดชอบ</div><div class="fw-bold">${c.station}</div></div>
+                    <div class="col-12"><div class="text-body-secondary small">สถานที่พบเห็นครั้งสุดท้าย</div><div class="fw-bold">${c.lastSeen}</div></div>
+                    <div class="col-md-6"><div class="text-body-secondary small">สาเหตุการสูญหาย</div><div class="fw-bold">${c.reason}</div></div>
+                    <div class="col-md-6"><div class="text-body-secondary small">ผู้แจ้งเหตุ (ความสัมพันธ์: ${c.relation})</div><div class="fw-bold">${c.reporter}</div></div>
+                    <div class="col-12"><div class="text-body-secondary small">หมายเหตุเพิ่มเติม</div><div>${c.notes}</div></div>
+                </div>
+            `;
+            const modalEl = document.getElementById('caseDetailModal');
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+        }
+
+        // แสดงตารางเคสทันทีที่หน้าเว็บพร้อม แยกอิสระจากการสร้างกราฟด้านบน
+        // เพื่อไม่ให้ปัญหาการโหลด Chart.js (เช่น เครือข่ายขัดข้อง) กระทบต่อการแสดงตาราง
+        document.addEventListener('DOMContentLoaded', () => renderCasesTable(rawCases));
+    </script>
+</body>
+</html>

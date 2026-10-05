@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="th" data-bs-theme="light" data-scheme="navy">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เพิ่มเบาะแสคนหาย - Thai PBS Center</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/nifty/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/nifty/css/nifty.min.css">
+    <link rel="stylesheet" href="assets/nifty/css/overrides.css">
+    <style>
+
+        /* Step Indicator (4 Steps) */
+        .step-container { display: flex; justify-content: space-between; background: var(--bs-card-bg); padding: 20px 30px; border-radius: var(--bs-card-border-radius); box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 25px; }
+        .step-item { text-align: center; flex-grow: 1; position: relative; color: #b2bec3; font-weight: 600; font-size: 14px; transition: color 0.3s; }
+        .step-item.active { color: var(--bs-primary); }
+        .step-item.completed { color: #2ecc71; }
+        .step-circle { width: 35px; height: 35px; border: 2px solid #b2bec3; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px auto; background: var(--bs-card-bg); font-weight: bold; transition: all 0.3s; font-size: 16px; }
+        .step-item.active .step-circle { border-color: var(--bs-primary); background: var(--bs-primary); color: white; }
+        .step-item.completed .step-circle { border-color: #2ecc71; background: #2ecc71; color: white; }
+
+        .form-step { display: none; }
+        .form-step.active { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .content-body { max-width: 1000px; margin: 0 auto; width: 100%; }
+        .form-card { background: var(--bs-card-bg); padding: 35px; border-radius: var(--bs-card-border-radius); box-shadow: 0 4px 16px rgba(0,0,0,0.04); }
+
+        /* Custom UI Elements */
+        .selectable-box { border: 2px solid var(--bs-border-color); border-radius: 8px; padding: 12px 10px; text-align: center; cursor: pointer; font-weight: 600; transition: all 0.2s; background: var(--bs-card-bg); font-size: 14px; height: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; flex-direction: column; }
+        .selectable-box:hover { border-color: var(--bs-primary); background-color: var(--bs-tertiary-bg); }
+        .selectable-box.selected { border-color: var(--bs-primary); background-color: rgba(37, 71, 106, 0.08); color: var(--bs-primary); }
+
+        .case-mock-card { border: 2px solid #4a90e2; background-color: rgba(37, 71, 106, 0.05); border-radius: 10px; padding: 15px; display: none; }
+        .case-result-card { border: 2px solid #4a90e2; background-color: rgba(37, 71, 106, 0.05); border-radius: 10px; padding: 15px; margin-bottom: 12px; transition: border-color 0.2s; }
+        .case-result-card.border-success { border-color: #57a805 !important; background-color: rgba(87, 168, 5, 0.06); }
+        .upload-preview { max-width: 100%; max-height: 250px; object-fit: contain; border-radius: 8px; display: none; margin-top: 15px; border: 1px dashed var(--bs-border-color); padding: 5px; }
+
+        @media (max-width: 991px) {
+            .step-container { overflow-x: auto; white-space: nowrap; padding: 15px; justify-content: flex-start; gap: 20px; -webkit-overflow-scrolling: touch; margin-bottom: 15px; }
+            .step-item { min-width: 100px; flex: 0 0 auto; }
+            .form-card { padding: 20px; }
+            .selectable-box { padding: 10px 5px; font-size: 13px; flex-direction: row; }
+        }
+    </style>
+</head>
+<body class="out-quart">
+
+   <!-- PAGE CONTAINER -->
+   <div id="root" class="root mn--max">
+
+      <!-- HEADER -->
+      <header class="header header--primary">
+         <div class="header__inner">
+            <div class="header__brand">
+               <div class="brand-wrap">
+                  <a href="Homepage.html" class="brand-img stretched-link">
+                     <i class="fa-solid fa-layer-group fs-3" style="color: var(--nf-brand-color);"></i>
+                  </a>
+                  <div class="brand-title">Thai PBS Center</div>
+               </div>
+            </div>
+
+            <div class="header__content">
+               <div class="header__content-start">
+                  <button type="button" class="nav-toggler header__btn btn btn-icon btn-sm" aria-label="Nav Toggler">
+                     <i class="fa-solid fa-bars"></i>
+                  </button>
+                  <div class="vr mx-1 d-none d-md-block"></div>
+                  <h5 class="m-0 d-none d-md-block text-body-secondary fw-normal">แจ้งเบาะแสคนหาย</h5>
+               </div>
+
+               <div class="header__content-end">
+                  <div class="dropdown">
+                     <button class="header__btn btn btn-icon btn-sm" type="button" data-bs-toggle="dropdown" aria-label="User dropdown" aria-expanded="false">
+                        <i class="fa-solid fa-circle-user fs-4"></i>
+                     </button>
+                     <div class="dropdown-menu dropdown-menu-end">
+                        <div class="d-flex align-items-center border-bottom px-3 py-2">
+                           <div class="flex-grow-1">
+                              <h6 class="mb-0">เจ้าหน้าที่ (ผู้ดูแลระบบ)</h6>
+                              <small class="text-body-secondary">Thai PBS Center</small>
+                           </div>
+                        </div>
+                        <a href="login.html" class="dropdown-item" onclick="localStorage.clear();">
+                           <i class="fa-solid fa-right-from-bracket fs-6 me-2"></i> ออกจากระบบ
+                        </a>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </header>
+      <!-- END - HEADER -->
+
+      <!-- MAIN NAVIGATION -->
+      <nav id="mainnav-container" class="mainnav mainnav--primary">
+         <div class="mainnav__inner">
+            <div class="mainnav__top-content scrollable-content pb-5">
+
+               <!-- Profile Widget -->
+               <div id="_dm-mainnavProfile" class="mainnav__widget my-3 hv-outline-parent">
+                  <div class="mininav-toggle text-center py-2">
+                     <img class="mainnav__avatar img-md rounded-circle hv-oc" src="assets/nifty/img/profile-photos/1.png" alt="รูปโปรไฟล์">
+                  </div>
+                  <div class="mininav-content collapse d-mn-max">
+                     <span data-popper-arrow class="arrow"></span>
+                     <div class="d-grid">
+                        <button class="mainnav-widget-toggle d-block btn border-0 p-2" data-bs-toggle="collapse" data-bs-target="#usernav" aria-expanded="false" aria-controls="usernav">
+                           <span class="dropdown-toggle d-flex justify-content-center align-items-center">
+                              <h5 class="mb-0 me-3">เจ้าหน้าที่ (ผู้ดูแลระบบ)</h5>
+                           </span>
+                           <small class="text-body-secondary">ผู้ดูแลระบบ</small>
+                        </button>
+
+                        <div id="usernav" class="nav flex-column collapse">
+                           <a href="#" class="nav-link d-flex justify-content-between align-items-center">
+                              <span><i class="fa-solid fa-envelope fs-5 me-2"></i><span class="ms-1">ข้อความ</span></span>
+                              <span class="badge bg-danger rounded-pill">14</span>
+                           </a>
+                           <a href="#" class="nav-link">
+                              <i class="fa-solid fa-user fs-5 me-2"></i>
+                              <span class="ms-1">โปรไฟล์</span>
+                           </a>
+                           <a href="#" class="nav-link">
+                              <i class="fa-solid fa-gear fs-5 me-2"></i>
+                              <span class="ms-1">ตั้งค่า</span>
+                           </a>
+                           <a href="#" class="nav-link">
+                              <i class="fa-solid fa-lock fs-5 me-2"></i>
+                              <span class="ms-1">ล็อกหน้าจอ</span>
+                           </a>
+                           <a href="login.html" class="nav-link" onclick="localStorage.clear();">
+                              <i class="fa-solid fa-right-from-bracket fs-5 me-2"></i>
+                              <span class="ms-1">ออกจากระบบ</span>
+                           </a>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <!-- End - Profile widget -->
+
+               <div class="mainnav__categoriy py-3">
+                  <h6 class="mainnav__caption mt-0 fw-bold">เมนูหลัก</h6>
+                  <ul class="mainnav__menu nav flex-column">
+                     <li class="nav-item">
+                        <a href="Homepage.html" class="nav-link mininav-toggle"><i class="fa-solid fa-house fs-5 me-2"></i>
+                           <span class="nav-label mininav-content ms-1">
+                              <span data-popper-arrow class="arrow"></span>
+                              หน้าแรก
+                           </span>
+                        </a>
+                     </li>
+
+                     <li class="nav-item">
+                        <a href="track.html" class="nav-link mininav-toggle"><i class="fa-solid fa-magnifying-glass fs-5 me-2"></i>
+                           <span class="nav-label mininav-content ms-1">
+                              <span data-popper-arrow class="arrow"></span>
+                              ติดตามคนหาย
+                           </span>
+                        </a>
+                     </li>
+
+                     <li class="nav-item">
+                        <a href="add-case.html" class="nav-link mininav-toggle"><i class="fa-solid fa-plus fs-5 me-2"></i>
+                           <span class="nav-label mininav-content ms-1">
+                              <span data-popper-arrow class="arrow"></span>
+                              เพิ่มเคส
+                           </span>
+                        </a>
+                     </li>
+
+                     <li class="nav-item">
+                        <a href="add-clue.html" class="nav-link mininav-toggle active"><i class="fa-solid fa-bell fs-5 me-2"></i>
+                           <span class="nav-label mininav-content ms-1">
+                              <span data-popper-arrow class="arrow"></span>
+                              แจ้งเบาะแส
+                           </span>
+                        </a>
+                     </li>
+
+                     <li class="nav-item">
+                        <a href="dashboard.html" class="nav-link mininav-toggle"><i class="fa-solid fa-chart-pie fs-5 me-2"></i>
+                           <span class="nav-label mininav-content ms-1">
+                              <span data-popper-arrow class="arrow"></span>
+                              แดชบอร์ด
+                           </span>
+                        </a>
+                     </li>
+                  </ul>
+               </div>
+            </div>
+         </div>
+      </nav>
+      <!-- END - MAIN NAVIGATION -->
+
+      <!-- CONTENTS -->
+      <section id="content" class="content">
+
+
+         <div class="content__boxed">
+            <div class="content__wrap py-4">
+
+               <!-- Progress Steps (4 ขั้นตอน) -->
+               <div class="step-container">
+                  <div class="step-item active" id="stepIndicator1"><div class="step-circle">1</div>เลือกเคส</div>
+                  <div class="step-item" id="stepIndicator2"><div class="step-circle">2</div>ข้อมูลผู้แจ้ง</div>
+                  <div class="step-item" id="stepIndicator3"><div class="step-circle">3</div>รายละเอียดการพบ</div>
+                  <div class="step-item" id="stepIndicator4"><div class="step-circle">4</div>หลักฐาน & ยืนยัน</div>
+               </div>
+
+               <div class="content-body">
+                  <form id="clueForm" class="form-card" enctype="multipart/form-data">
+
+                     <!-- Step 1: ค้นหาและเลือกเคส -->
+                     <div class="form-step active" id="step1">
+                        <h4 class="fw-bold mb-4 text-primary"><i class="fa-solid fa-magnifying-glass me-2"></i>1. ค้นหาเคสบุคคลสูญหายอ้างอิง</h4>
+
+                        <div class="alert alert-info border-0 shadow-sm">
+                           <label class="form-label fw-bold">🔎 ค้นหาเคส (รหัสเคส / ชื่อ-สกุลคนหาย / เลขบัตร)</label>
+                           <div class="input-group mb-3">
+                              <input type="text" class="form-control form-control-lg" id="search_case_input" placeholder="พิมพ์ชื่อเพื่อค้นหาเคส..." onkeypress="if(event.key==='Enter'){event.preventDefault(); searchCase();}">
+                              <button class="btn btn-primary px-4 fw-bold" type="button" onclick="searchCase()"><i class="fa-solid fa-search"></i> ค้นหา</button>
+                           </div>
+                        </div>
+
+                        <!-- กล่องแสดงผลลัพธ์การค้นหา (ดึงจากระบบจริง) -->
+                        <div class="mt-4" id="case_result_box">
+                           <p class="text-body-secondary text-center py-4"><i class="fa-solid fa-magnifying-glass me-1"></i> กรอกคำค้นหาแล้วกดปุ่ม "ค้นหา" เพื่อดึงรายชื่อเคสจากระบบ</p>
+                        </div>
+                        <input type="hidden" id="selected_case_id">
+                     </div>
+
+                     <!-- Step 2: ข้อมูลผู้แจ้งเบาะแส -->
+                     <div class="form-step" id="step2">
+                        <h4 class="fw-bold mb-4 text-primary"><i class="fa-solid fa-user-secret me-2"></i>2. ข้อมูลผู้แจ้งเบาะแส</h4>
+
+                        <div class="mb-4 p-3 bg-body-tertiary rounded border">
+                           <label class="form-label fw-bold">ช่องทางที่รับแจ้งเบาะแส</label>
+                           <div class="row g-2 mb-2">
+                              <div class="col-6 col-md-3"><div class="selectable-box target-contact" data-value="Facebook"><i class="fa-brands fa-facebook text-primary fs-5"></i> Facebook</div></div>
+                              <div class="col-6 col-md-3"><div class="selectable-box target-contact" data-value="Line"><i class="fa-brands fa-line text-success fs-5"></i> LINE</div></div>
+                              <div class="col-6 col-md-3"><div class="selectable-box target-contact" data-value="เบอร์โทรศัพท์"><i class="fa-solid fa-phone fs-5 text-secondary"></i> เบอร์โทรฯ</div></div>
+                              <div class="col-6 col-md-3"><div class="selectable-box target-contact" data-value="อื่นๆ"><i class="fa-solid fa-ellipsis fs-5"></i> อื่นๆ</div></div>
+                           </div>
+                           <input type="hidden" id="clue_contact_source">
+
+                           <div class="mt-3" id="contact_detail_div" style="display:none; animation: fadeIn 0.3s ease;">
+                              <label class="form-label fw-bold text-primary" id="contact_detail_label">รายละเอียดช่องทาง</label>
+                              <input type="text" class="form-control border-primary" id="clue_contact_detail" placeholder="ระบุรายละเอียดเพิ่มเติม...">
+                           </div>
+                        </div>
+
+                        <div class="mb-4 border-bottom pb-3">
+                           <label class="form-label fw-bold">การเปิดเผยตัวตน</label>
+                           <div class="form-check form-switch fs-5">
+                              <input class="form-check-input" type="checkbox" id="anonymous_toggle" onchange="toggleAnonymous()">
+                              <label class="form-check-label fs-6 fw-bold text-danger ms-2" for="anonymous_toggle">ไม่ประสงค์ออกนาม (ปกปิดข้อมูลผู้แจ้ง)</label>
+                           </div>
+                        </div>
+
+                        <div class="row g-3 mb-4" id="informant_details_section">
+                           <div class="col-md-6 col-12"><label class="form-label fw-bold">ชื่อ-นามสกุล ผู้แจ้งเบาะแส</label><input type="text" class="form-control" id="informant_name" placeholder="ระบุชื่อ (ถ้ามี)"></div>
+                           <div class="col-md-6 col-12"><label class="form-label fw-bold">เบอร์โทรศัพท์ติดต่อ</label><input type="text" class="form-control phone-format" id="informant_phone" placeholder="08X-XXX-XXXX" maxlength="12"></div>
+                        </div>
+                     </div>
+
+                     <!-- Step 3: รายละเอียดสถานที่/เวลาที่พบ -->
+                     <div class="form-step" id="step3">
+                        <h4 class="fw-bold mb-4 text-primary"><i class="fa-solid fa-map-location-dot me-2"></i>3. รายละเอียดและสถานที่พบเห็น</h4>
+
+                        <div class="row g-3 mb-4">
+                           <div class="col-md-4 col-12"><label class="form-label fw-bold text-danger">วันที่พบเห็น *</label><input type="date" class="form-control border-danger" id="clue_date" required></div>
+                           <div class="col-md-4 col-12"><label class="form-label fw-bold">เวลาที่พบ (โดยประมาณ)</label><input type="time" class="form-control" id="clue_time"></div>
+                           <div class="col-md-4 col-12">
+                              <label class="form-label fw-bold">ความมั่นใจว่าใช่คนหาย</label>
+                              <select class="form-select" id="clue_confidence">
+                                 <option value="มั่นใจมาก">มั่นใจมาก (80-100%)</option>
+                                 <option value="ค่อนข้างมั่นใจ">ค่อนข้างมั่นใจ (50-79%)</option>
+                                 <option value="ไม่แน่ใจ แค่คล้าย">ไม่แน่ใจ แค่คล้ายคลึง</option>
+                              </select>
+                           </div>
+                        </div>
+
+                        <div class="row g-3 mb-4 bg-body-tertiary p-3 rounded border">
+                           <div class="col-12"><label class="form-label fw-bold">ลักษณะที่พบเห็น / การแต่งกาย (เล่าเหตุการณ์)</label><textarea class="form-control" id="clue_description" rows="3" placeholder="เช่น ใส่เสื้อสีแดง กางเกงขาสั้นสีดำ เดินอยู่คนเดียวบริเวณป้ายรถเมล์ ท่าทางเหม่อลอย..."></textarea></div>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                           <h6 class="fw-bold w-100 mb-0"><i class="fa-solid fa-location-crosshairs"></i> พิกัดสถานที่ที่พบเห็นเบาะแส</h6>
+                           <div class="col-12"><label class="form-label fw-bold">จุดสังเกตสำคัญ (ชื่อร้าน, ซอย, ถนน)</label><input type="text" class="form-control" id="clue_location_detail" placeholder="ระบุจุดสังเกต..."></div>
+                           <div class="col-md-3 col-6"><label class="form-label fw-bold text-success">📮 รหัสไปรษณีย์</label><input type="text" class="form-control border-success fw-bold" id="zipcode" placeholder="เช่น 10900" maxlength="5"></div>
+                           <div class="col-md-3 col-6"><label class="form-label text-body-secondary">ตำบล / แขวง</label><input type="text" class="form-control bg-body-tertiary" id="subdistrict" readonly></div>
+                           <div class="col-md-3 col-6"><label class="form-label text-body-secondary">อำเภอ / เขต</label><input type="text" class="form-control bg-body-tertiary" id="district" readonly></div>
+                           <div class="col-md-3 col-6"><label class="form-label text-body-secondary">จังหวัด</label><input type="text" class="form-control bg-body-tertiary" id="province" readonly></div>
+                        </div>
+                     </div>
+
+                     <!-- Step 4: หลักฐาน & ยืนยัน -->
+                     <div class="form-step" id="step4">
+                        <h4 class="fw-bold mb-4 text-primary"><i class="fa-solid fa-camera-retro me-2"></i>4. แนบหลักฐาน และตรวจสอบข้อมูล</h4>
+
+                        <div class="row g-3 mb-4">
+                           <div class="col-12 bg-body-tertiary p-4 rounded border text-center">
+                              <label class="form-label fw-bold text-primary d-block mb-3"><i class="fa-solid fa-image"></i> อัปโหลดรูปภาพ / ภาพจากกล้องวงจรปิด (ถ้ามี)</label>
+                              <input type="file" class="form-control mx-auto" style="max-width: 400px;" id="clue_img_input" accept="image/*" onchange="previewImage(this, 'clue_img_preview')">
+                              <img id="clue_img_preview" class="upload-preview mx-auto mt-3" alt="รูปเบาะแส">
+                           </div>
+                        </div>
+
+                        <div class="alert alert-secondary p-4 rounded mt-4" id="previewBox" style="white-space: pre-line; line-height: 1.8; font-size: 15px; border-left: 5px solid var(--bs-primary);">
+                           <!-- Preview content goes here -->
+                        </div>
+                     </div>
+
+                     <!-- Navigation Buttons -->
+                     <div class="d-flex justify-content-between mt-5 pt-3 border-top">
+                        <button type="button" class="btn btn-outline-secondary px-4 py-2 fw-bold" id="prevBtn" onclick="changeStep(-1)" disabled>ย้อนกลับ</button>
+                        <button type="button" class="btn btn-primary px-5 py-2 fw-bold shadow-sm" id="nextBtn" onclick="changeStep(1)" disabled>ถัดไป <i class="fa-solid fa-arrow-right ms-1"></i></button>
+                     </div>
+
+                  </form>
+               </div>
+
+            </div>
+         </div>
+
+      </section>
+   </div>
+   <!-- END - PAGE CONTAINER -->
+
+   <!-- SCROLL TO TOP BUTTON -->
+   <div class="scroll-container">
+      <a href="#root" class="scroll-page ratio ratio-1x1" aria-label="Scroll button"></a>
+   </div>
+
+   <!-- JAVASCRIPTS -->
+   <script src="assets/nifty/vendors/popperjs/popper.min.js"></script>
+   <script src="assets/nifty/vendors/bootstrap/bootstrap.min.js"></script>
+   <script src="assets/nifty/js/nifty.min.js"></script>
+
+    <script src="zipcodeData.js"></script> <!-- เรียกใช้ไฟล์ฐานข้อมูลรหัสไปรษณีย์เดิม -->
+
+    <script>
+        let currentStep = 1;
+        const API_URL = 'http://localhost:5000/api';
+
+        // 1. ค้นหาเคสจริงจากระบบ (GET /api/cases แล้วกรองฝั่งหน้าเว็บ)
+        async function searchCase() {
+            const query = document.getElementById('search_case_input').value.trim();
+            const resultBox = document.getElementById('case_result_box');
+
+            if (query === '') {
+                alert('กรุณากรอกข้อมูลเพื่อค้นหาเคส');
+                return;
+            }
+
+            resultBox.innerHTML = '<p class="text-body-secondary text-center py-4"><i class="fa-solid fa-spinner fa-spin me-1"></i> กำลังค้นหา...</p>';
+
+            try {
+                const response = await fetch(`${API_URL}/cases`);
+                if (!response.ok) throw new Error('Network response was not ok');
+                const cases = await response.json();
+
+                const q = query.toLowerCase();
+                const matches = cases.filter(c =>
+                    String(c.case_id || '').toLowerCase().includes(q) ||
+                    (c.missingperson_name || '').toLowerCase().includes(q) ||
+                    (c.missingperson_identity || '').toLowerCase().includes(q)
+                );
+
+                renderCaseResults(matches);
+            } catch (err) {
+                console.error('ค้นหาเคสไม่สำเร็จ:', err);
+                resultBox.innerHTML = '<p class="text-danger text-center py-4"><i class="fa-solid fa-triangle-exclamation"></i> ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ฐานข้อมูลได้ กรุณาลองใหม่อีกครั้ง</p>';
+            }
+        }
+
+        function renderCaseResults(matches) {
+            const resultBox = document.getElementById('case_result_box');
+            if (matches.length === 0) {
+                resultBox.innerHTML = '<p class="text-body-secondary text-center py-4"><i class="fa-solid fa-circle-info"></i> ไม่พบเคสที่ตรงกับคำค้นหา</p>';
+                return;
+            }
+            resultBox.innerHTML = matches.map(c => {
+                let imgUrl = c.character_image_url;
+                if (!imgUrl || String(imgUrl).trim().toLowerCase() === 'null' || String(imgUrl).trim() === '') {
+                    imgUrl = 'https://cdn-icons-png.flaticon.com/512/847/847969.png';
+                }
+                const dateObj = c.case_received_date ? new Date(c.case_received_date) : null;
+                const dateStr = dateObj ? dateObj.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' }) : 'ไม่ระบุ';
+                const name = `${c.missingperson_title || ''} ${c.missingperson_name || 'ไม่ระบุชื่อ'}`.trim();
+                return `
+                <div class="case-result-card shadow-sm">
+                    <div class="d-flex align-items-center flex-wrap gap-3">
+                        <img src="${imgUrl}" alt="ภาพเคส" class="rounded border" style="width: 100px; height: 120px; object-fit: cover;">
+                        <div>
+                            <span class="badge bg-danger mb-2">${c.case_priority || 'กำลังดำเนินการ'}</span>
+                            <h5 class="fw-bold mb-1 text-primary">${name}</h5>
+                            <p class="mb-1 text-body-secondary text-sm"><i class="fa-solid fa-id-card"></i> รหัสเคส: <strong>${c.case_id}</strong></p>
+                            <p class="mb-0 text-body-secondary text-sm"><i class="fa-solid fa-calendar-xmark"></i> วันที่รับแจ้ง: ${dateStr}</p>
+                        </div>
+                        <div class="ms-auto w-100 text-md-end mt-2 mt-md-0">
+                            <button type="button" class="btn btn-success fw-bold px-4" onclick="selectCase('${c.case_id}', this)"><i class="fa-solid fa-check-circle"></i> เลือกเคสนี้</button>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        // เมื่อกดเลือกเคส
+        function selectCase(caseId, btnEl) {
+            document.getElementById('selected_case_id').value = caseId;
+            document.getElementById('nextBtn').disabled = false; // ปลดล็อคปุ่มถัดไป
+            document.querySelectorAll('.case-result-card').forEach(c => c.classList.remove('border-success'));
+            if (btnEl) {
+                const card = btnEl.closest('.case-result-card');
+                if (card) card.classList.add('border-success');
+            }
+            alert('เลือกรหัสเคส: ' + caseId + ' เรียบร้อยแล้ว สามารถกดถัดไปได้เลย');
+        }
+
+        // 2. จัดการกล่องตัวเลือก (ช่องทางติดต่อ)
+        function initBoxSelection(className, hiddenInputId) {
+            document.querySelectorAll('.' + className).forEach(box => {
+                box.addEventListener('click', function() {
+                    document.querySelectorAll('.' + className).forEach(b => b.classList.remove('selected'));
+                    this.classList.add('selected');
+                    const val = this.getAttribute('data-value');
+                    document.getElementById(hiddenInputId).value = val;
+
+                    if (hiddenInputId === 'clue_contact_source') {
+                        const detailDiv = document.getElementById('contact_detail_div');
+                        const detailLabel = document.getElementById('contact_detail_label');
+                        const detailInput = document.getElementById('clue_contact_detail');
+
+                        detailDiv.style.display = "block";
+                        if (val === "Facebook") { detailLabel.innerHTML = '<i class="fa-brands fa-facebook"></i> ลิงก์โพสต์/ชื่อเฟสคนที่แจ้ง'; detailInput.placeholder = "ระบุข้อมูลเฟสบุ๊ค..."; }
+                        else if (val === "Line") { detailLabel.innerHTML = '<i class="fa-brands fa-line"></i> ชื่อ Line ที่แจ้งเข้ามา'; detailInput.placeholder = "ระบุชื่อ Line..."; }
+                        else if (val === "เบอร์โทรศัพท์") { detailLabel.innerHTML = '<i class="fa-solid fa-phone"></i> เบอร์โทรฯ ที่โทรแจ้ง'; detailInput.placeholder = "ระบุเบอร์โทรฯ..."; }
+                        else { detailLabel.innerHTML = 'โปรดระบุช่องทางอื่นๆ'; detailInput.placeholder = "ระบุรายละเอียด..."; }
+                    }
+                });
+            });
+        }
+        initBoxSelection('target-contact', 'clue_contact_source');
+
+        // Toggle ปิดบังตัวตน
+        function toggleAnonymous() {
+            const isAnon = document.getElementById('anonymous_toggle').checked;
+            const section = document.getElementById('informant_details_section');
+            if(isAnon) {
+                section.style.opacity = '0.4';
+                document.getElementById('informant_name').disabled = true;
+                document.getElementById('informant_phone').disabled = true;
+                document.getElementById('informant_name').value = 'ไม่ประสงค์ออกนาม';
+            } else {
+                section.style.opacity = '1';
+                document.getElementById('informant_name').disabled = false;
+                document.getElementById('informant_phone').disabled = false;
+                document.getElementById('informant_name').value = '';
+            }
+        }
+
+        // จัดการเบอร์โทรให้มีขีด
+        document.getElementById('informant_phone').addEventListener('input', function() {
+            let v = this.value.replace(/\D/g, '').substring(0, 10);
+            if (v.length > 6) this.value = v.substring(0,3) + '-' + v.substring(3,6) + '-' + v.substring(6);
+            else if (v.length > 3) this.value = v.substring(0,3) + '-' + v.substring(3);
+            else this.value = v;
+        });
+
+        // 3. จัดการระบบ Zipcode (นำโค้ดจากหน้าเพิ่มเคสมาประยุกต์)
+        document.getElementById('zipcode').addEventListener('input', function() {
+            const zip = this.value.trim();
+            if(zip.length === 5 && typeof masterZipcodeDB !== 'undefined') {
+                let foundData = masterZipcodeDB[zip] || Object.values(masterZipcodeDB).find(item => item.zipcode === zip || item.zip === zip);
+                if(foundData) {
+                    document.getElementById('subdistrict').value = foundData.subdistrict || foundData.tambon || "";
+                    document.getElementById('district').value = foundData.district || foundData.amphoe || "";
+                    document.getElementById('province').value = foundData.province || foundData.changwat || "";
+                }
+            }
+        });
+
+        // Preview Image
+        function previewImage(input, previewId) {
+            const preview = document.getElementById(previewId);
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // 4. การควบคุม Step หน้าจอ
+        function changeStep(n) {
+            // ถ้าถึงหน้าสุดท้ายแล้วกดยืนยัน
+            if (currentStep === 4 && n === 1) {
+                const nextBtn = document.getElementById('nextBtn');
+                nextBtn.disabled = true;
+                nextBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> กำลังส่งข้อมูล...';
+
+                // จำลองการ Submit API
+                setTimeout(() => {
+                    alert("🎉 บันทึกเบาะแสเข้าสู่ระบบเรียบร้อยแล้ว!");
+                    window.location.href = 'Homepage.html';
+                }, 1500);
+                return;
+            }
+
+            document.getElementById(`step${currentStep}`).classList.remove('active');
+            document.getElementById(`stepIndicator${currentStep}`).classList.remove('active');
+            if (n === 1) document.getElementById(`stepIndicator${currentStep}`).classList.add('completed');
+
+            currentStep += n;
+
+            document.getElementById(`step${currentStep}`).classList.add('active');
+            document.getElementById(`stepIndicator${currentStep}`).classList.add('active');
+
+            // ปุ่มย้อนกลับ
+            document.getElementById('prevBtn').disabled = (currentStep === 1);
+
+            // ล็อคปุ่มถัดไปใน Step 1 ถ้ายังไม่ได้เลือกเคส
+            if (currentStep === 1 && !document.getElementById('selected_case_id').value) {
+                document.getElementById('nextBtn').disabled = true;
+            } else {
+                document.getElementById('nextBtn').disabled = false;
+            }
+
+            // หน้าสุดท้าย (Preview)
+            if (currentStep === 4) {
+                document.getElementById('nextBtn').innerHTML = 'ยืนยันส่งข้อมูล <i class="fa-solid fa-paper-plane ms-1"></i>';
+                document.getElementById('nextBtn').classList.replace('btn-primary', 'btn-success');
+                generateCluePreview();
+            } else {
+                document.getElementById('nextBtn').innerHTML = 'ถัดไป <i class="fa-solid fa-arrow-right ms-1"></i>';
+                document.getElementById('nextBtn').classList.replace('btn-success', 'btn-primary');
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // สรุปข้อมูลเบาะแสเพื่อรีวิว
+        function generateCluePreview() {
+            const caseId = document.getElementById('selected_case_id').value;
+
+            const contactSrc = document.getElementById('clue_contact_source').value || '-';
+            const contactDetail = document.getElementById('clue_contact_detail').value || '';
+            const finalContact = contactSrc !== '-' ? `${contactSrc} ${contactDetail ? `(${contactDetail})` : ''}` : '-';
+
+            const isAnon = document.getElementById('anonymous_toggle').checked;
+            const infName = isAnon ? '<span class="text-danger fw-bold">ไม่ประสงค์ออกนาม</span>' : (document.getElementById('informant_name').value || '-');
+            const infPhone = isAnon ? '<span class="text-danger">ปกปิดข้อมูล</span>' : (document.getElementById('informant_phone').value || '-');
+
+            const cDate = document.getElementById('clue_date').value || '-';
+            const cTime = document.getElementById('clue_time').value || '-';
+            const cConf = document.getElementById('clue_confidence').value || '-';
+            const cDesc = document.getElementById('clue_description').value || '-';
+
+            const locDetail = document.getElementById('clue_location_detail').value || '';
+            const subDist = document.getElementById('subdistrict').value || '';
+            const dist = document.getElementById('district').value || '';
+            const prov = document.getElementById('province').value || '';
+            const zip = document.getElementById('zipcode').value || '';
+            const finalLoc = `${locDetail} ต.${subDist} อ.${dist} จ.${prov} ${zip}`;
+
+            const html = `
+                <h5 class="fw-bold mb-3 border-bottom pb-2">📄 สรุปรายงานแจ้งเบาะแส</h5>
+                <p><strong><i class="fa-solid fa-id-card text-primary"></i> อ้างอิงรหัสเคส:</strong> <span class="fw-bold text-primary">${caseId}</span></p>
+                <p><strong>📞 รับแจ้งผ่านช่องทาง:</strong> ${finalContact}</p>
+
+                <h6 class="fw-bold mt-4">👤 ข้อมูลผู้แจ้งเบาะแส</h6>
+                <ul class="mb-3">
+                    <li><strong>ชื่อผู้แจ้ง:</strong> ${infName}</li>
+                    <li><strong>เบอร์ติดต่อ:</strong> ${infPhone}</li>
+                </ul>
+
+                <h6 class="fw-bold mt-4">📍 รายละเอียดการพบเห็น</h6>
+                <ul class="mb-3">
+                    <li><strong>วันและเวลาที่พบ:</strong> ${cDate} เวลา ${cTime} น.</li>
+                    <li><strong>ความมั่นใจ:</strong> <span class="badge bg-warning text-dark">${cConf}</span></li>
+                    <li><strong>สถานที่พบ:</strong> ${finalLoc}</li>
+                    <li><strong>ลักษณะที่พบ/การแต่งกาย:</strong><br><span class="text-body-secondary">${cDesc}</span></li>
+                </ul>
+            `;
+            document.getElementById('previewBox').innerHTML = html;
+        }
+    </script>
+</body>
+</html>

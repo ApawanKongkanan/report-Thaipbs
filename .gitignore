@@ -1,0 +1,15 @@
+# Environment
+Backend/.env
+
+# Node
+Backend/node_modules/
+
+# Upload files
+Backend/uploads/
+
+# VS Code
+.vscode/
+
+# OSss
+Thumbs.db
+.DS_Store

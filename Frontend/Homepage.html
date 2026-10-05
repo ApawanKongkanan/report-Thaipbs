@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="th" data-bs-theme="light" data-scheme="navy">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>หน้าแรก - Thai PBS Center</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/nifty/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/nifty/css/nifty.min.css">
+    <link rel="stylesheet" href="assets/nifty/css/overrides.css">
+    <style>
+        .content-body { max-width: 1400px; margin: 0 auto; width: 100%; }
+
+        /* Dashboard Cards */
+        .stat-card { background: var(--bs-card-bg); border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 15px; transition: transform 0.2s; border-bottom: 4px solid #ddd; }
+        .stat-card:hover { transform: translateY(-5px); }
+        .stat-icon { width: 60px; height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; color: white; }
+        .stat-info h3 { margin: 0; font-weight: 700; font-size: 24px; }
+        .stat-info p { margin: 0; color: var(--bs-secondary-color); font-size: 14px; font-weight: 600; }
+
+        .urgent-case-card { background: var(--bs-card-bg); border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-left: 5px solid #e74c3c; display: flex; gap: 15px; align-items: center; }
+        .urgent-img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; }
+    </style>
+</head>
+<body class="out-quart">
+
+   <!-- PAGE CONTAINER -->
+   <div id="root" class="root mn--max">
+
+      <!-- HEADER -->
+      <header class="header header--primary">
+         <div class="header__inner">
+            <div class="header__brand">
+               <div class="brand-wrap">
+                  <a href="Homepage.html" class="brand-img stretched-link">
+                     <i class="fa-solid fa-layer-group fs-3" style="color: var(--nf-brand-color);"></i>
+                  </a>
+                  <div class="brand-title">Thai PBS Center</div>
+               </div>
+            </div>
+
+            <div class="header__content">
+               <div class="header__content-start">
+                  <button type="button" class="nav-toggler header__btn btn btn-icon btn-sm" aria-label="Nav Toggler">
+                     <i class="fa-solid fa-bars"></i>
+                  </button>
+                  <div class="vr mx-1 d-none d-md-block"></div>
+                  <h5 class="m-0 d-none d-md-block text-body-secondary fw-normal">ภาพรวมระบบ</h5>
+               </div>
+
+               <div class="header__content-end">
+                  <div class="dropdown">
+                     <button class="header__btn btn btn-icon btn-sm" type="button" data-bs-toggle="dropdown" aria-label="User dropdown" aria-expanded="false">
+                        <i class="fa-solid fa-circle-user fs-4"></i>
+                     </button>
+                     <div class="dropdown-menu dropdown-menu-end">
+                        <div class="d-flex align-items-center border-bottom px-3 py-2">
+                           <div class="flex-grow-1">
+                              <h6 class="mb-0">เจ้าหน้าที่ (ผู้ดูแลระบบ)</h6>
+                              <small class="text-body-secondary">Thai PBS Center</small>
+                           </div>
+                        </div>
+                        <a href="login.html" class="dropdown-item" onclick="localStorage.clear();">
+                           <i class="fa-solid fa-right-from-bracket fs-6 me-2"></i> ออกจากระบบ
+                        </a>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </header>
+      <!-- END - HEADER -->
+
+      <!-- MAIN NAVIGATION -->
+      <nav id="mainnav-container" class="mainnav mainnav--primary">
+         <div class="mainnav__inner">
+            <div class="mainnav__top-content scrollable-content pb-5">
+
+               <!-- Profile Widget -->
+               <div id="_dm-mainnavProfile" class="mainnav__widget my-3 hv-outline-parent">
+                  <div class="mininav-toggle text-center py-2">
+                     <img class="mainnav__avatar img-md rounded-circle hv-oc" src="assets/nifty/img/profile-photos/1.png" alt="รูปโปรไฟล์">
+                  </div>
+                  <div class="mininav-content collapse d-mn-max">
+                     <span data-popper-arrow class="arrow"></span>
+                     <div class="d-grid">
+                        <button class="mainnav-widget-toggle d-block btn border-0 p-2" data-bs-toggle="collapse" data-bs-target="#usernav" aria-expanded="false" aria-controls="usernav">
+                           <span class="dropdown-toggle d-flex justify-content-center align-items-center">
+                              <h5 class="mb-0 me-3">เจ้าหน้าที่ (ผู้ดูแลระบบ)</h5>
+                           </span>
+                           <small class="text-body-secondary">ผู้ดูแลระบบ</small>
+                        </button>
+
+                        <div id="usernav" class="nav flex-column collapse">
+                           <a href="#" class="nav-link d-flex justify-content-between align-items-center">
+                              <span><i class="fa-solid fa-envelope fs-5 me-2"></i><span class="ms-1">ข้อความ</span></span>
+                              <span class="badge bg-danger rounded-pill">14</span>
+                           </a>
+                           <a href="#" class="nav-link">
+                              <i class="fa-solid fa-user fs-5 me-2"></i>
+                              <span class="ms-1">โปรไฟล์</span>
+                           </a>
+                           <a href="#" class="nav-link">
+                              <i class="fa-solid fa-gear fs-5 me-2"></i>
+                              <span class="ms-1">ตั้งค่า</span>
+                           </a>
+                           <a href="#" class="nav-link">
+                              <i class="fa-solid fa-lock fs-5 me-2"></i>
+                              <span class="ms-1">ล็อกหน้าจอ</span>
+                           </a>
+                           <a href="login.html" class="nav-link" onclick="localStorage.clear();">
+                              <i class="fa-solid fa-right-from-bracket fs-5 me-2"></i>
+                              <span class="ms-1">ออกจากระบบ</span>
+                           </a>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <!-- End - Profile widget -->
+
+               <div class="mainnav__categoriy py-3">
+                  <h6 class="mainnav__caption mt-0 fw-bold">เมนูหลัก</h6>
+                  <ul class="mainnav__menu nav flex-column">
+                     <li class="nav-item">
+                        <a href="Homepage.html" class="nav-link mininav-toggle active"><i class="fa-solid fa-house fs-5 me-2"></i>
+                           <span class="nav-label mininav-content ms-1">
+                              <span data-popper-arrow class="arrow"></span>
+                              หน้าแรก
+                           </span>
+                        </a>
+                     </li>
+
+                     <li class="nav-item">
+                        <a href="track.html" class="nav-link mininav-toggle"><i class="fa-solid fa-magnifying-glass fs-5 me-2"></i>
+                           <span class="nav-label mininav-content ms-1">
+                              <span data-popper-arrow class="arrow"></span>
+                              ติดตามคนหาย
+                           </span>
+                        </a>
+                     </li>
+
+                     <li class="nav-item">
+                        <a href="add-case.html" class="nav-link mininav-toggle"><i class="fa-solid fa-plus fs-5 me-2"></i>
+                           <span class="nav-label mininav-content ms-1">
+                              <span data-popper-arrow class="arrow"></span>
+                              เพิ่มเคส
+                           </span>
+                        </a>
+                     </li>
+
+                     <li class="nav-item">
+                        <a href="add-clue.html" class="nav-link mininav-toggle"><i class="fa-solid fa-bell fs-5 me-2"></i>
+                           <span class="nav-label mininav-content ms-1">
+                              <span data-popper-arrow class="arrow"></span>
+                              แจ้งเบาะแส
+                           </span>
+                        </a>
+                     </li>
+
+                     <li class="nav-item">
+                        <a href="dashboard.html" class="nav-link mininav-toggle"><i class="fa-solid fa-chart-pie fs-5 me-2"></i>
+                           <span class="nav-label mininav-content ms-1">
+                              <span data-popper-arrow class="arrow"></span>
+                              แดชบอร์ด
+                           </span>
+                        </a>
+                     </li>
+                  </ul>
+               </div>
+            </div>
+         </div>
+      </nav>
+      <!-- END - MAIN NAVIGATION -->
+
+      <!-- CONTENTS -->
+      <section id="content" class="content">
+
+
+         <div class="content__boxed">
+            <div class="content__wrap py-4">
+
+               <div class="content-body">
+                  <div class="d-flex justify-content-between align-items-end mb-4 flex-wrap gap-3">
+                      <div>
+                          <h1 class="page-title mb-1">ภาพรวมระบบ</h1>
+                          <p class="text-body-secondary m-0">สรุปข้อมูลและสถานการณ์คนหายประจำวันนี้</p>
+                      </div>
+                      <div class="d-none d-md-flex gap-2">
+                          <a href="add-case.html" class="btn btn-primary fw-bold"><i class="fa-solid fa-plus me-1"></i> เพิ่มเคสใหม่</a>
+                          <a href="add-clue.html" class="btn btn-warning fw-bold text-dark"><i class="fa-solid fa-bell me-1"></i> รับแจ้งเบาะแส</a>
+                      </div>
+                  </div>
+
+                  <div class="row g-4 mb-5">
+                      <div class="col-xl-3 col-md-6 col-12">
+                          <div class="stat-card" style="border-color: #3498db;">
+                              <div class="stat-icon bg-primary"><i class="fa-solid fa-users"></i></div>
+                              <div class="stat-info">
+                                  <p>บุคคลสูญหายทั้งหมด (คน)</p>
+                                  <h3 id="stat-total">...</h3>
+                              </div>
+                          </div>
+                      </div>
+                      <div class="col-xl-3 col-md-6 col-12">
+                          <div class="stat-card" style="border-color: #e74c3c;">
+                              <div class="stat-icon bg-danger"><i class="fa-solid fa-search"></i></div>
+                              <div class="stat-info">
+                                  <p>กำลังติดตามค้นหา (คน)</p>
+                                  <h3 id="stat-active">...</h3>
+                              </div>
+                          </div>
+                      </div>
+                      <div class="col-xl-3 col-md-6 col-12">
+                          <div class="stat-card" style="border-color: #2ecc71;">
+                              <div class="stat-icon bg-success"><i class="fa-solid fa-hand-holding-heart"></i></div>
+                              <div class="stat-info">
+                                  <p>พบแล้ว (คน)</p>
+                                  <h3 id="stat-resolved">...</h3>
+                              </div>
+                          </div>
+                      </div>
+                      <div class="col-xl-3 col-md-6 col-12">
+                          <div class="stat-card" style="border-color: #f39c12;">
+                              <div class="stat-icon bg-warning text-dark"><i class="fa-solid fa-bullhorn"></i></div>
+                              <div class="stat-info">
+                                  <p>เบาะแสที่รอดำเนินการ (รายการ)</p>
+                                  <h3 id="stat-pending">...</h3>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+
+                  <h5 class="fw-bold mb-3"><i class="fa-solid fa-triangle-exclamation text-danger me-2"></i> เคสเร่งด่วนล่าสุด (ต้องการความช่วยเหลือทันที)</h5>
+                  <div class="row g-4" id="urgent-cases-container">
+                      <p class="text-body-secondary">กำลังโหลดข้อมูล...</p>
+                  </div>
+               </div>
+
+            </div>
+         </div>
+
+      </section>
+   </div>
+   <!-- END - PAGE CONTAINER -->
+
+   <!-- SCROLL TO TOP BUTTON -->
+   <div class="scroll-container">
+      <a href="#root" class="scroll-page ratio ratio-1x1" aria-label="Scroll button"></a>
+   </div>
+
+   <!-- JAVASCRIPTS -->
+   <script src="assets/nifty/vendors/popperjs/popper.min.js"></script>
+   <script src="assets/nifty/vendors/bootstrap/bootstrap.min.js"></script>
+   <script src="assets/nifty/js/nifty.min.js"></script>
+
+    <script>
+
+        const API_URL = 'http://localhost:5000/api';
+
+        async function loadDashboardData() {
+            try {
+                // 1. ดึงข้อมูลจาก API ของคุณ
+                const response = await fetch(`${API_URL}/cases`);
+                if (!response.ok) throw new Error('Network response was not ok');
+                const cases = await response.json();
+
+                // 2. อัปเดตตัวเลขสถิติบนหน้าเว็บ
+                document.getElementById('stat-total').innerText = cases.length;
+
+                // คำนวณเคสที่กำลังค้นหา (ตั้งเงื่อนไขสมมติว่าถ้ายังไม่ใช่ 'ยุติคดี')
+                const activeCases = cases.filter(c => c.case_priority === 'เร่งด่วน' || c.case_priority === 'เร่งด่วนมาก' || c.case_priority === 'ปกติ');
+                document.getElementById('stat-active').innerText = activeCases.length;
+
+                // สำหรับสถิติพบแล้วและเบาะแส อาจต้องให้ Backend คำนวณส่งมาเพิ่มในอนาคต (ใส่เป็นค่าตัวอย่างไปก่อน)
+                document.getElementById('stat-resolved').innerText = "0";
+                document.getElementById('stat-pending').innerText = "0";
+
+                // 3. สร้างและแสดงการ์ดเคสเร่งด่วน (ดึงมาเฉพาะ 2 เคสล่าสุด)
+                const container = document.getElementById('urgent-cases-container');
+                container.innerHTML = ''; // ล้างข้อความ 'กำลังโหลดข้อมูล...'
+
+                // เลือกเฉพาะเคส 2 อันแรก
+                const latestCases = cases.slice(0, 2);
+
+                if (latestCases.length === 0) {
+                    container.innerHTML = '<div class="col-12"><p class="text-body-secondary">ยังไม่มีข้อมูลเคสเร่งด่วนในระบบ</p></div>';
+                    return;
+                }
+
+                latestCases.forEach(caseData => {
+                    // จัดการรูปแบบวันที่
+                    const dateObj = caseData.case_received_date ? new Date(caseData.case_received_date) : new Date();
+                    const formattedDate = dateObj.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' });
+
+                    // จัดการรูปภาพ (ดักจับค่า null, สตริงว่าง, หรือคำว่า "null" จากข้อมูลเก่า)
+                    let imgUrl = caseData.character_image_url;
+                    if (!imgUrl || String(imgUrl).trim().toLowerCase() === 'null' || String(imgUrl).trim() === '') {
+                        // ใช้รูปโปรไฟล์จำลอง (Default Avatar) ที่โหลดได้ชัวร์ๆ
+                        imgUrl = 'https://cdn-icons-png.flaticon.com/512/847/847969.png';
+                    }
+                    // จัดการข้อความสาเหตุ
+                    const reason = caseData.case_missing_reason ? caseData.case_missing_reason.split(',')[0] : 'ไม่ระบุสาเหตุ';
+
+                    // สร้างโครงสร้าง HTML สำหรับการ์ดแต่ละใบ
+                    const cardHtml = `
+                    <div class="col-lg-6 col-12">
+                        <div class="urgent-case-card">
+                            <img src="${imgUrl}" class="urgent-img" alt="ภาพคนหาย">
+                            <div class="flex-grow-1">
+                                <h6 class="fw-bold m-0">${caseData.missingperson_title || ''} ${caseData.missingperson_name || 'ไม่ระบุชื่อ'}</h6>
+                                <p class="text-body-secondary small m-0 mb-2">
+                                    <i class="fa-solid fa-location-dot"></i> หายที่: ${caseData.Last_Seen_province || 'ไม่ระบุ'} | วันที่: ${formattedDate}
+                                </p>
+                                <span class="badge bg-danger">${caseData.case_priority || 'เร่งด่วน'}</span>
+                                <span class="badge bg-light text-dark border">${reason}</span>
+                            </div>
+                            <a href="case-detail.html?id=${caseData.case_id}" class="btn btn-outline-primary btn-sm fw-bold px-3">ดูรายละเอียด</a>
+                        </div>
+                    </div>
+                    `;
+                    // นำการ์ดไปใส่ในกล่อง
+                    container.insertAdjacentHTML('beforeend', cardHtml);
+                });
+
+            } catch (error) {
+                console.error('ไม่สามารถดึงข้อมูลได้:', error);
+                document.getElementById('urgent-cases-container').innerHTML =
+                    '<div class="col-12"><p class="text-danger fw-bold"><i class="fa-solid fa-triangle-exclamation"></i> ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ฐานข้อมูลได้</p></div>';
+            }
+        }
+
+        // ให้สคริปต์เริ่มทำงานทันทีหลังจากหน้าเว็บเปิดขึ้นมา
+        document.addEventListener('DOMContentLoaded', loadDashboardData);
+    </script>
+</body>
+</html>
