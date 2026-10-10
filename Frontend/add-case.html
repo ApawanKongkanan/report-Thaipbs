@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>เพิ่มเคสคนหาย - Thai PBS Center</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/nifty/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/nifty/css/nifty.min.css">
+    <link rel="stylesheet" href="assets/nifty/css/overrides.css">
     <style>
-        :root { --primary-blue: #25476a; }
 
         /* Step Indicator */
         .step-container { display: flex; justify-content: space-between; background: var(--bs-card-bg); padding: 20px 30px; border-radius: var(--bs-card-border-radius); box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 25px; }
@@ -33,8 +33,8 @@
         .selectable-box { border: 2px solid var(--bs-border-color); border-radius: 8px; padding: 12px 10px; text-align: center; cursor: pointer; font-weight: 600; transition: all 0.2s; background: var(--bs-card-bg); font-size: 14px; height: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; flex-direction: column; }
         .selectable-box:hover { border-color: var(--bs-primary); background-color: var(--bs-tertiary-bg); }
         .selectable-box.selected { border-color: var(--bs-primary); background-color: rgba(37, 71, 106, 0.08); color: var(--bs-primary); }
-        .urgency-orange.selected { border-color: #ff9f43; background-color: #fff5ec; color: #ff9f43; }
-        .urgency-red.selected { border-color: #ee5253; background-color: #ffeded; color: #ee5253; }
+        .urgency-orange.selected { border-color: #ff9f43; background-color: #fff5ec; color: #000; }
+        .urgency-red.selected { border-color: #ee5253; background-color: #ffeded; color: #000; }
 
         .cause-box { position: relative; }
         .cause-box .rank-badge { position: absolute; top: -10px; right: -10px; background: #ff4757; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; display: none; }
@@ -56,64 +56,100 @@
    <!-- PAGE CONTAINER -->
    <div id="root" class="root mn--max">
 
-      <!-- CONTENTS -->
-      <section id="content" class="content">
+      <!-- HEADER -->
+      <header class="header header--primary">
+         <div class="header__inner">
+            <div class="header__brand">
+               <div class="brand-wrap">
+                  <a href="Homepage.html" class="brand-img stretched-link">
+                     <i class="fa-solid fa-layer-group fs-3" style="color: var(--nf-brand-color);"></i>
+                  </a>
+                  <div class="brand-title">Thai PBS Center</div>
+               </div>
+            </div>
 
-         <!-- HEADER -->
-         <header class="header">
-            <div class="header__inner">
-               <div class="header__brand">
-                  <div class="brand-wrap">
-                     <a href="Homepage.html" class="brand-img stretched-link">
-                        <i class="fa-solid fa-layer-group fs-3 text-primary"></i>
-                     </a>
-                     <div class="brand-title">Thai PBS Center</div>
-                  </div>
+            <div class="header__content">
+               <div class="header__content-start">
+                  <button type="button" class="nav-toggler header__btn btn btn-icon btn-sm" aria-label="Nav Toggler">
+                     <i class="fa-solid fa-bars"></i>
+                  </button>
+                  <div class="vr mx-1 d-none d-md-block"></div>
+                  <h5 class="m-0 d-none d-md-block text-body-secondary fw-normal">เพิ่มเคสคนหาย</h5>
                </div>
 
-               <div class="header__content">
-                  <div class="header__content-start">
-                     <button type="button" class="nav-toggler header__btn btn btn-icon btn-sm" aria-label="Nav Toggler">
-                        <i class="fa-solid fa-bars"></i>
+               <div class="header__content-end">
+                  <div class="dropdown">
+                     <button class="header__btn btn btn-icon btn-sm" type="button" data-bs-toggle="dropdown" aria-label="User dropdown" aria-expanded="false">
+                        <i class="fa-solid fa-circle-user fs-4"></i>
                      </button>
-                     <div class="vr mx-1 d-none d-md-block"></div>
-                     <h5 class="m-0 d-none d-md-block text-body-secondary fw-normal">เพิ่มเคสคนหาย</h5>
-                  </div>
-
-                  <div class="header__content-end">
-                     <div class="dropdown">
-                        <button class="header__btn btn btn-icon btn-sm" type="button" data-bs-toggle="dropdown" aria-label="User dropdown" aria-expanded="false">
-                           <i class="fa-solid fa-circle-user fs-4"></i>
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-end">
-                           <div class="d-flex align-items-center border-bottom px-3 py-2">
-                              <div class="flex-grow-1">
-                                 <h6 class="mb-0">เจ้าหน้าที่ (Admin)</h6>
-                                 <small class="text-body-secondary">Thai PBS Center</small>
-                              </div>
+                     <div class="dropdown-menu dropdown-menu-end">
+                        <div class="d-flex align-items-center border-bottom px-3 py-2">
+                           <div class="flex-grow-1">
+                              <h6 class="mb-0">เจ้าหน้าที่ (ผู้ดูแลระบบ)</h6>
+                              <small class="text-body-secondary">Thai PBS Center</small>
                            </div>
-                           <a href="login.html" class="dropdown-item" onclick="localStorage.clear();">
-                              <i class="fa-solid fa-right-from-bracket fs-6 me-2"></i> ออกจากระบบ
-                           </a>
                         </div>
+                        <a href="login.html" class="dropdown-item" onclick="localStorage.clear();">
+                           <i class="fa-solid fa-right-from-bracket fs-6 me-2"></i> ออกจากระบบ
+                        </a>
                      </div>
-                     <div class="vr mx-1 d-none d-md-block"></div>
-                     <button class="sidebar-toggler header__btn btn btn-icon btn-sm" type="button" aria-label="Sidebar button">
-                        <i class="fa-solid fa-ellipsis-vertical"></i>
-                     </button>
                   </div>
                </div>
             </div>
-         </header>
-         <!-- END - HEADER -->
+         </div>
+      </header>
+      <!-- END - HEADER -->
 
-         <!-- MAIN NAVIGATION -->
-         <nav id="mainnav-container" class="mainnav">
-            <div class="mainnav__inner">
-               <div class="mainnav__top-content scrollable-content pb-5">
-                  <div class="mainnav__categoriy py-3">
-                     <h6 class="mainnav__caption mt-0 fw-bold">เมนูหลัก</h6>
-                     <ul class="mainnav__menu nav flex-column">
+      <!-- MAIN NAVIGATION -->
+      <nav id="mainnav-container" class="mainnav mainnav--primary">
+         <div class="mainnav__inner">
+            <div class="mainnav__top-content scrollable-content pb-5">
+
+               <!-- Profile Widget -->
+               <div id="_dm-mainnavProfile" class="mainnav__widget my-3 hv-outline-parent">
+                  <div class="mininav-toggle text-center py-2">
+                     <img class="mainnav__avatar img-md rounded-circle hv-oc" src="assets/nifty/img/profile-photos/1.png" alt="รูปโปรไฟล์">
+                  </div>
+                  <div class="mininav-content collapse d-mn-max">
+                     <span data-popper-arrow class="arrow"></span>
+                     <div class="d-grid">
+                        <button class="mainnav-widget-toggle d-block btn border-0 p-2" data-bs-toggle="collapse" data-bs-target="#usernav" aria-expanded="false" aria-controls="usernav">
+                           <span class="dropdown-toggle d-flex justify-content-center align-items-center">
+                              <h5 class="mb-0 me-3">เจ้าหน้าที่ (ผู้ดูแลระบบ)</h5>
+                           </span>
+                           <small class="text-body-secondary">ผู้ดูแลระบบ</small>
+                        </button>
+
+                        <div id="usernav" class="nav flex-column collapse">
+                           <a href="#" class="nav-link d-flex justify-content-between align-items-center">
+                              <span><i class="fa-solid fa-envelope fs-5 me-2"></i><span class="ms-1">ข้อความ</span></span>
+                              <span class="badge bg-danger rounded-pill">14</span>
+                           </a>
+                           <a href="#" class="nav-link">
+                              <i class="fa-solid fa-user fs-5 me-2"></i>
+                              <span class="ms-1">โปรไฟล์</span>
+                           </a>
+                           <a href="#" class="nav-link">
+                              <i class="fa-solid fa-gear fs-5 me-2"></i>
+                              <span class="ms-1">ตั้งค่า</span>
+                           </a>
+                           <a href="#" class="nav-link">
+                              <i class="fa-solid fa-lock fs-5 me-2"></i>
+                              <span class="ms-1">ล็อกหน้าจอ</span>
+                           </a>
+                           <a href="login.html" class="nav-link" onclick="localStorage.clear();">
+                              <i class="fa-solid fa-right-from-bracket fs-5 me-2"></i>
+                              <span class="ms-1">ออกจากระบบ</span>
+                           </a>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <!-- End - Profile widget -->
+
+               <div class="mainnav__categoriy py-3">
+                  <h6 class="mainnav__caption mt-0 fw-bold">เมนูหลัก</h6>
+                  <ul class="mainnav__menu nav flex-column">
                      <li class="nav-item">
                         <a href="Homepage.html" class="nav-link mininav-toggle"><i class="fa-solid fa-house fs-5 me-2"></i>
                            <span class="nav-label mininav-content ms-1">
@@ -158,12 +194,15 @@
                            </span>
                         </a>
                      </li>
-                     </ul>
-                  </div>
+                  </ul>
                </div>
             </div>
-         </nav>
-         <!-- END - MAIN NAVIGATION -->
+         </div>
+      </nav>
+      <!-- END - MAIN NAVIGATION -->
+
+      <!-- CONTENTS -->
+      <section id="content" class="content">
 
 
          <div class="content__boxed">
@@ -184,7 +223,7 @@
 
                 <!-- Step 1 -->
                 <div class="form-step active" id="step1">
-                    <h4 class="fw-bold mb-4" style="color: var(--primary-blue);"><i class="fa-solid fa-bullhorn me-2"></i>1. ข้อมูลการแจ้งเหตุ</h4>
+                    <h4 class="fw-bold mb-4 text-primary"><i class="fa-solid fa-bullhorn me-2"></i>1. ข้อมูลการแจ้งเหตุ</h4>
                     <div class="mb-4">
                         <label class="form-label fw-bold mb-3">สาเหตุการสูญหาย (เลือกได้มากกว่า 1)</label>
                         <div class="row g-2">
@@ -208,7 +247,7 @@
 
                 <!-- Step 2 -->
                 <div class="form-step" id="step2">
-                    <h4 class="fw-bold mb-4" style="color: var(--primary-blue);"><i class="fa-solid fa-user-shield me-2"></i>2. ข้อมูลผู้แจ้งเหตุ และช่องทางการติดต่อ</h4>
+                    <h4 class="fw-bold mb-4 text-primary"><i class="fa-solid fa-user-shield me-2"></i>2. ข้อมูลผู้แจ้งเหตุ และช่องทางการติดต่อ</h4>
                     
                     <div class="mb-4 p-3 bg-light rounded border">
                         <label class="form-label fw-bold">ติดต่อเรื่องมาจากช่องทางไหน?</label>
@@ -252,19 +291,19 @@
                     </div>
 
                     <div class="mb-4">
-                        <label class="form-label fw-bold mb-2">ความสัมพันธ์กับคนหาย</label>
-                        <div class="row g-2 mb-2">
-                            <div class="col-4 col-md-3"><div class="selectable-box target-relation" data-value="พ่อ/แม่">พ่อ/แม่</div></div>
-                            <div class="col-4 col-md-3"><div class="selectable-box target-relation" data-value="ลูก">ลูก</div></div>
-                            <div class="col-4 col-md-3"><div class="selectable-box target-relation" data-value="พี่น้อง">พี่น้อง</div></div>
-                            <div class="col-4 col-md-3"><div class="selectable-box target-relation" data-value="ญาติ">ญาติ</div></div>
-                            <div class="col-4 col-md-3"><div class="selectable-box target-relation" data-value="สามี/ภรรยา">สามี/ภรรยา</div></div>
-                            <div class="col-4 col-md-3"><div class="selectable-box target-relation" data-value="แฟน/คนรัก">แฟน/คนรัก</div></div>
-                            <div class="col-6 col-md-3"><div class="selectable-box target-relation" data-value="นายจ้าง/เพื่อนร่วมงาน">เพื่อนร่วมงาน</div></div>
-                            <div class="col-6 col-md-3"><div class="selectable-box target-relation" data-value="เพื่อน">เพื่อน</div></div>
-                            <div class="col-12 col-md-12"><div class="selectable-box target-relation" data-value="อื่นๆ">อื่นๆ (ระบุเอง)</div></div>
-                        </div>
-                        <input type="hidden" id="reporter_relationship" name="reporter_relationship"> <!-- 🌟 เพิ่ม name -->
+                        <label class="form-label fw-bold mb-2">ความสัมพันธ์กับผู้สูญหาย</label>
+                        <select class="form-select" id="reporter_relationship" name="reporter_relationship" onchange="document.getElementById('relation_other_div').style.display = (this.value === 'อื่นๆ') ? 'block' : 'none';">
+                            <option value="">-- กรุณาเลือกความสัมพันธ์ --</option>
+                            <option value="บิดา/มารดา">บิดา/มารดา</option>
+                            <option value="บุตร/ธิดา">บุตร/ธิดา</option>
+                            <option value="พี่น้อง">พี่น้อง</option>
+                            <option value="ญาติ">ญาติ</option>
+                            <option value="สามี/ภรรยา">สามี/ภรรยา</option>
+                            <option value="คู่รัก/คู่ชีวิต">คู่รัก/คู่ชีวิต</option>
+                            <option value="นายจ้าง/เพื่อนร่วมงาน">นายจ้าง/เพื่อนร่วมงาน</option>
+                            <option value="เพื่อน">เพื่อน</option>
+                            <option value="อื่นๆ">อื่นๆ (โปรดระบุ)</option>
+                        </select>
                         <div class="mt-2" id="relation_other_div" style="display:none;">
                             <input type="text" class="form-control" id="reporter_relationship_other" name="reporter_relationship_other" placeholder="ระบุความสัมพันธ์เพิ่มเติม...">
                         </div>
@@ -273,7 +312,7 @@
 
                 <!-- Step 3 -->
                 <div class="form-step" id="step3">
-                    <h4 class="fw-bold mb-4" style="color: var(--primary-blue);"><i class="fa-solid fa-clock-rotate-left me-2"></i>3. วันเวลาและสถานที่พบเห็นครั้งสุดท้าย</h4>
+                    <h4 class="fw-bold mb-4 text-primary"><i class="fa-solid fa-clock-rotate-left me-2"></i>3. วันเวลาและสถานที่พบเห็นครั้งสุดท้าย</h4>
                     <div class="row g-3 mb-4">
                         <div class="col-md-3 col-12"><label class="form-label fw-bold">วันที่หาย</label><input type="date" class="form-control" id="last_seen_date" name="last_seen_date"></div>
                         <div class="col-md-9 col-12">
@@ -305,26 +344,49 @@
 
                 <!-- Step 4 -->
                 <div class="form-step" id="step4">
-                    <h4 class="fw-bold mb-4" style="color: var(--primary-blue);"><i class="fa-solid fa-user-injured me-2"></i>4. ข้อมูลคนหายและลักษณะทางกายภาพ</h4>
+                    <h4 class="fw-bold mb-4 text-primary"><i class="fa-solid fa-user-injured me-2"></i>4. ข้อมูลคนหายและลักษณะทางกายภาพ</h4>
                     
                     <div class="row g-3 mb-3">
                         <div class="col-md-3 col-4"><label class="form-label fw-bold">คำนำหน้า</label><input class="form-control" list="officialTitlesList" id="missing_title" name="missing_title" placeholder="นาย,นาง..."></div>
                         <div class="col-md-9 col-8"><label class="form-label fw-bold">ชื่อ-นามสกุลคนหาย</label><input type="text" class="form-control" id="missing_name" name="missing_name"></div>
                     </div>
 
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-3 col-6">
-                            <label class="form-label fw-bold">เพศ</label>
-                            <select class="form-select" id="missing_gender" name="missing_gender">
+                    <div class="row g-3 mb-2">
+                        <div class="col-md-4 col-6">
+                            <label class="form-label fw-bold">เพศโดยกำเนิด</label>
+                            <select class="form-select" id="missing_gender_birth" onchange="updateGenderCategory()">
                                 <option value="">-- เลือก --</option>
                                 <option value="ชาย">ชาย</option>
                                 <option value="หญิง">หญิง</option>
-                                <option value="ไม่ระบุ/อื่นๆ">ไม่ระบุ/อื่นๆ</option>
                             </select>
                         </div>
-                        <div class="col-md-4 col-6"><label class="form-label fw-bold">วัน/เดือน/ปีเกิด</label><input type="date" class="form-control" id="missing_birthdate" name="missing_birthdate"></div>
-                        <div class="col-md-2 col-6"><label class="form-label fw-bold">อายุ (ปี)</label><input type="number" class="form-control" id="missing_age" name="missing_age" min="0" placeholder="เช่น 25"></div>
-                        <div class="col-md-3 col-6"><label class="form-label fw-bold">สัญชาติ</label><input type="text" class="form-control" id="missing_nationality" name="missing_nationality" value="ไทย"></div>
+                        <div class="col-md-4 col-6">
+                            <label class="form-label fw-bold">
+                                เพศสภาพในปัจจุบัน
+                                <i class="fa-solid fa-circle-info text-secondary ms-1" style="cursor: help;" data-bs-toggle="tooltip" data-bs-placement="top" title="โปรดพิจารณาจากลักษณะภายนอกของผู้สูญหาย เช่น รูปร่าง การแต่งกาย หรือทรงผม ว่ามีลักษณะใกล้เคียงกับเพศชายหรือเพศหญิงมากกว่ากัน เพื่อประโยชน์ในการติดตามค้นหา หากเพศโดยกำเนิดและเพศสภาพในปัจจุบันไม่ตรงกัน ระบบจะจัดอยู่ในหมวดหมู่ LGBTQ+ ให้โดยอัตโนมัติ"></i>
+                            </label>
+                            <select class="form-select" id="missing_gender_current" onchange="updateGenderCategory()">
+                                <option value="">-- เลือก --</option>
+                                <option value="ชาย">ชาย</option>
+                                <option value="หญิง">หญิง</option>
+                                <option value="LGBTQ+">LGBTQ+</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 col-12">
+                            <label class="form-label fw-bold">หมวดหมู่เพศ (ระบบคำนวณให้อัตโนมัติ)</label>
+                            <div><span id="gender_category_badge" class="badge bg-secondary py-2 px-3 fs-6">- ยังไม่ได้ระบุ -</span></div>
+                            <input type="hidden" id="missing_gender" name="missing_gender">
+                        </div>
+                        <div class="col-12" id="gender_lgbtq_desc_div" style="display:none;">
+                            <label class="form-label fw-bold text-secondary mt-2">อธิบายลักษณะเพิ่มเติม (ถ้ามี)</label>
+                            <textarea class="form-control" id="missing_gender_desc" name="missing_gender_desc" rows="2" placeholder="เช่น ลักษณะการแต่งกาย ทรงผม หรือข้อมูลอื่นที่เป็นประโยชน์ต่อการติดตามค้นหา"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-4 mt-1">
+                        <div class="col-md-5 col-6"><label class="form-label fw-bold">วัน/เดือน/ปีเกิด</label><input type="date" class="form-control" id="missing_birthdate" name="missing_birthdate"></div>
+                        <div class="col-md-3 col-6"><label class="form-label fw-bold">อายุ (ปี)</label><input type="number" class="form-control" id="missing_age" name="missing_age" min="0" placeholder="เช่น 25"></div>
+                        <div class="col-md-4 col-12"><label class="form-label fw-bold">สัญชาติ</label><input type="text" class="form-control" id="missing_nationality" name="missing_nationality" value="ไทย"></div>
                     </div>
 
                     <div class="row g-3 mb-4 bg-light p-3 rounded border">
@@ -393,7 +455,7 @@
 
                 <!-- Step 5 -->
                 <div class="form-step" id="step5">
-                    <h4 class="fw-bold mb-4" style="color: var(--primary-blue);"><i class="fa-solid fa-building-shield"></i> 5. สถานีตำรวจที่รับแจ้งความ</h4>
+                    <h4 class="fw-bold mb-4 text-primary"><i class="fa-solid fa-building-shield"></i> 5. สถานีตำรวจที่รับแจ้งความ</h4>
                     
                     <div class="row g-3 mb-4">
                         <div class="col-md-6 col-12">
@@ -429,10 +491,10 @@
 
                 <!-- Step 6 -->
                 <div class="form-step" id="step6">
-                    <h4 class="fw-bold mb-4 text-success"><i class="fa-solid fa-circle-check"></i> 6. ตรวจสอบข้อมูลก่อนบันทึก</h4>
+                    <h4 class="fw-bold mb-4 text-primary"><i class="fa-solid fa-circle-check"></i> 6. ตรวจสอบข้อมูลก่อนบันทึก</h4>
                     <div class="row g-4">
                         <div class="col-lg-8 col-12">
-                            <div class="alert alert-secondary p-4 rounded" id="previewBox" style="white-space: pre-line; line-height: 1.8; font-size: 15px; border-left: 5px solid var(--primary-blue); background-color: #f8f9fa;"></div>
+                            <div class="alert alert-secondary p-4 rounded" id="previewBox" style="white-space: pre-line; line-height: 1.8; font-size: 15px; border-left: 5px solid var(--bs-primary); background-color: var(--bs-tertiary-bg);"></div>
                         </div>
                         <div class="col-lg-4 col-12">
                             <div class="bg-light p-3 rounded border text-center h-100">
@@ -502,6 +564,41 @@
                     if(previewId === 'police_doc_preview') document.getElementById('final_police_preview').src = e.target.result;
                 }
                 reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // เปิดใช้งาน Bootstrap Tooltip สำหรับไอคอนคำอธิบาย (แสดงเมื่อเมาส์ชี้เท่านั้น)
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
+        });
+
+        // คำนวณ "หมวดหมู่เพศ" จากเพศโดยกำเนิด + เพศสภาพในปัจจุบัน (ตามลักษณะภายนอกที่มองเห็นได้)
+        // หากไม่ตรงกัน (เช่น เกิดชาย ปัจจุบันหญิง) หรือเลือก LGBTQ+ ตรงๆ จะจัดเป็นหมวด LGBTQ+ ให้อัตโนมัติ
+        function updateGenderCategory() {
+            const birth = document.getElementById('missing_gender_birth').value;
+            const current = document.getElementById('missing_gender_current').value;
+            const finalInput = document.getElementById('missing_gender');
+            const badge = document.getElementById('gender_category_badge');
+            const descDiv = document.getElementById('gender_lgbtq_desc_div');
+
+            if (!birth || !current) {
+                finalInput.value = '';
+                badge.textContent = '- ยังไม่ได้ระบุ -';
+                badge.className = 'badge bg-secondary py-2 px-3 fs-6';
+                descDiv.style.display = 'none';
+                return;
+            }
+
+            if (current === 'LGBTQ+' || birth !== current) {
+                finalInput.value = 'LGBTQ+';
+                badge.textContent = 'LGBTQ+';
+                badge.className = 'badge bg-info text-dark py-2 px-3 fs-6';
+                descDiv.style.display = 'block';
+            } else {
+                finalInput.value = current;
+                badge.textContent = current;
+                badge.className = 'badge bg-primary py-2 px-3 fs-6';
+                descDiv.style.display = 'none';
             }
         }
 
@@ -619,9 +716,7 @@
                     document.getElementById(hiddenInputId).value = val;
                     
                     // ส่วนขยายเงื่อนไขแสดงกล่องเพิ่มเติม
-                    if (hiddenInputId === 'reporter_relationship') {
-                        document.getElementById('relation_other_div').style.display = (val === "อื่นๆ") ? "block" : "none";
-                    } else if (hiddenInputId === 'reporter_contact_source') {
+                    if (hiddenInputId === 'reporter_contact_source') {
                         const detailDiv = document.getElementById('contact_detail_div');
                         const detailLabel = document.getElementById('contact_detail_label');
                         const detailInput = document.getElementById('reporter_contact_detail');
@@ -637,7 +732,6 @@
             });
         }
         initBoxSelection('target-urgency', 'urgency_level');
-        initBoxSelection('target-relation', 'reporter_relationship');
         initBoxSelection('target-period', 'time_period_val');
         initBoxSelection('target-contact', 'reporter_contact_source');
 

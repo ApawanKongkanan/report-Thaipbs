@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>เพิ่มเบาะแสคนหาย - Thai PBS Center</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/nifty/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/nifty/css/nifty.min.css">
+    <link rel="stylesheet" href="assets/nifty/css/overrides.css">
     <style>
-        :root { --primary-blue: #25476a; }
 
         /* Step Indicator (4 Steps) */
         .step-container { display: flex; justify-content: space-between; background: var(--bs-card-bg); padding: 20px 30px; border-radius: var(--bs-card-border-radius); box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 25px; }
@@ -35,6 +35,8 @@
         .selectable-box.selected { border-color: var(--bs-primary); background-color: rgba(37, 71, 106, 0.08); color: var(--bs-primary); }
 
         .case-mock-card { border: 2px solid #4a90e2; background-color: rgba(37, 71, 106, 0.05); border-radius: 10px; padding: 15px; display: none; }
+        .case-result-card { border: 2px solid #4a90e2; background-color: rgba(37, 71, 106, 0.05); border-radius: 10px; padding: 15px; margin-bottom: 12px; transition: border-color 0.2s; }
+        .case-result-card.border-success { border-color: #57a805 !important; background-color: rgba(87, 168, 5, 0.06); }
         .upload-preview { max-width: 100%; max-height: 250px; object-fit: contain; border-radius: 8px; display: none; margin-top: 15px; border: 1px dashed var(--bs-border-color); padding: 5px; }
 
         @media (max-width: 991px) {
@@ -50,64 +52,100 @@
    <!-- PAGE CONTAINER -->
    <div id="root" class="root mn--max">
 
-      <!-- CONTENTS -->
-      <section id="content" class="content">
+      <!-- HEADER -->
+      <header class="header header--primary">
+         <div class="header__inner">
+            <div class="header__brand">
+               <div class="brand-wrap">
+                  <a href="Homepage.html" class="brand-img stretched-link">
+                     <i class="fa-solid fa-layer-group fs-3" style="color: var(--nf-brand-color);"></i>
+                  </a>
+                  <div class="brand-title">Thai PBS Center</div>
+               </div>
+            </div>
 
-         <!-- HEADER -->
-         <header class="header">
-            <div class="header__inner">
-               <div class="header__brand">
-                  <div class="brand-wrap">
-                     <a href="Homepage.html" class="brand-img stretched-link">
-                        <i class="fa-solid fa-layer-group fs-3 text-primary"></i>
-                     </a>
-                     <div class="brand-title">Thai PBS Center</div>
-                  </div>
+            <div class="header__content">
+               <div class="header__content-start">
+                  <button type="button" class="nav-toggler header__btn btn btn-icon btn-sm" aria-label="Nav Toggler">
+                     <i class="fa-solid fa-bars"></i>
+                  </button>
+                  <div class="vr mx-1 d-none d-md-block"></div>
+                  <h5 class="m-0 d-none d-md-block text-body-secondary fw-normal">แจ้งเบาะแสคนหาย</h5>
                </div>
 
-               <div class="header__content">
-                  <div class="header__content-start">
-                     <button type="button" class="nav-toggler header__btn btn btn-icon btn-sm" aria-label="Nav Toggler">
-                        <i class="fa-solid fa-bars"></i>
+               <div class="header__content-end">
+                  <div class="dropdown">
+                     <button class="header__btn btn btn-icon btn-sm" type="button" data-bs-toggle="dropdown" aria-label="User dropdown" aria-expanded="false">
+                        <i class="fa-solid fa-circle-user fs-4"></i>
                      </button>
-                     <div class="vr mx-1 d-none d-md-block"></div>
-                     <h5 class="m-0 d-none d-md-block text-body-secondary fw-normal">แจ้งเบาะแสคนหาย</h5>
-                  </div>
-
-                  <div class="header__content-end">
-                     <div class="dropdown">
-                        <button class="header__btn btn btn-icon btn-sm" type="button" data-bs-toggle="dropdown" aria-label="User dropdown" aria-expanded="false">
-                           <i class="fa-solid fa-circle-user fs-4"></i>
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-end">
-                           <div class="d-flex align-items-center border-bottom px-3 py-2">
-                              <div class="flex-grow-1">
-                                 <h6 class="mb-0">เจ้าหน้าที่ (Admin)</h6>
-                                 <small class="text-body-secondary">Thai PBS Center</small>
-                              </div>
+                     <div class="dropdown-menu dropdown-menu-end">
+                        <div class="d-flex align-items-center border-bottom px-3 py-2">
+                           <div class="flex-grow-1">
+                              <h6 class="mb-0">เจ้าหน้าที่ (ผู้ดูแลระบบ)</h6>
+                              <small class="text-body-secondary">Thai PBS Center</small>
                            </div>
-                           <a href="login.html" class="dropdown-item" onclick="localStorage.clear();">
-                              <i class="fa-solid fa-right-from-bracket fs-6 me-2"></i> ออกจากระบบ
-                           </a>
                         </div>
+                        <a href="login.html" class="dropdown-item" onclick="localStorage.clear();">
+                           <i class="fa-solid fa-right-from-bracket fs-6 me-2"></i> ออกจากระบบ
+                        </a>
                      </div>
-                     <div class="vr mx-1 d-none d-md-block"></div>
-                     <button class="sidebar-toggler header__btn btn btn-icon btn-sm" type="button" aria-label="Sidebar button">
-                        <i class="fa-solid fa-ellipsis-vertical"></i>
-                     </button>
                   </div>
                </div>
             </div>
-         </header>
-         <!-- END - HEADER -->
+         </div>
+      </header>
+      <!-- END - HEADER -->
 
-         <!-- MAIN NAVIGATION -->
-         <nav id="mainnav-container" class="mainnav">
-            <div class="mainnav__inner">
-               <div class="mainnav__top-content scrollable-content pb-5">
-                  <div class="mainnav__categoriy py-3">
-                     <h6 class="mainnav__caption mt-0 fw-bold">เมนูหลัก</h6>
-                     <ul class="mainnav__menu nav flex-column">
+      <!-- MAIN NAVIGATION -->
+      <nav id="mainnav-container" class="mainnav mainnav--primary">
+         <div class="mainnav__inner">
+            <div class="mainnav__top-content scrollable-content pb-5">
+
+               <!-- Profile Widget -->
+               <div id="_dm-mainnavProfile" class="mainnav__widget my-3 hv-outline-parent">
+                  <div class="mininav-toggle text-center py-2">
+                     <img class="mainnav__avatar img-md rounded-circle hv-oc" src="assets/nifty/img/profile-photos/1.png" alt="รูปโปรไฟล์">
+                  </div>
+                  <div class="mininav-content collapse d-mn-max">
+                     <span data-popper-arrow class="arrow"></span>
+                     <div class="d-grid">
+                        <button class="mainnav-widget-toggle d-block btn border-0 p-2" data-bs-toggle="collapse" data-bs-target="#usernav" aria-expanded="false" aria-controls="usernav">
+                           <span class="dropdown-toggle d-flex justify-content-center align-items-center">
+                              <h5 class="mb-0 me-3">เจ้าหน้าที่ (ผู้ดูแลระบบ)</h5>
+                           </span>
+                           <small class="text-body-secondary">ผู้ดูแลระบบ</small>
+                        </button>
+
+                        <div id="usernav" class="nav flex-column collapse">
+                           <a href="#" class="nav-link d-flex justify-content-between align-items-center">
+                              <span><i class="fa-solid fa-envelope fs-5 me-2"></i><span class="ms-1">ข้อความ</span></span>
+                              <span class="badge bg-danger rounded-pill">14</span>
+                           </a>
+                           <a href="#" class="nav-link">
+                              <i class="fa-solid fa-user fs-5 me-2"></i>
+                              <span class="ms-1">โปรไฟล์</span>
+                           </a>
+                           <a href="#" class="nav-link">
+                              <i class="fa-solid fa-gear fs-5 me-2"></i>
+                              <span class="ms-1">ตั้งค่า</span>
+                           </a>
+                           <a href="#" class="nav-link">
+                              <i class="fa-solid fa-lock fs-5 me-2"></i>
+                              <span class="ms-1">ล็อกหน้าจอ</span>
+                           </a>
+                           <a href="login.html" class="nav-link" onclick="localStorage.clear();">
+                              <i class="fa-solid fa-right-from-bracket fs-5 me-2"></i>
+                              <span class="ms-1">ออกจากระบบ</span>
+                           </a>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <!-- End - Profile widget -->
+
+               <div class="mainnav__categoriy py-3">
+                  <h6 class="mainnav__caption mt-0 fw-bold">เมนูหลัก</h6>
+                  <ul class="mainnav__menu nav flex-column">
                      <li class="nav-item">
                         <a href="Homepage.html" class="nav-link mininav-toggle"><i class="fa-solid fa-house fs-5 me-2"></i>
                            <span class="nav-label mininav-content ms-1">
@@ -152,12 +190,15 @@
                            </span>
                         </a>
                      </li>
-                     </ul>
-                  </div>
+                  </ul>
                </div>
             </div>
-         </nav>
-         <!-- END - MAIN NAVIGATION -->
+         </div>
+      </nav>
+      <!-- END - MAIN NAVIGATION -->
+
+      <!-- CONTENTS -->
+      <section id="content" class="content">
 
 
          <div class="content__boxed">
@@ -181,25 +222,14 @@
                         <div class="alert alert-info border-0 shadow-sm">
                            <label class="form-label fw-bold">🔎 ค้นหาเคส (รหัสเคส / ชื่อ-สกุลคนหาย / เลขบัตร)</label>
                            <div class="input-group mb-3">
-                              <input type="text" class="form-control form-control-lg" id="search_case_input" placeholder="พิมพ์ชื่อเพื่อค้นหาเคส...">
-                              <button class="btn btn-primary px-4 fw-bold" type="button" onclick="mockSearchCase()"><i class="fa-solid fa-search"></i> ค้นหา</button>
+                              <input type="text" class="form-control form-control-lg" id="search_case_input" placeholder="พิมพ์ชื่อเพื่อค้นหาเคส..." onkeypress="if(event.key==='Enter'){event.preventDefault(); searchCase();}">
+                              <button class="btn btn-primary px-4 fw-bold" type="button" onclick="searchCase()"><i class="fa-solid fa-search"></i> ค้นหา</button>
                            </div>
                         </div>
 
-                        <!-- กล่องแสดงผลลัพธ์ (Mockup) -->
-                        <div class="case-mock-card mt-4 shadow-sm" id="case_result_box">
-                           <div class="d-flex align-items-center flex-wrap gap-3">
-                              <img src="https://via.placeholder.com/100x120?text=Photo" alt="Case Photo" class="rounded border" style="width: 100px; height: 120px; object-fit: cover;">
-                              <div>
-                                 <span class="badge bg-danger mb-2">เคสกำลังดำเนินการ</span>
-                                 <h5 class="fw-bold mb-1 text-primary">ด.ช. สมมติ ทดสอบ (น้องเอ)</h5>
-                                 <p class="mb-1 text-body-secondary text-sm"><i class="fa-solid fa-id-card"></i> รหัสเคส: <strong>TH-2026-0001</strong></p>
-                                 <p class="mb-0 text-body-secondary text-sm"><i class="fa-solid fa-calendar-xmark"></i> วันที่สูญหาย: 1 กรกฎาคม 2569</p>
-                              </div>
-                              <div class="ms-auto w-100 text-md-end mt-2 mt-md-0">
-                                 <button type="button" class="btn btn-success fw-bold px-4" onclick="selectCase('TH-2026-0001')"><i class="fa-solid fa-check-circle"></i> เลือกเคสนี้</button>
-                              </div>
-                           </div>
+                        <!-- กล่องแสดงผลลัพธ์การค้นหา (ดึงจากระบบจริง) -->
+                        <div class="mt-4" id="case_result_box">
+                           <p class="text-body-secondary text-center py-4"><i class="fa-solid fa-magnifying-glass me-1"></i> กรอกคำค้นหาแล้วกดปุ่ม "ค้นหา" เพื่อดึงรายชื่อเคสจากระบบ</p>
                         </div>
                         <input type="hidden" id="selected_case_id">
                      </div>
@@ -316,25 +346,80 @@
 
     <script>
         let currentStep = 1;
-        const API_BASE_URL = window.location.origin;
+        const API_URL = 'http://localhost:5000/api';
 
-        // 1. Mockup ระบบค้นหาเคส
-        function mockSearchCase() {
-            const input = document.getElementById('search_case_input').value;
-            if(input.trim() === '') {
+        // 1. ค้นหาเคสจริงจากระบบ (GET /api/cases แล้วกรองฝั่งหน้าเว็บ)
+        async function searchCase() {
+            const query = document.getElementById('search_case_input').value.trim();
+            const resultBox = document.getElementById('case_result_box');
+
+            if (query === '') {
                 alert('กรุณากรอกข้อมูลเพื่อค้นหาเคส');
                 return;
             }
-            // จำลองการค้นหาเจอ
-            document.getElementById('case_result_box').style.display = 'block';
+
+            resultBox.innerHTML = '<p class="text-body-secondary text-center py-4"><i class="fa-solid fa-spinner fa-spin me-1"></i> กำลังค้นหา...</p>';
+
+            try {
+                const response = await fetch(`${API_URL}/cases`);
+                if (!response.ok) throw new Error('Network response was not ok');
+                const cases = await response.json();
+
+                const q = query.toLowerCase();
+                const matches = cases.filter(c =>
+                    String(c.case_id || '').toLowerCase().includes(q) ||
+                    (c.missingperson_name || '').toLowerCase().includes(q) ||
+                    (c.missingperson_identity || '').toLowerCase().includes(q)
+                );
+
+                renderCaseResults(matches);
+            } catch (err) {
+                console.error('ค้นหาเคสไม่สำเร็จ:', err);
+                resultBox.innerHTML = '<p class="text-danger text-center py-4"><i class="fa-solid fa-triangle-exclamation"></i> ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ฐานข้อมูลได้ กรุณาลองใหม่อีกครั้ง</p>';
+            }
+        }
+
+        function renderCaseResults(matches) {
+            const resultBox = document.getElementById('case_result_box');
+            if (matches.length === 0) {
+                resultBox.innerHTML = '<p class="text-body-secondary text-center py-4"><i class="fa-solid fa-circle-info"></i> ไม่พบเคสที่ตรงกับคำค้นหา</p>';
+                return;
+            }
+            resultBox.innerHTML = matches.map(c => {
+                let imgUrl = c.character_image_url;
+                if (!imgUrl || String(imgUrl).trim().toLowerCase() === 'null' || String(imgUrl).trim() === '') {
+                    imgUrl = 'https://cdn-icons-png.flaticon.com/512/847/847969.png';
+                }
+                const dateObj = c.case_received_date ? new Date(c.case_received_date) : null;
+                const dateStr = dateObj ? dateObj.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' }) : 'ไม่ระบุ';
+                const name = `${c.missingperson_title || ''} ${c.missingperson_name || 'ไม่ระบุชื่อ'}`.trim();
+                return `
+                <div class="case-result-card shadow-sm">
+                    <div class="d-flex align-items-center flex-wrap gap-3">
+                        <img src="${imgUrl}" alt="ภาพเคส" class="rounded border" style="width: 100px; height: 120px; object-fit: cover;">
+                        <div>
+                            <span class="badge bg-danger mb-2">${c.case_priority || 'กำลังดำเนินการ'}</span>
+                            <h5 class="fw-bold mb-1 text-primary">${name}</h5>
+                            <p class="mb-1 text-body-secondary text-sm"><i class="fa-solid fa-id-card"></i> รหัสเคส: <strong>${c.case_id}</strong></p>
+                            <p class="mb-0 text-body-secondary text-sm"><i class="fa-solid fa-calendar-xmark"></i> วันที่รับแจ้ง: ${dateStr}</p>
+                        </div>
+                        <div class="ms-auto w-100 text-md-end mt-2 mt-md-0">
+                            <button type="button" class="btn btn-success fw-bold px-4" onclick="selectCase('${c.case_id}', this)"><i class="fa-solid fa-check-circle"></i> เลือกเคสนี้</button>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
         }
 
         // เมื่อกดเลือกเคส
-        function selectCase(caseId) {
+        function selectCase(caseId, btnEl) {
             document.getElementById('selected_case_id').value = caseId;
             document.getElementById('nextBtn').disabled = false; // ปลดล็อคปุ่มถัดไป
-            document.getElementById('case_result_box').classList.add('border-success', 'bg-white');
-            document.getElementById('case_result_box').classList.remove('border-primary', 'bg-light');
+            document.querySelectorAll('.case-result-card').forEach(c => c.classList.remove('border-success'));
+            if (btnEl) {
+                const card = btnEl.closest('.case-result-card');
+                if (card) card.classList.add('border-success');
+            }
             alert('เลือกรหัสเคส: ' + caseId + ' เรียบร้อยแล้ว สามารถกดถัดไปได้เลย');
         }
 
