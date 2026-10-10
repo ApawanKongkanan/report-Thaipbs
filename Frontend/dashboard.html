@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="th" data-bs-theme="light" data-scheme="navy">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แดชบอร์ดภาพรวม - Thai PBS Center</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/nifty/css/nifty.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        .kpi-box { text-align: center; padding: 15px; border-radius: 8px; background: var(--bs-tertiary-bg); border: 1px solid var(--bs-border-color); }
+        .kpi-title { font-size: 13px; color: var(--bs-secondary-color); font-weight: 600; margin-bottom: 5px; }
+        .kpi-value { font-size: 32px; font-weight: 700; color: var(--bs-primary); margin: 0; line-height: 1; }
+
+        .filter-label { font-size: 13px; font-weight: 600; color: var(--bs-secondary-color); margin-bottom: 5px; }
+
+        .tab-pane { display: none; animation: fadeIn 0.4s; }
+        .tab-pane.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .chart-container-lg { position: relative; height: 350px; width: 100%; }
+        .chart-container-md { position: relative; height: 250px; width: 100%; }
+    </style>
+</head>
+<body class="out-quart">
+
+   <!-- PAGE CONTAINER -->
+   <div id="root" class="root mn--max">
+
+      <!-- CONTENTS -->
+      <section id="content" class="content">
+
+         <!-- HEADER -->
+         <header class="header">
+            <div class="header__inner">
+               <div class="header__brand">
+                  <div class="brand-wrap">
+                     <a href="Homepage.html" class="brand-img stretched-link">
+                        <i class="fa-solid fa-layer-group fs-3 text-primary"></i>
+                     </a>
+                     <div class="brand-title">Thai PBS Center</div>
+                  </div>
+               </div>
+
+               <div class="header__content">
+                  <div class="header__content-start">
+                     <button type="button" class="nav-toggler header__btn btn btn-icon btn-sm" aria-label="Nav Toggler">
+                        <i class="fa-solid fa-bars"></i>
+                     </button>
+                     <div class="vr mx-1 d-none d-md-block"></div>
+                     <h5 class="m-0 d-none d-md-block text-body-secondary fw-normal">สถิติและข้อมูลเชิงลึก</h5>
+                  </div>
+
+                  <div class="header__content-end">
+                     <div class="dropdown">
+                        <button class="header__btn btn btn-icon btn-sm" type="button" data-bs-toggle="dropdown" aria-label="User dropdown" aria-expanded="false">
+                           <i class="fa-solid fa-circle-user fs-4"></i>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end">
+                           <div class="d-flex align-items-center border-bottom px-3 py-2">
+                              <div class="flex-grow-1">
+                                 <h6 class="mb-0">เจ้าหน้าที่ (Admin)</h6>
+                                 <small class="text-body-secondary">Thai PBS Center</small>
+                              </div>
+                           </div>
+                           <a href="login.html" class="dropdown-item" onclick="localStorage.clear();">
+                              <i class="fa-solid fa-right-from-bracket fs-6 me-2"></i> ออกจากระบบ
+                           </a>
+                        </div>
+                     </div>
+                     <div class="vr mx-1 d-none d-md-block"></div>
+                     <button class="sidebar-toggler header__btn btn btn-icon btn-sm" type="button" aria-label="Sidebar button">
+                        <i class="fa-solid fa-ellipsis-vertical"></i>
+                     </button>
+                  </div>
+               </div>
+            </div>
+         </header>
+         <!-- END - HEADER -->
+
+         <!-- MAIN NAVIGATION -->
+         <nav id="mainnav-container" class="mainnav">
+            <div class="mainnav__inner">
+               <div class="mainnav__top-content scrollable-content pb-5">
+                  <div class="mainnav__categoriy py-3">
+                     <h6 class="mainnav__caption mt-0 fw-bold">เมนูหลัก</h6>
+                     <ul class="mainnav__menu nav flex-column">
+                     <li class="nav-item">
+                        <a href="Homepage.html" class="nav-link mininav-toggle"><i class="fa-solid fa-house fs-5 me-2"></i>
+                           <span class="nav-label mininav-content ms-1">
+                              <span data-popper-arrow class="arrow"></span>
+                              หน้าแรก
+                           </span>
+                        </a>
+                     </li>
+
+                     <li class="nav-item">
+                        <a href="track.html" class="nav-link mininav-toggle"><i class="fa-solid fa-magnifying-glass fs-5 me-2"></i>
+                           <span class="nav-label mininav-content ms-1">
+                              <span data-popper-arrow class="arrow"></span>
+                              ติดตามคนหาย
+                           </span>
+                        </a>
+                     </li>
+
+                     <li class="nav-item">
+                        <a href="add-case.html" class="nav-link mininav-toggle"><i class="fa-solid fa-plus fs-5 me-2"></i>
+                           <span class="nav-label mininav-content ms-1">
+                              <span data-popper-arrow class="arrow"></span>
+                              เพิ่มเคส
+                           </span>
+                        </a>
+                     </li>
+
+                     <li class="nav-item">
+                        <a href="add-clue.html" class="nav-link mininav-toggle"><i class="fa-solid fa-bell fs-5 me-2"></i>
+                           <span class="nav-label mininav-content ms-1">
+                              <span data-popper-arrow class="arrow"></span>
+                              แจ้งเบาะแส
+                           </span>
+                        </a>
+                     </li>
+
+                     <li class="nav-item">
+                        <a href="dashboard.html" class="nav-link mininav-toggle active"><i class="fa-solid fa-chart-pie fs-5 me-2"></i>
+                           <span class="nav-label mininav-content ms-1">
+                              <span data-popper-arrow class="arrow"></span>
+                              แดชบอร์ด
+                           </span>
+                        </a>
+                     </li>
+                     </ul>
+                  </div>
+               </div>
+            </div>
+         </nav>
+         <!-- END - MAIN NAVIGATION -->
+
+
+         <div class="content__boxed">
+            <div class="content__wrap py-4">
+
+               <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                  <h1 class="page-title m-0">สถิติและข้อมูลเชิงลึกคนหาย</h1>
+                  <div class="fw-bold text-primary fs-6"><i class="fa-solid fa-circle-user fs-5 align-middle me-1"></i> เจ้าหน้าที่วิเคราะห์ข้อมูล</div>
+               </div>
+
+               <div class="card mb-4">
+                  <div class="card-body d-flex flex-wrap gap-3 align-items-end">
+                     <div class="fw-bold text-primary d-none d-md-block"><i class="fa-solid fa-filter"></i> ตัวกรอง:</div>
+                     <div style="min-width: 150px;">
+                        <div class="filter-label">ปีที่รับแจ้ง (Year)</div>
+                        <select class="form-select form-select-sm"><option>ทั้งหมด (All)</option><option>2023</option><option>2024</option></select>
+                     </div>
+                     <div style="min-width: 150px;">
+                        <div class="filter-label">จังหวัด (Province)</div>
+                        <select class="form-select form-select-sm"><option>ทั่วประเทศไทย</option><option>กรุงเทพมหานคร</option><option>เชียงใหม่</option></select>
+                     </div>
+                     <div style="min-width: 150px;">
+                        <div class="filter-label">เดือน (Month)</div>
+                        <select class="form-select form-select-sm"><option>ทุกเดือน</option><option>มกราคม</option><option>กุมภาพันธ์</option></select>
+                     </div>
+                     <div class="ms-auto d-flex gap-2">
+                        <button class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-rotate-right"></i> ล้างค่า</button>
+                        <button class="btn btn-primary btn-sm"><i class="fa-solid fa-search"></i> ค้นหา</button>
+                     </div>
+                  </div>
+               </div>
+
+               <ul class="nav nav-tabs" id="dashboardTabs">
+                  <li class="nav-item">
+                     <button class="nav-link active" onclick="switchTab('overview', this)"><i class="fa-solid fa-chart-bar me-2"></i>ภาพรวม (Overview)</button>
+                  </li>
+                  <li class="nav-item">
+                     <button class="nav-link" onclick="switchTab('location', this)"><i class="fa-solid fa-map-location-dot me-2"></i>พื้นที่และแผนที่ (Location)</button>
+                  </li>
+                  <li class="nav-item">
+                     <button class="nav-link" onclick="switchTab('details', this)"><i class="fa-solid fa-table-list me-2"></i>ข้อมูลรายเคส (Details)</button>
+                  </li>
+               </ul>
+
+               <div id="overview" class="tab-pane active pt-4">
+
+                  <div class="row g-3 mb-4">
+                     <div class="col"><div class="kpi-box border-start border-4 border-primary"><div class="kpi-title">คนหายทั้งหมด (Total)</div><div class="kpi-value">200</div></div></div>
+                     <div class="col"><div class="kpi-box border-start border-4 border-success"><div class="kpi-title">พบตัวแล้ว (Found)</div><div class="kpi-value text-success">147</div></div></div>
+                     <div class="col"><div class="kpi-box"><div class="kpi-title">เพศหญิง (Female)</div><div class="kpi-value">105</div></div></div>
+                     <div class="col"><div class="kpi-box"><div class="kpi-title">เพศชาย (Male)</div><div class="kpi-value">95</div></div></div>
+                     <div class="col"><div class="kpi-box"><div class="kpi-title">อายุเฉลี่ย (Avg Age)</div><div class="kpi-value text-warning">48.3</div></div></div>
+                  </div>
+
+                  <div class="row g-4">
+                     <div class="col-lg-8">
+                        <div class="card h-100">
+                           <div class="card-header border-0"><h3 class="h4 m-0">แนวโน้มจำนวนคนหายและการพบตัวต่อปี</h3></div>
+                           <div class="card-body chart-container-lg"><canvas id="trendChart"></canvas></div>
+                        </div>
+                     </div>
+
+                     <div class="col-lg-4">
+                        <div class="card h-100">
+                           <div class="card-header border-0"><h3 class="h4 m-0">สัดส่วนผู้แจ้งเหตุ (Reporter)</h3></div>
+                           <div class="card-body">
+                              <div class="chart-container-lg" style="height: 250px;"><canvas id="reporterChart"></canvas></div>
+                              <div class="mt-4 row text-center">
+                                 <div class="col-4"><h5 class="fw-bold text-danger m-0">72</h5><small class="text-body-secondary">หน่วยงาน</small></div>
+                                 <div class="col-4"><h5 class="fw-bold text-primary m-0">65</h5><small class="text-body-secondary">มูลนิธิ</small></div>
+                                 <div class="col-4"><h5 class="fw-bold text-warning m-0">63</h5><small class="text-body-secondary">ญาติ</small></div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+
+                     <div class="col-lg-7">
+                        <div class="card h-100">
+                           <div class="card-header border-0"><h3 class="h4 m-0">สาเหตุการสูญหายสูงสุด (Top Missing Reasons)</h3></div>
+                           <div class="card-body chart-container-md"><canvas id="reasonChart"></canvas></div>
+                        </div>
+                     </div>
+
+                     <div class="col-lg-5">
+                        <div class="card h-100">
+                           <div class="card-header border-0"><h3 class="h4 m-0">สัดส่วนตามกลุ่มอายุ (Age Group)</h3></div>
+                           <div class="card-body chart-container-md"><canvas id="ageChart"></canvas></div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+
+               <div id="location" class="tab-pane pt-4">
+                  <div class="row g-4">
+                     <div class="col-lg-4">
+                        <div class="card h-100">
+                           <div class="card-header border-0"><h3 class="h4 m-0">10 อันดับจังหวัดที่มีเคสสูงสุด</h3></div>
+                           <div class="card-body" style="height: 550px; position: relative;"><canvas id="provinceChart"></canvas></div>
+                        </div>
+                     </div>
+                     <div class="col-lg-8">
+                        <div class="card p-2 h-100">
+                           <div id="map" style="width: 100%; height: 600px; min-height: 400px; border-radius: 8px;"></div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+
+               <div id="details" class="tab-pane pt-4">
+                  <div class="card">
+                     <div class="card-body">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+                           <h3 class="h4 m-0">ตารางข้อมูลดิบรายเคส (Raw Data)</h3>
+                           <div class="d-flex gap-2 w-100 w-md-auto">
+                              <input type="text" class="form-control form-control-sm" placeholder="ค้นหา รหัส, จังหวัด...">
+                              <button class="btn btn-outline-success btn-sm text-nowrap"><i class="fa-solid fa-file-excel"></i> Export</button>
+                           </div>
+                        </div>
+
+                        <div class="table-responsive" style="max-height: 550px; overflow-y: auto;">
+                           <table class="table table-hover">
+                              <thead class="sticky-top">
+                                 <tr>
+                                    <th>Case ID</th>
+                                    <th class="text-nowrap">วันที่รับแจ้ง (Received Date)</th>
+                                    <th>เพศ (Gender)</th>
+                                    <th>อายุ (Age)</th>
+                                    <th>จังหวัด (Province)</th>
+                                    <th>สาเหตุ (Reason)</th>
+                                    <th>สถานะ (Status)</th>
+                                 </tr>
+                              </thead>
+                              <tbody>
+                                 <tr>
+                                    <td class="fw-bold">002</td><td class="text-nowrap">8 ก.ค. 2020</td><td>หญิง</td><td>10</td><td>สุโขทัย</td>
+                                    <td>มีอาการทางสมอง/ป่วย</td><td><span class="badge bg-success">เจอตัวแล้ว</span></td>
+                                 </tr>
+                                 <tr>
+                                    <td class="fw-bold">016</td><td class="text-nowrap">23 พ.ย. 2020</td><td>ชาย</td><td>45</td><td>ชัยภูมิ</td>
+                                    <td>ล่อลวงเพื่อทางเพศ/แรงงาน</td><td><span class="badge bg-success">เจอตัวแล้ว</span></td>
+                                 </tr>
+                                 <tr>
+                                    <td class="fw-bold">034</td><td class="text-nowrap">15 ก.พ. 2021</td><td>หญิง</td><td>75</td><td>เชียงใหม่</td>
+                                    <td>หลงลืม/อัลไซเมอร์</td><td><span class="badge bg-danger">ยังไม่พบ</span></td>
+                                 </tr>
+                                 <tr>
+                                    <td class="fw-bold">045</td><td class="text-nowrap">10 เม.ย. 2021</td><td>ชาย</td><td>15</td><td>กรุงเทพมหานคร</td>
+                                    <td>หนีออกจากบ้าน</td><td><span class="badge bg-warning text-dark">พบเบาะแส</span></td>
+                                 </tr>
+                                 <tr>
+                                    <td class="fw-bold">027</td><td class="text-nowrap">16 เม.ย. 2021</td><td>หญิง</td><td>45</td><td>บุรีรัมย์</td>
+                                    <td>ถูกลักพาตัว</td><td><span class="badge bg-success">เจอตัวแล้ว</span></td>
+                                 </tr>
+                              </tbody>
+                           </table>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+
+            </div>
+         </div>
+
+      </section>
+   </div>
+   <!-- END - PAGE CONTAINER -->
+
+   <!-- SCROLL TO TOP BUTTON -->
+   <div class="scroll-container">
+      <a href="#root" class="scroll-page ratio ratio-1x1" aria-label="Scroll button"></a>
+   </div>
+
+   <!-- JAVASCRIPTS -->
+   <script src="assets/nifty/vendors/popperjs/popper.min.js"></script>
+   <script src="assets/nifty/vendors/bootstrap/bootstrap.min.js"></script>
+   <script src="assets/nifty/js/nifty.min.js"></script>
+
+    <script>
+        let map;
+        let mapInitialized = false;
+
+        // ฟังก์ชันสลับ Tab
+        function switchTab(tabId, btnElement) {
+            // ซ่อน/แสดง Tab Content
+            document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+
+            // อัปเดตสถานะปุ่ม Tab
+            document.querySelectorAll('#dashboardTabs .nav-link').forEach(el => el.classList.remove('active'));
+            btnElement.classList.add('active');
+
+            // ถ้าเปิดหน้าแผนที่ครั้งแรก ให้ Load Map
+            if (tabId === 'location' && !mapInitialized) {
+                setTimeout(initMap, 100); // รอให้ div แสดงผลเสร็จก่อนค่อยดึงแผนที่
+                mapInitialized = true;
+            }
+        }
+
+        // ตั้งค่าสีกลาง (Theme Colors)
+        Chart.defaults.font.family = "'Ubuntu', 'Segoe UI', Tahoma, sans-serif";
+        const colors = { primary: '#25476a', success: '#2ecc71', danger: '#e74c3c', warning: '#f39c12', muted: '#bdc3c7' };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // 1. กราฟเส้น (Trend)
+            new Chart(document.getElementById('trendChart'), {
+                type: 'line',
+                data: {
+                    labels: ['2020', '2021', '2022', '2023', '2024', '2025'],
+                    datasets: [
+                        { label: 'รับแจ้งทั้งหมด', data: [15, 38, 42, 45, 40, 20], borderColor: colors.primary, backgroundColor: 'rgba(37, 71, 106, 0.1)', fill: true, tension: 0.4 },
+                        { label: 'พบตัวแล้ว', data: [5, 18, 15, 12, 18, 10], borderColor: colors.success, backgroundColor: 'transparent', borderDash: [5, 5], tension: 0.4 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+            });
+
+            // 2. โดนัท (Reporter)
+            new Chart(document.getElementById('reporterChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['หน่วยงาน', 'มูลนิธิ', 'ญาติแจ้ง'],
+                    datasets: [{ data: [72, 65, 63], backgroundColor: [colors.danger, colors.primary, colors.warning], borderWidth: 0 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { position: 'bottom' } } }
+            });
+
+            // 3. กราฟแท่งแนวนอน (Reasons)
+            new Chart(document.getElementById('reasonChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['พลัดหลงออกจากบ้าน', 'ถูกลักพาตัว', 'ปัญหาการใช้สื่อโซเชียล', 'อาการทางสมอง/ป่วย', 'ล่อลวงทางเพศ/แรงงาน', 'ปัญหากับครอบครัว'],
+                    datasets: [{ label: 'จำนวน (เคส)', data: [37, 33, 28, 28, 28, 24], backgroundColor: colors.warning }]
+                },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } } } }
+            });
+
+            // 4. กราฟแท่ง (Age Groups)
+            new Chart(document.getElementById('ageChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['0-18 ปี', '19-35 ปี', '36-60 ปี', '60+ ปี'],
+                    datasets: [{ label: 'จำนวน (เคส)', data: [30, 42, 56, 72], backgroundColor: colors.primary, borderRadius: 4 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+            });
+
+            // 5. แผนภูมิแท่งแนวนอน (Location Rank) - กราฟซ้อนทับแบบสวยงาม
+            new Chart(document.getElementById('provinceChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['กรุงเทพมหานคร', 'นครปฐม', 'เชียงใหม่', 'อุดรธานี', 'ระยอง', 'สุราษฎร์ธานี', 'ชลบุรี', 'นนทบุรี', 'พิษณุโลก', 'น่าน'],
+                    datasets: [
+                        { label: 'พบตัวแล้ว', data: [80, 75, 65, 70, 85, 70, 60, 50, 40, 30], backgroundColor: colors.success },
+                        { label: 'ยังไม่พบ', data: [20, 15, 20, 10, 5, 20, 15, 10, 10, 5], backgroundColor: colors.danger }
+                    ]
+                },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { x: { stacked: true }, y: { stacked: true } } }
+            });
+        });
+
+        // ฟังก์ชันโหลดแผนที่ (Map)
+        function initMap() {
+            // พิกัดศูนย์กลางประเทศไทย
+            map = L.map('map').setView([13.7563, 100.5018], 5);
+
+            // ใช้ Base Map สไตล์สะอาดตา (CartoDB Light)
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+            }).addTo(map);
+
+            // ใส่ตัวอย่างจุด Marker แจ้งเหตุ
+            L.marker([13.7563, 100.5018]).addTo(map).bindPopup("<b>กรุงเทพมหานคร</b><br>มีแจ้งเหตุ 100 เคส.");
+            L.marker([18.7883, 98.9853]).addTo(map).bindPopup("<b>เชียงใหม่</b><br>มีแจ้งเหตุ 85 เคส.");
+            L.marker([12.9236, 100.8825]).addTo(map).bindPopup("<b>ชลบุรี (พัทยา)</b><br>มีแจ้งเหตุ 75 เคส.");
+        }
+    </script>
+</body>
+</html>

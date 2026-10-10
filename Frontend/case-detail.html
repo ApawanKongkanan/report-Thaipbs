@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="th" data-bs-theme="light" data-scheme="navy">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>รายละเอียดเคสและเบาะแส - Thai PBS Center</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/nifty/css/nifty.min.css">
+    <style>
+        .profile-img { width: 100%; max-width: 200px; height: 250px; object-fit: cover; border-radius: 10px; border: 3px solid var(--bs-border-color); margin-bottom: 15px; }
+        .info-label { font-size: 13px; color: var(--bs-secondary-color); font-weight: 600; margin-bottom: 2px; }
+        .info-value { font-size: 15px; font-weight: bold; margin-bottom: 15px; }
+        .status-badge { padding: 6px 15px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+
+        /* Timeline Styles */
+        .timeline { position: relative; padding-left: 30px; margin-top: 20px; }
+        .timeline::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background-color: var(--bs-border-color); border-radius: 3px; }
+
+        .timeline-item { position: relative; margin-bottom: 30px; }
+        .timeline-marker { position: absolute; left: -36px; top: 0; width: 15px; height: 15px; border-radius: 50%; background-color: var(--bs-primary); border: 3px solid var(--bs-card-bg); box-shadow: 0 0 0 2px var(--bs-primary); z-index: 1; }
+        .timeline-marker.status-verified { background-color: #2ecc71; box-shadow: 0 0 0 2px #2ecc71; }
+        .timeline-marker.status-invalid { background-color: #e74c3c; box-shadow: 0 0 0 2px #e74c3c; }
+        .timeline-marker.status-pending { background-color: #f1c40f; box-shadow: 0 0 0 2px #f1c40f; }
+
+        .timeline-content { background: var(--bs-tertiary-bg); border: 1px solid var(--bs-border-color); border-radius: 8px; padding: 15px; position: relative; }
+        .timeline-content::before { content: ''; position: absolute; left: -8px; top: 5px; width: 0; height: 0; border-top: 8px solid transparent; border-bottom: 8px solid transparent; border-right: 8px solid var(--bs-border-color); }
+        .timeline-content::after { content: ''; position: absolute; left: -7px; top: 6px; width: 0; height: 0; border-top: 7px solid transparent; border-bottom: 7px solid transparent; border-right: 7px solid var(--bs-tertiary-bg); }
+
+        .clue-img { max-width: 100%; max-height: 150px; border-radius: 6px; margin-top: 10px; cursor: pointer; border: 1px solid var(--bs-border-color); }
+    </style>
+</head>
+<body class="out-quart">
+
+   <!-- PAGE CONTAINER -->
+   <div id="root" class="root mn--max">
+
+      <!-- CONTENTS -->
+      <section id="content" class="content">
+
+         <!-- HEADER -->
+         <header class="header">
+            <div class="header__inner">
+               <div class="header__brand">
+                  <div class="brand-wrap">
+                     <a href="Homepage.html" class="brand-img stretched-link">
+                        <i class="fa-solid fa-layer-group fs-3 text-primary"></i>
+                     </a>
+                     <div class="brand-title">Thai PBS Center</div>
+                  </div>
+               </div>
+
+               <div class="header__content">
+                  <div class="header__content-start">
+                     <button type="button" class="nav-toggler header__btn btn btn-icon btn-sm" aria-label="Nav Toggler">
+                        <i class="fa-solid fa-bars"></i>
+                     </button>
+                     <div class="vr mx-1 d-none d-md-block"></div>
+                     <h5 class="m-0 d-none d-md-block text-body-secondary fw-normal">รายละเอียดเคส</h5>
+                  </div>
+
+                  <div class="header__content-end">
+                     <div class="dropdown">
+                        <button class="header__btn btn btn-icon btn-sm" type="button" data-bs-toggle="dropdown" aria-label="User dropdown" aria-expanded="false">
+                           <i class="fa-solid fa-circle-user fs-4"></i>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end">
+                           <div class="d-flex align-items-center border-bottom px-3 py-2">
+                              <div class="flex-grow-1">
+                                 <h6 class="mb-0">เจ้าหน้าที่ (Admin)</h6>
+                                 <small class="text-body-secondary">Thai PBS Center</small>
+                              </div>
+                           </div>
+                           <a href="login.html" class="dropdown-item" onclick="localStorage.clear();">
+                              <i class="fa-solid fa-right-from-bracket fs-6 me-2"></i> ออกจากระบบ
+                           </a>
+                        </div>
+                     </div>
+                     <div class="vr mx-1 d-none d-md-block"></div>
+                     <button class="sidebar-toggler header__btn btn btn-icon btn-sm" type="button" aria-label="Sidebar button">
+                        <i class="fa-solid fa-ellipsis-vertical"></i>
+                     </button>
+                  </div>
+               </div>
+            </div>
+         </header>
+         <!-- END - HEADER -->
+
+         <!-- MAIN NAVIGATION -->
+         <nav id="mainnav-container" class="mainnav">
+            <div class="mainnav__inner">
+               <div class="mainnav__top-content scrollable-content pb-5">
+                  <div class="mainnav__categoriy py-3">
+                     <h6 class="mainnav__caption mt-0 fw-bold">เมนูหลัก</h6>
+                     <ul class="mainnav__menu nav flex-column">
+                     <li class="nav-item">
+                        <a href="Homepage.html" class="nav-link mininav-toggle"><i class="fa-solid fa-house fs-5 me-2"></i>
+                           <span class="nav-label mininav-content ms-1">
+                              <span data-popper-arrow class="arrow"></span>
+                              หน้าแรก
+                           </span>
+                        </a>
+                     </li>
+
+                     <li class="nav-item">
+                        <a href="track.html" class="nav-link mininav-toggle active"><i class="fa-solid fa-magnifying-glass fs-5 me-2"></i>
+                           <span class="nav-label mininav-content ms-1">
+                              <span data-popper-arrow class="arrow"></span>
+                              ติดตามคนหาย
+                           </span>
+                        </a>
+                     </li>
+
+                     <li class="nav-item">
+                        <a href="add-case.html" class="nav-link mininav-toggle"><i class="fa-solid fa-plus fs-5 me-2"></i>
+                           <span class="nav-label mininav-content ms-1">
+                              <span data-popper-arrow class="arrow"></span>
+                              เพิ่มเคส
+                           </span>
+                        </a>
+                     </li>
+
+                     <li class="nav-item">
+                        <a href="add-clue.html" class="nav-link mininav-toggle"><i class="fa-solid fa-bell fs-5 me-2"></i>
+                           <span class="nav-label mininav-content ms-1">
+                              <span data-popper-arrow class="arrow"></span>
+                              แจ้งเบาะแส
+                           </span>
+                        </a>
+                     </li>
+
+                     <li class="nav-item">
+                        <a href="dashboard.html" class="nav-link mininav-toggle"><i class="fa-solid fa-chart-pie fs-5 me-2"></i>
+                           <span class="nav-label mininav-content ms-1">
+                              <span data-popper-arrow class="arrow"></span>
+                              แดชบอร์ด
+                           </span>
+                        </a>
+                     </li>
+                     </ul>
+                  </div>
+               </div>
+            </div>
+         </nav>
+         <!-- END - MAIN NAVIGATION -->
+
+
+         <div class="content__boxed">
+            <div class="content__wrap py-4">
+
+               <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                  <a href="Homepage.html" class="btn-link text-decoration-none fw-bold"><i class="fa-solid fa-arrow-left me-2"></i> กลับหน้าหลัก</a>
+                  <h1 class="page-title m-0 h4"><i class="fa-solid fa-folder-open me-2"></i>รายละเอียดเคส: <span id="header_case_id">TH-2026-0001</span></h1>
+                  <button class="btn btn-outline-secondary btn-sm fw-bold"><i class="fa-solid fa-print"></i> พิมพ์</button>
+               </div>
+
+               <div class="row g-4">
+
+                  <div class="col-lg-4">
+                     <div class="card sticky-top" style="top: 20px;">
+                        <div class="card-body">
+                           <div class="text-center">
+                              <img src="https://via.placeholder.com/200x250?text=Missing+Person" class="profile-img" alt="ภาพคนหาย">
+                              <h5 class="fw-bold text-primary mb-1">ด.ช. สมมติ ทดสอบ (น้องเอ)</h5>
+                              <p class="text-body-secondary small mb-3">อายุ 12 ปี • เพศ ชาย</p>
+                              <span class="status-badge bg-danger text-white d-inline-block mb-4"><i class="fa-solid fa-search"></i> กำลังค้นหา (เร่งด่วน)</span>
+                           </div>
+
+                           <h6 class="fw-bold border-bottom pb-2"><i class="fa-solid fa-circle-info"></i> ข้อมูลการสูญหาย</h6>
+                           <div class="row mt-3">
+                              <div class="col-12"><div class="info-label">วันเวลาที่หาย</div><div class="info-value">1 กรกฎาคม 2569 (ช่วงเย็น)</div></div>
+                              <div class="col-12"><div class="info-label">สถานที่พบล่าสุด</div><div class="info-value">หน้าตลาดบางกะปิ เขตบางกะปิ กทม. 10240</div></div>
+                              <div class="col-12"><div class="info-label">สาเหตุเบื้องต้น</div><div class="info-value text-danger">พลัดหลงออกจากบ้าน</div></div>
+                           </div>
+
+                           <h6 class="fw-bold border-bottom pb-2 mt-2"><i class="fa-solid fa-dna"></i> รูปพรรณสัณฐาน</h6>
+                           <div class="row mt-3">
+                              <div class="col-6"><div class="info-label">ส่วนสูง</div><div class="info-value">145 ซม.</div></div>
+                              <div class="col-6"><div class="info-label">สีผิว</div><div class="info-value">ผิวสองสี</div></div>
+                              <div class="col-6"><div class="info-label">รูปร่าง</div><div class="info-value">ผอม</div></div>
+                              <div class="col-6"><div class="info-label">เส้นผม</div><div class="info-value">ผมดำสั้น</div></div>
+                           </div>
+
+                           <h6 class="fw-bold border-bottom pb-2 mt-2"><i class="fa-solid fa-building-shield"></i> ข้อมูลคดี</h6>
+                           <div class="row mt-3">
+                              <div class="col-12"><div class="info-label">สถานีตำรวจรับผิดชอบ</div><div class="info-value">สน.ลาดพร้าว (จ.กรุงเทพมหานคร)</div></div>
+                              <div class="col-12"><div class="info-label">ผู้แจ้งความ</div><div class="info-value">นาง สมศรี ทดสอบ (แม่)</div></div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+
+                  <div class="col-lg-8">
+                     <div class="card">
+                        <div class="card-body">
+                           <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+                              <h4 class="fw-bold m-0 text-primary"><i class="fa-solid fa-route me-2"></i>ไทม์ไลน์เบาะแส (Clues)</h4>
+                              <a href="add-clue.html" class="btn btn-primary fw-bold"><i class="fa-solid fa-plus me-1"></i> แจ้งเบาะแสเพิ่ม</a>
+                           </div>
+
+                           <div class="timeline">
+
+                              <div class="timeline-item">
+                                 <div class="timeline-marker status-pending"></div>
+                                 <div class="timeline-content">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                       <h6 class="fw-bold m-0 text-primary"><i class="fa-solid fa-location-dot me-1"></i> พบเห็นที่ ซอยรามคำแหง 39</h6>
+                                       <span class="badge bg-warning text-dark"><i class="fa-solid fa-hourglass-half"></i> รอดำเนินการ</span>
+                                    </div>
+                                    <p class="text-body-secondary small mb-2"><i class="fa-solid fa-calendar-days"></i> รับแจ้งเมื่อ: 5 ก.ค. 2569 เวลา 14:30 น. (ผ่าน Facebook)</p>
+                                    <p class="mb-2"><strong>รายละเอียด:</strong> เจอเด็กผู้ชายหน้าตาคล้ายในรูป ใส่เสื้อยืดสีขาว กางเกงขาสั้น เดินอยู่แถวร้านสะดวกซื้อในซอยรามคำแหง 39 ท่าทางหิวข้าว</p>
+                                    <div class="alert alert-info py-2 px-3 m-0 mb-2 small">
+                                       <i class="fa-solid fa-user-secret"></i> <strong>ผู้แจ้ง:</strong> คุณสมชาย (081-XXX-XXXX) | <strong>ความมั่นใจ:</strong> ค่อนข้างมั่นใจ
+                                    </div>
+
+                                    <div class="mt-3 pt-2 border-top">
+                                       <span class="small fw-bold text-body-secondary me-2">อัปเดตสถานะเบาะแส:</span>
+                                       <button class="btn btn-outline-success btn-sm"><i class="fa-solid fa-check"></i> เป็นประโยชน์</button>
+                                       <button class="btn btn-outline-danger btn-sm"><i class="fa-solid fa-xmark"></i> ข้อมูลเท็จ</button>
+                                    </div>
+                                 </div>
+                              </div>
+
+                              <div class="timeline-item">
+                                 <div class="timeline-marker status-verified"></div>
+                                 <div class="timeline-content">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                       <h6 class="fw-bold m-0 text-primary"><i class="fa-solid fa-location-dot me-1"></i> ภาพจากกล้อง CCTV ปากซอยบ้าน</h6>
+                                       <span class="badge bg-success"><i class="fa-solid fa-check-circle"></i> ยืนยันแล้ว/เป็นประโยชน์</span>
+                                    </div>
+                                    <p class="text-body-secondary small mb-2"><i class="fa-solid fa-calendar-days"></i> รับแจ้งเมื่อ: 2 ก.ค. 2569 เวลา 09:15 น. (ผ่าน มูลนิธิกระจกเงา)</p>
+                                    <p class="mb-2"><strong>รายละเอียด:</strong> ดึงภาพจากกล้องวงจรปิดหน้าหมู่บ้าน พบว่าน้องเดินออกไปทางถนนใหญ่คนเดียวเมื่อเวลา 17.40 น. ของวันเกิดเหตุ</p>
+                                    <img src="https://via.placeholder.com/300x150?text=CCTV+Footage" class="clue-img" alt="หลักฐานวงจรปิด">
+                                 </div>
+                              </div>
+
+                              <div class="timeline-item">
+                                 <div class="timeline-marker"></div>
+                                 <div class="timeline-content bg-body border-primary border-2">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                       <h6 class="fw-bold m-0 text-primary"><i class="fa-solid fa-bullhorn me-1"></i> เปิดรับแจ้งคดีคนหายเข้าสู่ระบบ</h6>
+                                    </div>
+                                    <p class="text-body-secondary small m-0"><i class="fa-solid fa-calendar-days"></i> 1 กรกฎาคม 2569 เวลา 20:00 น.</p>
+                                    <p class="mt-2 m-0">ระบบได้ทำการบันทึกข้อมูลและประกาศตามหาบุคคลสูญหายอย่างเป็นทางการ</p>
+                                 </div>
+                              </div>
+
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+
+               </div>
+
+            </div>
+         </div>
+
+      </section>
+   </div>
+   <!-- END - PAGE CONTAINER -->
+
+   <!-- SCROLL TO TOP BUTTON -->
+   <div class="scroll-container">
+      <a href="#root" class="scroll-page ratio ratio-1x1" aria-label="Scroll button"></a>
+   </div>
+
+   <!-- JAVASCRIPTS -->
+   <script src="assets/nifty/vendors/popperjs/popper.min.js"></script>
+   <script src="assets/nifty/vendors/bootstrap/bootstrap.min.js"></script>
+   <script src="assets/nifty/js/nifty.min.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,23 @@
+const masterZipcodeDB = {
+    "10200": {
+        subdistrict: "พระบรมมหาราชวัง",
+        district: "พระนคร",
+        province: "กรุงเทพมหานคร"
+    },
+    "11120": {
+        subdistrict: "ปากเกร็ด",
+        district: "ปากเกร็ด",
+        province: "นนทบุรี"
+    },
+    "50000": {
+        subdistrict: "ศรีภูมิ",
+        district: "เมืองเชียงใหม่",
+        province: "เชียงใหม่"
+    },
+    "50000": {
+        subdistrict: "ศรีภูมิ",
+        district: "เมืองเชียงใหม่",
+        province: "เชียงใหม่"
+    }
+    
+};

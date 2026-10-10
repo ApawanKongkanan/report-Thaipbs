@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="th" data-bs-theme="light" data-scheme="navy">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ติดตามคนหาย - Thai PBS Center</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/nifty/css/nifty.min.css">
+    <style>
+        .content-body { max-width: 1400px; margin: 0 auto; width: 100%; }
+        .person-img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; }
+    </style>
+</head>
+<body class="out-quart">
+
+   <!-- PAGE CONTAINER -->
+   <div id="root" class="root mn--max">
+
+      <!-- CONTENTS -->
+      <section id="content" class="content">
+
+         <!-- HEADER -->
+         <header class="header">
+            <div class="header__inner">
+               <div class="header__brand">
+                  <div class="brand-wrap">
+                     <a href="Homepage.html" class="brand-img stretched-link">
+                        <i class="fa-solid fa-layer-group fs-3 text-primary"></i>
+                     </a>
+                     <div class="brand-title">Thai PBS Center</div>
+                  </div>
+               </div>
+
+               <div class="header__content">
+                  <div class="header__content-start">
+                     <button type="button" class="nav-toggler header__btn btn btn-icon btn-sm" aria-label="Nav Toggler">
+                        <i class="fa-solid fa-bars"></i>
+                     </button>
+                     <div class="vr mx-1 d-none d-md-block"></div>
+                     <h5 class="m-0 d-none d-md-block text-body-secondary fw-normal">ติดตามและค้นหาคนหาย</h5>
+                  </div>
+
+                  <div class="header__content-end">
+                     <div class="dropdown">
+                        <button class="header__btn btn btn-icon btn-sm" type="button" data-bs-toggle="dropdown" aria-label="User dropdown" aria-expanded="false">
+                           <i class="fa-solid fa-circle-user fs-4"></i>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end">
+                           <div class="d-flex align-items-center border-bottom px-3 py-2">
+                              <div class="flex-grow-1">
+                                 <h6 class="mb-0">เจ้าหน้าที่ (Admin)</h6>
+                                 <small class="text-body-secondary">Thai PBS Center</small>
+                              </div>
+                           </div>
+                           <a href="login.html" class="dropdown-item" onclick="localStorage.clear();">
+                              <i class="fa-solid fa-right-from-bracket fs-6 me-2"></i> ออกจากระบบ
+                           </a>
+                        </div>
+                     </div>
+                     <div class="vr mx-1 d-none d-md-block"></div>
+                     <button class="sidebar-toggler header__btn btn btn-icon btn-sm" type="button" aria-label="Sidebar button">
+                        <i class="fa-solid fa-ellipsis-vertical"></i>
+                     </button>
+                  </div>
+               </div>
+            </div>
+         </header>
+         <!-- END - HEADER -->
+
+         <!-- MAIN NAVIGATION -->
+         <nav id="mainnav-container" class="mainnav">
+            <div class="mainnav__inner">
+               <div class="mainnav__top-content scrollable-content pb-5">
+                  <div class="mainnav__categoriy py-3">
+                     <h6 class="mainnav__caption mt-0 fw-bold">เมนูหลัก</h6>
+                     <ul class="mainnav__menu nav flex-column">
+                     <li class="nav-item">
+                        <a href="Homepage.html" class="nav-link mininav-toggle"><i class="fa-solid fa-house fs-5 me-2"></i>
+                           <span class="nav-label mininav-content ms-1">
+                              <span data-popper-arrow class="arrow"></span>
+                              หน้าแรก
+                           </span>
+                        </a>
+                     </li>
+
+                     <li class="nav-item">
+                        <a href="track.html" class="nav-link mininav-toggle active"><i class="fa-solid fa-magnifying-glass fs-5 me-2"></i>
+                           <span class="nav-label mininav-content ms-1">
+                              <span data-popper-arrow class="arrow"></span>
+                              ติดตามคนหาย
+                           </span>
+                        </a>
+                     </li>
+
+                     <li class="nav-item">
+                        <a href="add-case.html" class="nav-link mininav-toggle"><i class="fa-solid fa-plus fs-5 me-2"></i>
+                           <span class="nav-label mininav-content ms-1">
+                              <span data-popper-arrow class="arrow"></span>
+                              เพิ่มเคส
+                           </span>
+                        </a>
+                     </li>
+
+                     <li class="nav-item">
+                        <a href="add-clue.html" class="nav-link mininav-toggle"><i class="fa-solid fa-bell fs-5 me-2"></i>
+                           <span class="nav-label mininav-content ms-1">
+                              <span data-popper-arrow class="arrow"></span>
+                              แจ้งเบาะแส
+                           </span>
+                        </a>
+                     </li>
+
+                     <li class="nav-item">
+                        <a href="dashboard.html" class="nav-link mininav-toggle"><i class="fa-solid fa-chart-pie fs-5 me-2"></i>
+                           <span class="nav-label mininav-content ms-1">
+                              <span data-popper-arrow class="arrow"></span>
+                              แดชบอร์ด
+                           </span>
+                        </a>
+                     </li>
+                     </ul>
+                  </div>
+               </div>
+            </div>
+         </nav>
+         <!-- END - MAIN NAVIGATION -->
+
+
+         <div class="content__boxed">
+            <div class="content__wrap py-4">
+
+               <div class="content-body">
+                  <h1 class="page-title mb-4"><i class="fa-solid fa-magnifying-glass me-2 text-primary"></i> ติดตามและค้นหาคนหาย</h1>
+
+                  <!-- กล่องค้นหา (Filters) -->
+                  <div class="card mb-4">
+                     <div class="card-body">
+                        <form class="row g-3 align-items-end">
+                            <div class="col-md-4 col-12">
+                                <label class="form-label fw-bold small text-body-secondary">ค้นหาชื่อ / รหัสเคส / เลขบัตร</label>
+                                <input type="text" class="form-control" placeholder="พิมพ์คำค้นหา...">
+                            </div>
+                            <div class="col-md-2 col-6">
+                                <label class="form-label fw-bold small text-body-secondary">สถานะ</label>
+                                <select class="form-select">
+                                    <option value="">ทั้งหมด</option>
+                                    <option value="active">กำลังค้นหา</option>
+                                    <option value="closed">พบตัวแล้ว</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 col-6">
+                                <label class="form-label fw-bold small text-body-secondary">ความเร่งด่วน</label>
+                                <select class="form-select">
+                                    <option value="">ทั้งหมด</option>
+                                    <option value="high">เร่งด่วนมาก (แดง)</option>
+                                    <option value="medium">เร่งด่วน (ส้ม)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 col-12">
+                                <label class="form-label fw-bold small text-body-secondary">จังหวัดที่หาย</label>
+                                <select class="form-select">
+                                    <option value="">ทุกจังหวัด</option>
+                                    <option value="กรุงเทพมหานคร">กรุงเทพมหานคร</option>
+                                    <option value="เชียงใหม่">เชียงใหม่</option>
+                                    <!-- เพิ่มจังหวัดอื่นๆ -->
+                                </select>
+                            </div>
+                            <div class="col-md-2 col-12 d-grid">
+                                <button type="button" class="btn btn-primary fw-bold"><i class="fa-solid fa-filter me-1"></i> กรองข้อมูล</button>
+                            </div>
+                        </form>
+                     </div>
+                  </div>
+
+                  <!-- ตารางแสดงผล (Data Table) -->
+                  <div class="card table-responsive">
+                     <table class="table table-hover align-middle m-0">
+                        <thead>
+                            <tr>
+                                <th width="80">ภาพ</th>
+                                <th>ข้อมูลคนหาย / รหัสเคส</th>
+                                <th>สถานที่ / วันที่หาย</th>
+                                <th>สถานะ / ระดับ</th>
+                                <th class="text-center" width="150">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- ตัวอย่างข้อมูล 1 -->
+                            <tr>
+                                <td><img src="https://via.placeholder.com/45" class="person-img" alt="pic"></td>
+                                <td>
+                                    <div class="fw-bold">ด.ช. สมมติ ทดสอบ (น้องเอ)</div>
+                                    <div class="small text-body-secondary"><i class="fa-solid fa-id-card"></i> TH-2026-0001</div>
+                                </td>
+                                <td>
+                                    <div><i class="fa-solid fa-location-dot text-danger"></i> เขตบางกะปิ กรุงเทพฯ</div>
+                                    <div class="small text-body-secondary">1 ก.ค. 2569</div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-danger mb-1">เร่งด่วนมาก</span><br>
+                                    <span class="badge bg-light text-dark border">กำลังค้นหา</span>
+                                </td>
+                                <td class="text-center">
+                                    <a href="case-detail.html" class="btn btn-outline-primary btn-sm fw-bold">ดูประวัติ</a>
+                                </td>
+                            </tr>
+                            <!-- ตัวอย่างข้อมูล 2 -->
+                            <tr>
+                                <td><img src="https://via.placeholder.com/45" class="person-img" alt="pic"></td>
+                                <td>
+                                    <div class="fw-bold">นาง ลืมจำ ทดสอบ</div>
+                                    <div class="small text-body-secondary"><i class="fa-solid fa-id-card"></i> TH-2026-0002</div>
+                                </td>
+                                <td>
+                                    <div><i class="fa-solid fa-location-dot text-danger"></i> อ.เมือง จ.เชียงใหม่</div>
+                                    <div class="small text-body-secondary">3 ก.ค. 2569</div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-danger mb-1">เร่งด่วนมาก</span><br>
+                                    <span class="badge bg-light text-dark border">กำลังค้นหา</span>
+                                </td>
+                                <td class="text-center">
+                                    <a href="case-detail.html" class="btn btn-outline-primary btn-sm fw-bold">ดูประวัติ</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                     </table>
+                  </div>
+
+                  <!-- Pagination -->
+                  <nav class="mt-4">
+                     <ul class="pagination justify-content-end">
+                        <li class="page-item disabled"><a class="page-link" href="#">ก่อนหน้า</a></li>
+                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item"><a class="page-link" href="#">ถัดไป</a></li>
+                     </ul>
+                  </nav>
+
+               </div>
+
+            </div>
+         </div>
+
+      </section>
+   </div>
+   <!-- END - PAGE CONTAINER -->
+
+   <!-- SCROLL TO TOP BUTTON -->
+   <div class="scroll-container">
+      <a href="#root" class="scroll-page ratio ratio-1x1" aria-label="Scroll button"></a>
+   </div>
+
+   <!-- JAVASCRIPTS -->
+   <script src="assets/nifty/vendors/popperjs/popper.min.js"></script>
+   <script src="assets/nifty/vendors/bootstrap/bootstrap.min.js"></script>
+   <script src="assets/nifty/js/nifty.min.js"></script>
+
+</body>
+</html>
