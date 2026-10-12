@@ -1,10 +1,11 @@
+// ฐานข้อมูลรหัสไปรษณีย์ (ตัวอย่างบางส่วน) — ถ้าไม่พบรหัส หน้าเว็บจะให้กรอกตำบล/อำเภอ/จังหวัดเอง
 const masterZipcodeDB = {
     "10200": {
-        subdistrict: "บรมมหาราชวัง",
+        subdistrict: "พระบรมมหาราชวัง",
         district: "พระนคร",
         province: "กรุงเทพมหานคร"
     },
-    "10200": {
+    "11120": {
         subdistrict: "ปากเกร็ด",
         district: "ปากเกร็ด",
         province: "นนทบุรี"
@@ -13,11 +14,5 @@ const masterZipcodeDB = {
         subdistrict: "ศรีภูมิ",
         district: "เมืองเชียงใหม่",
         province: "เชียงใหม่"
-    },
-    "50000": {
-        subdistrict: "ศรีภูมิ",
-        district: "เมืองเชียงใหม่",
-        province: "เชียงใหม่"
-    },
-    
+    }
 };

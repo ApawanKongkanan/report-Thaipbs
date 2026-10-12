@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="assets/nifty/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/nifty/css/nifty.min.css">
     <link rel="stylesheet" href="assets/nifty/css/overrides.css">
+    <script src="common.js"></script>
+    <script>App.guardPage(['admin']);</script>
     <style>
 
         /* Step Indicator */
@@ -85,11 +87,11 @@
                      <div class="dropdown-menu dropdown-menu-end">
                         <div class="d-flex align-items-center border-bottom px-3 py-2">
                            <div class="flex-grow-1">
-                              <h6 class="mb-0">เจ้าหน้าที่ (ผู้ดูแลระบบ)</h6>
-                              <small class="text-body-secondary">Thai PBS Center</small>
+                              <h6 class="mb-0" data-auth-name>ผู้ใช้งาน</h6>
+                              <small class="text-body-secondary" data-auth-role-label>-</small>
                            </div>
                         </div>
-                        <a href="login.html" class="dropdown-item" onclick="localStorage.clear();">
+                        <a href="login.html" class="dropdown-item" data-logout>
                            <i class="fa-solid fa-right-from-bracket fs-6 me-2"></i> ออกจากระบบ
                         </a>
                      </div>
@@ -115,29 +117,13 @@
                      <div class="d-grid">
                         <button class="mainnav-widget-toggle d-block btn border-0 p-2" data-bs-toggle="collapse" data-bs-target="#usernav" aria-expanded="false" aria-controls="usernav">
                            <span class="dropdown-toggle d-flex justify-content-center align-items-center">
-                              <h5 class="mb-0 me-3">เจ้าหน้าที่ (ผู้ดูแลระบบ)</h5>
+                              <h5 class="mb-0 me-3" data-auth-name>ผู้ใช้งาน</h5>
                            </span>
-                           <small class="text-body-secondary">ผู้ดูแลระบบ</small>
+                           <small class="text-body-secondary" data-auth-role-label>-</small>
                         </button>
 
                         <div id="usernav" class="nav flex-column collapse">
-                           <a href="#" class="nav-link d-flex justify-content-between align-items-center">
-                              <span><i class="fa-solid fa-envelope fs-5 me-2"></i><span class="ms-1">ข้อความ</span></span>
-                              <span class="badge bg-danger rounded-pill">14</span>
-                           </a>
-                           <a href="#" class="nav-link">
-                              <i class="fa-solid fa-user fs-5 me-2"></i>
-                              <span class="ms-1">โปรไฟล์</span>
-                           </a>
-                           <a href="#" class="nav-link">
-                              <i class="fa-solid fa-gear fs-5 me-2"></i>
-                              <span class="ms-1">ตั้งค่า</span>
-                           </a>
-                           <a href="#" class="nav-link">
-                              <i class="fa-solid fa-lock fs-5 me-2"></i>
-                              <span class="ms-1">ล็อกหน้าจอ</span>
-                           </a>
-                           <a href="login.html" class="nav-link" onclick="localStorage.clear();">
+                           <a href="login.html" class="nav-link" data-logout>
                               <i class="fa-solid fa-right-from-bracket fs-5 me-2"></i>
                               <span class="ms-1">ออกจากระบบ</span>
                            </a>
@@ -168,7 +154,7 @@
                         </a>
                      </li>
 
-                     <li class="nav-item">
+                     <li class="nav-item" data-role-only="admin">
                         <a href="add-case.html" class="nav-link mininav-toggle active"><i class="fa-solid fa-plus fs-5 me-2"></i>
                            <span class="nav-label mininav-content ms-1">
                               <span data-popper-arrow class="arrow"></span>
@@ -186,7 +172,7 @@
                         </a>
                      </li>
 
-                     <li class="nav-item">
+                     <li class="nav-item" data-role-only="admin">
                         <a href="dashboard.html" class="nav-link mininav-toggle"><i class="fa-solid fa-chart-pie fs-5 me-2"></i>
                            <span class="nav-label mininav-content ms-1">
                               <span data-popper-arrow class="arrow"></span>
@@ -219,13 +205,13 @@
 
                <div class="content-body">
 
-            <form id="multiStepForm" class="form-card" enctype="multipart/form-data">
+            <form id="multiStepForm" class="form-card" enctype="multipart/form-data" novalidate>
 
                 <!-- Step 1 -->
                 <div class="form-step active" id="step1">
                     <h4 class="fw-bold mb-4 text-primary"><i class="fa-solid fa-bullhorn me-2"></i>1. ข้อมูลการแจ้งเหตุ</h4>
-                    <div class="mb-4">
-                        <label class="form-label fw-bold mb-3">สาเหตุการสูญหาย (เลือกได้มากกว่า 1)</label>
+                    <div class="mb-4" id="causeGroup">
+                        <label class="form-label fw-bold mb-3 req">สาเหตุการสูญหาย (เลือกได้มากกว่า 1 — ลำดับที่เลือกคือความสำคัญ)</label>
                         <div class="row g-2">
                             <div class="col-6 col-md-4"><div class="selectable-box cause-box" data-cause="ถูกลักพาตัว"><i class="fa-solid fa-user-ninja d-md-none"></i>ถูกลักพาตัว<span class="rank-badge"></span></div></div>
                             <div class="col-6 col-md-4"><div class="selectable-box cause-box" data-cause="ปัญหาการใช้สื่อโซเชียล"><i class="fa-solid fa-mobile-screen d-md-none"></i>ปัญหาโซเชียล<span class="rank-badge"></span></div></div>
@@ -234,23 +220,25 @@
                             <div class="col-6 col-md-4"><div class="selectable-box cause-box" data-cause="มีอาการทางสมอง/ป่วย"><i class="fa-solid fa-head-side-virus d-md-none"></i>อาการทางสมอง/ป่วย<span class="rank-badge"></span></div></div>
                             <div class="col-6 col-md-4"><div class="selectable-box cause-box" data-cause="การล่อลวงทางเพศ/แรงงาน"><i class="fa-solid fa-handcuffs d-md-none"></i>ล่อลวงทางเพศ/แรงงาน<span class="rank-badge"></span></div></div>
                         </div>
+                        <div class="group-feedback"></div>
                     </div>
-                    <div class="mb-4">
-                        <label class="form-label fw-bold mb-3">ระดับความเร่งด่วน</label>
+                    <div class="mb-4" id="urgencyGroup">
+                        <label class="form-label fw-bold mb-3 req">ระดับความเร่งด่วน</label>
                         <div class="row g-2">
                             <div class="col-6 col-md-4"><div class="selectable-box urgency-orange target-urgency" data-value="เร่งด่วน">🟠 เร่งด่วน</div></div>
                             <div class="col-6 col-md-4"><div class="selectable-box urgency-red target-urgency" data-value="เร่งด่วนมาก">🔴 เร่งด่วนมาก</div></div>
                         </div>
-                        <input type="hidden" id="urgency_level" name="urgency_level"> <!-- 🌟 เพิ่ม name -->
+                        <input type="hidden" id="urgency_level" name="urgency_level">
+                        <div class="group-feedback"></div>
                     </div>
                 </div>
 
                 <!-- Step 2 -->
                 <div class="form-step" id="step2">
                     <h4 class="fw-bold mb-4 text-primary"><i class="fa-solid fa-user-shield me-2"></i>2. ข้อมูลผู้แจ้งเหตุ และช่องทางการติดต่อ</h4>
-                    
-                    <div class="mb-4 p-3 bg-light rounded border">
-                        <label class="form-label fw-bold">ติดต่อเรื่องมาจากช่องทางไหน?</label>
+
+                    <div class="mb-4 p-3 bg-light rounded border" id="contactGroup">
+                        <label class="form-label fw-bold req">ติดต่อเรื่องมาจากช่องทางไหน?</label>
                         <div class="row g-2 mb-2">
                             <div class="col-6 col-md-3"><div class="selectable-box target-contact" data-value="Facebook"><i class="fa-brands fa-facebook text-primary fs-5"></i> Facebook</div></div>
                             <div class="col-6 col-md-3"><div class="selectable-box target-contact" data-value="Line"><i class="fa-brands fa-line text-success fs-5"></i> LINE</div></div>
@@ -258,25 +246,26 @@
                             <div class="col-6 col-md-3"><div class="selectable-box target-contact" data-value="มูลนิธิ"><i class="fa-solid fa-building-ngo fs-5 text-warning"></i> มูลนิธิ</div></div>
                             <div class="col-12 col-md-12"><div class="selectable-box target-contact" data-value="อื่นๆ"><i class="fa-solid fa-ellipsis fs-5"></i> อื่นๆ</div></div>
                         </div>
-                        <input type="hidden" id="reporter_contact_source" name="reporter_contact_source"> <!-- 🌟 เพิ่ม name -->
-                        
+                        <input type="hidden" id="reporter_contact_source" name="reporter_contact_source">
+                        <div class="group-feedback"></div>
+
                         <!-- ช่องกรอกรายละเอียดเพิ่มเติม จะแสดงขึ้นมาตามช่องทางที่เลือก -->
                         <div class="mt-3" id="contact_detail_div" style="display:none; animation: fadeIn 0.3s ease;">
-                            <label class="form-label fw-bold text-primary" id="contact_detail_label">รายละเอียดช่องทาง</label>
-                            <input type="text" class="form-control border-primary" id="reporter_contact_detail" name="reporter_contact_detail" placeholder="ระบุรายละเอียดเพิ่มเติม...">
+                            <label class="form-label fw-bold text-primary" for="reporter_contact_detail" id="contact_detail_label">รายละเอียดช่องทาง</label>
+                            <input type="text" class="form-control border-primary" id="reporter_contact_detail" name="reporter_contact_detail" maxlength="255" placeholder="ระบุรายละเอียดเพิ่มเติม...">
                         </div>
                     </div>
 
                     <div class="row g-3 mb-4">
-                        <!-- 🌟 เปลี่ยน id จาก people_ เป็น reporter_ ให้ตรงกับ Backend -->
-                        <div class="col-md-3 col-12"><label class="form-label fw-bold">คำนำหน้าชื่อ / ยศ</label><input class="form-control" list="officialTitlesList" id="reporter_title" name="reporter_title" placeholder="เลือกหรือระบุ..."></div>
-                        <div class="col-md-5 col-12"><label class="form-label fw-bold">ชื่อ-นามสกุลผู้แจ้ง</label><input type="text" class="form-control" id="reporter_name" name="reporter_name"></div>
-                        <div class="col-md-4 col-12"><label class="form-label fw-bold">เบอร์โทรศัพท์ส่วนตัว (ผู้แจ้ง)</label><input type="text" class="form-control phone-format" id="reporter_phone" name="reporter_phone" placeholder="08X-XXX-XXXX" maxlength="12"></div>
+                        <div class="col-md-3 col-12"><label class="form-label fw-bold req" for="reporter_title">คำนำหน้าชื่อ / ยศ</label><input class="form-control" list="officialTitlesList" id="reporter_title" name="reporter_title" maxlength="50" placeholder="เลือกหรือระบุ..."></div>
+                        <div class="col-md-5 col-12"><label class="form-label fw-bold req" for="reporter_name">ชื่อ-นามสกุลผู้แจ้ง</label><input type="text" class="form-control" id="reporter_name" name="reporter_name" maxlength="150" autocomplete="off"></div>
+                        <div class="col-md-4 col-12"><label class="form-label fw-bold req" for="reporter_phone">เบอร์โทรศัพท์ส่วนตัว (ผู้แจ้ง)</label><input type="tel" inputmode="numeric" class="form-control phone-format" id="reporter_phone" name="reporter_phone" placeholder="080-000-0000" maxlength="12">
+                            <div class="form-text">ญาติจะใช้เบอร์นี้คู่กับเลขบัตรประชาชนในการลงทะเบียนติดตามเคส</div></div>
                     </div>
-                    
+
                     <div class="row g-3 mb-4">
                         <div class="col-md-4 col-12">
-                            <label class="form-label fw-bold text-secondary">ประเภทเอกสารยืนยันตัวตน</label>
+                            <label class="form-label fw-bold text-secondary req" for="reporter_id_type">ประเภทเอกสารยืนยันตัวตน</label>
                             <select class="form-select border-secondary" id="reporter_id_type" name="reporter_id_type" onchange="handleIdTypeChange('reporter')">
                                 <option value="บัตรประชาชน">บัตรประจำตัวประชาชน</option>
                                 <option value="พาสปอร์ต">หนังสือเดินทาง (Passport)</option>
@@ -285,13 +274,13 @@
                             </select>
                         </div>
                         <div class="col-md-8 col-12">
-                            <label class="form-label fw-bold text-secondary">หมายเลขเอกสารยืนยันตัวตน</label>
-                            <input type="text" class="form-control border-secondary" id="reporter_id_number" name="reporter_id_number" placeholder="1-XXXX-XXXXX-XX-X">
+                            <label class="form-label fw-bold text-secondary" for="reporter_id_number" id="reporter_id_label">หมายเลขเอกสารยืนยันตัวตน</label>
+                            <input type="text" class="form-control border-secondary" id="reporter_id_number" name="reporter_id_number" placeholder="1-XXXX-XXXXX-XX-X" maxlength="30" autocomplete="off">
                         </div>
                     </div>
 
                     <div class="mb-4">
-                        <label class="form-label fw-bold mb-2">ความสัมพันธ์กับผู้สูญหาย</label>
+                        <label class="form-label fw-bold mb-2 req" for="reporter_relationship">ความสัมพันธ์กับผู้สูญหาย</label>
                         <select class="form-select" id="reporter_relationship" name="reporter_relationship" onchange="document.getElementById('relation_other_div').style.display = (this.value === 'อื่นๆ') ? 'block' : 'none';">
                             <option value="">-- กรุณาเลือกความสัมพันธ์ --</option>
                             <option value="บิดา/มารดา">บิดา/มารดา</option>
@@ -305,7 +294,7 @@
                             <option value="อื่นๆ">อื่นๆ (โปรดระบุ)</option>
                         </select>
                         <div class="mt-2" id="relation_other_div" style="display:none;">
-                            <input type="text" class="form-control" id="reporter_relationship_other" name="reporter_relationship_other" placeholder="ระบุความสัมพันธ์เพิ่มเติม...">
+                            <input type="text" class="form-control" id="reporter_relationship_other" name="reporter_relationship_other" maxlength="100" placeholder="ระบุความสัมพันธ์เพิ่มเติม..." aria-label="ระบุความสัมพันธ์เพิ่มเติม">
                         </div>
                     </div>
                 </div>
@@ -314,46 +303,51 @@
                 <div class="form-step" id="step3">
                     <h4 class="fw-bold mb-4 text-primary"><i class="fa-solid fa-clock-rotate-left me-2"></i>3. วันเวลาและสถานที่พบเห็นครั้งสุดท้าย</h4>
                     <div class="row g-3 mb-4">
-                        <div class="col-md-3 col-12"><label class="form-label fw-bold">วันที่หาย</label><input type="date" class="form-control" id="last_seen_date" name="last_seen_date"></div>
+                        <div class="col-md-3 col-12"><label class="form-label fw-bold req" for="last_seen_date">วันที่หาย</label><input type="date" class="form-control" id="last_seen_date" name="last_seen_date"></div>
                         <div class="col-md-9 col-12">
-                            <label class="form-label fw-bold mb-2">ช่วงเวลาที่คาดว่าสูญหาย</label>
-                            <div class="row g-2 mb-3">
-                                <div class="col-6 col-md-3"><div class="selectable-box target-period" data-value="ช่วงเช้า (06:00 - 12:00)">🌅 เช้า</div></div>
-                                <div class="col-6 col-md-3"><div class="selectable-box target-period" data-value="ช่วงบ่าย (12:00 - 16:00)">☀️ บ่าย</div></div>
-                                <div class="col-6 col-md-3"><div class="selectable-box target-period" data-value="ช่วงเย็น (16:00 - 19:00)">🌆 เย็น</div></div>
-                                <div class="col-6 col-md-3"><div class="selectable-box target-period" data-value="ไม่ทราบเวลาแน่ชัด">❓ ไม่แน่ชัด</div></div>
+                            <div id="periodGroup">
+                                <label class="form-label fw-bold mb-2 req">ช่วงเวลาที่คาดว่าสูญหาย</label>
+                                <div class="row g-2 mb-1">
+                                    <div class="col-6 col-md"><div class="selectable-box target-period" data-value="ช่วงเช้า (06:00 - 12:00)" data-start="06:00" data-end="12:00">🌅 เช้า</div></div>
+                                    <div class="col-6 col-md"><div class="selectable-box target-period" data-value="ช่วงบ่าย (12:00 - 16:00)" data-start="12:00" data-end="16:00">☀️ บ่าย</div></div>
+                                    <div class="col-6 col-md"><div class="selectable-box target-period" data-value="ช่วงเย็น (16:00 - 19:00)" data-start="16:00" data-end="19:00">🌆 เย็น</div></div>
+                                    <div class="col-6 col-md"><div class="selectable-box target-period" data-value="ช่วงกลางคืน (19:00 - 06:00)" data-start="19:00" data-end="06:00">🌙 กลางคืน</div></div>
+                                    <div class="col-12 col-md"><div class="selectable-box target-period" data-value="ไม่ทราบเวลาแน่ชัด">❓ ไม่แน่ชัด</div></div>
+                                </div>
+                                <input type="hidden" id="time_period_val" name="time_period_val">
+                                <div class="group-feedback mb-2"></div>
                             </div>
-                            <input type="hidden" id="time_period_val" name="time_period_val">
-                            <div class="row g-2 align-items-center bg-light p-3 rounded border">
-                                <div class="col-12 col-md-auto"><span class="small fw-bold text-muted">ระบุเวลาประมาณคร่าวๆ:</span></div>
-                                <div class="col-5 col-md-3"><input type="time" class="form-control" id="time_start" name="time_start"></div>
-                                <div class="col-2 col-md-auto text-center"><span>ถึง</span></div>
-                                <div class="col-5 col-md-3"><input type="time" class="form-control" id="time_end" name="time_end"></div>
+                            <div class="row g-2 align-items-start bg-light p-3 rounded border mt-2">
+                                <div class="col-12 col-md-auto pt-md-2"><span class="small fw-bold text-muted" id="timeLabel">ระบุเวลาประมาณคร่าวๆ:</span></div>
+                                <div class="col-5 col-md-3"><input type="time" class="form-control" id="time_start" name="time_start" aria-label="เวลาเริ่มต้น"></div>
+                                <div class="col-2 col-md-auto text-center pt-2"><span>ถึง</span></div>
+                                <div class="col-5 col-md-3"><input type="time" class="form-control" id="time_end" name="time_end" aria-label="เวลาสิ้นสุด (ถ้ามี)"></div>
                             </div>
                         </div>
                     </div>
 
                     <div class="row g-3 mb-4">
-                        <div class="col-12"><label class="form-label fw-bold">สถานที่พบเห็นล่าสุด (จุดสังเกต)</label><textarea class="form-control" id="last_seen_place" name="last_seen_place" rows="2" placeholder="เช่น หน้าตลาด, ห้างสรรพสินค้า, ป้ายรถเมล์..."></textarea></div>
-                        <div class="col-md-3 col-6"><label class="form-label fw-bold text-success">📮 รหัสไปรษณีย์</label><input type="text" class="form-control border-success fw-bold" id="zipcode" name="zipcode" placeholder="เช่น 10900" maxlength="5"></div>
-                        <div class="col-md-3 col-6"><label class="form-label text-muted">ตำบล / แขวง</label><input type="text" class="form-control bg-light" id="subdistrict" name="subdistrict" readonly></div>
-                        <div class="col-md-3 col-6"><label class="form-label text-muted">อำเภอ / เขต</label><input type="text" class="form-control bg-light" id="district" name="district" readonly></div>
-                        <div class="col-md-3 col-6"><label class="form-label text-muted">จังหวัด</label><input type="text" class="form-control bg-light" id="province" name="province" readonly></div>
+                        <div class="col-12"><label class="form-label fw-bold req" for="last_seen_place">สถานที่พบเห็นล่าสุด (จุดสังเกต)</label><textarea class="form-control" id="last_seen_place" name="last_seen_place" rows="2" maxlength="500" placeholder="เช่น หน้าตลาด, ห้างสรรพสินค้า, ป้ายรถเมล์..."></textarea></div>
+                        <div class="col-md-3 col-6"><label class="form-label fw-bold text-success req" for="zipcode">📮 รหัสไปรษณีย์</label><input type="text" inputmode="numeric" class="form-control border-success fw-bold" id="zipcode" name="zipcode" placeholder="เช่น 10900" maxlength="5"></div>
+                        <div class="col-md-3 col-6"><label class="form-label text-muted req" for="subdistrict">ตำบล / แขวง</label><input type="text" class="form-control bg-light" id="subdistrict" name="subdistrict" maxlength="100" readonly></div>
+                        <div class="col-md-3 col-6"><label class="form-label text-muted req" for="district">อำเภอ / เขต</label><input type="text" class="form-control bg-light" id="district" name="district" maxlength="100" readonly></div>
+                        <div class="col-md-3 col-6"><label class="form-label text-muted req" for="province">จังหวัด</label><input type="text" class="form-control bg-light" id="province" name="province" list="provinceList" maxlength="100" readonly></div>
+                        <div class="col-12"><div class="small" id="zipHint" aria-live="polite"></div></div>
                     </div>
                 </div>
 
                 <!-- Step 4 -->
                 <div class="form-step" id="step4">
                     <h4 class="fw-bold mb-4 text-primary"><i class="fa-solid fa-user-injured me-2"></i>4. ข้อมูลคนหายและลักษณะทางกายภาพ</h4>
-                    
+
                     <div class="row g-3 mb-3">
-                        <div class="col-md-3 col-4"><label class="form-label fw-bold">คำนำหน้า</label><input class="form-control" list="officialTitlesList" id="missing_title" name="missing_title" placeholder="นาย,นาง..."></div>
-                        <div class="col-md-9 col-8"><label class="form-label fw-bold">ชื่อ-นามสกุลคนหาย</label><input type="text" class="form-control" id="missing_name" name="missing_name"></div>
+                        <div class="col-md-3 col-4"><label class="form-label fw-bold req" for="missing_title">คำนำหน้า</label><input class="form-control" list="officialTitlesList" id="missing_title" name="missing_title" maxlength="50" placeholder="นาย,นาง..."></div>
+                        <div class="col-md-9 col-8"><label class="form-label fw-bold req" for="missing_name">ชื่อ-นามสกุลคนหาย</label><input type="text" class="form-control" id="missing_name" name="missing_name" maxlength="150" autocomplete="off"></div>
                     </div>
 
                     <div class="row g-3 mb-2">
                         <div class="col-md-4 col-6">
-                            <label class="form-label fw-bold">เพศโดยกำเนิด</label>
+                            <label class="form-label fw-bold req" for="missing_gender_birth">เพศโดยกำเนิด</label>
                             <select class="form-select" id="missing_gender_birth" onchange="updateGenderCategory()">
                                 <option value="">-- เลือก --</option>
                                 <option value="ชาย">ชาย</option>
@@ -361,7 +355,7 @@
                             </select>
                         </div>
                         <div class="col-md-4 col-6">
-                            <label class="form-label fw-bold">
+                            <label class="form-label fw-bold req" for="missing_gender_current">
                                 เพศสภาพในปัจจุบัน
                                 <i class="fa-solid fa-circle-info text-secondary ms-1" style="cursor: help;" data-bs-toggle="tooltip" data-bs-placement="top" title="โปรดพิจารณาจากลักษณะภายนอกของผู้สูญหาย เช่น รูปร่าง การแต่งกาย หรือทรงผม ว่ามีลักษณะใกล้เคียงกับเพศชายหรือเพศหญิงมากกว่ากัน เพื่อประโยชน์ในการติดตามค้นหา หากเพศโดยกำเนิดและเพศสภาพในปัจจุบันไม่ตรงกัน ระบบจะจัดอยู่ในหมวดหมู่ LGBTQ+ ให้โดยอัตโนมัติ"></i>
                             </label>
@@ -373,25 +367,26 @@
                             </select>
                         </div>
                         <div class="col-md-4 col-12">
-                            <label class="form-label fw-bold">หมวดหมู่เพศ (ระบบคำนวณให้อัตโนมัติ)</label>
+                            <span class="form-label fw-bold d-block">หมวดหมู่เพศ (ระบบคำนวณให้อัตโนมัติ)</span>
                             <div><span id="gender_category_badge" class="badge bg-secondary py-2 px-3 fs-6">- ยังไม่ได้ระบุ -</span></div>
                             <input type="hidden" id="missing_gender" name="missing_gender">
                         </div>
                         <div class="col-12" id="gender_lgbtq_desc_div" style="display:none;">
-                            <label class="form-label fw-bold text-secondary mt-2">อธิบายลักษณะเพิ่มเติม (ถ้ามี)</label>
-                            <textarea class="form-control" id="missing_gender_desc" name="missing_gender_desc" rows="2" placeholder="เช่น ลักษณะการแต่งกาย ทรงผม หรือข้อมูลอื่นที่เป็นประโยชน์ต่อการติดตามค้นหา"></textarea>
+                            <label class="form-label fw-bold text-secondary mt-2" for="missing_gender_desc">อธิบายลักษณะเพิ่มเติม (ถ้ามี)</label>
+                            <textarea class="form-control" id="missing_gender_desc" name="missing_gender_desc" rows="2" maxlength="500" placeholder="เช่น ลักษณะการแต่งกาย ทรงผม หรือข้อมูลอื่นที่เป็นประโยชน์ต่อการติดตามค้นหา"></textarea>
                         </div>
                     </div>
 
                     <div class="row g-3 mb-4 mt-1">
-                        <div class="col-md-5 col-6"><label class="form-label fw-bold">วัน/เดือน/ปีเกิด</label><input type="date" class="form-control" id="missing_birthdate" name="missing_birthdate"></div>
-                        <div class="col-md-3 col-6"><label class="form-label fw-bold">อายุ (ปี)</label><input type="number" class="form-control" id="missing_age" name="missing_age" min="0" placeholder="เช่น 25"></div>
-                        <div class="col-md-4 col-12"><label class="form-label fw-bold">สัญชาติ</label><input type="text" class="form-control" id="missing_nationality" name="missing_nationality" value="ไทย"></div>
+                        <div class="col-md-5 col-6"><label class="form-label fw-bold" for="missing_birthdate">วัน/เดือน/ปีเกิด (ถ้าทราบ)</label><input type="date" class="form-control" id="missing_birthdate" name="missing_birthdate">
+                            <div class="form-text">กรอกวันเกิดแล้วระบบจะคำนวณอายุให้</div></div>
+                        <div class="col-md-3 col-6"><label class="form-label fw-bold req" for="missing_age">อายุ (ปี)</label><input type="number" class="form-control" id="missing_age" name="missing_age" min="0" max="120" step="1" inputmode="numeric" placeholder="เช่น 25"></div>
+                        <div class="col-md-4 col-12"><label class="form-label fw-bold req" for="missing_nationality">สัญชาติ</label><input type="text" class="form-control" id="missing_nationality" name="missing_nationality" maxlength="50" value="ไทย"></div>
                     </div>
 
                     <div class="row g-3 mb-4 bg-light p-3 rounded border">
                         <div class="col-md-4 col-12">
-                            <label class="form-label fw-bold text-secondary">เอกสารยืนยันตัวตน (คนหาย)</label>
+                            <label class="form-label fw-bold text-secondary req" for="missing_id_type">เอกสารยืนยันตัวตน (คนหาย)</label>
                             <select class="form-select border-secondary" id="missing_id_type" name="missing_id_type" onchange="handleIdTypeChange('missing')">
                                 <option value="บัตรประชาชน">บัตรประจำตัวประชาชน</option>
                                 <option value="พาสปอร์ต">หนังสือเดินทาง (Passport)</option>
@@ -400,16 +395,16 @@
                             </select>
                         </div>
                         <div class="col-md-8 col-12">
-                            <label class="form-label fw-bold text-secondary">หมายเลขเอกสาร (ถ้ามี)</label>
-                            <input type="text" class="form-control border-secondary" id="missing_id_number" name="missing_id_number" placeholder="1-XXXX-XXXXX-XX-X">
+                            <label class="form-label fw-bold text-secondary" for="missing_id_number" id="missing_id_label">หมายเลขเอกสาร</label>
+                            <input type="text" class="form-control border-secondary" id="missing_id_number" name="missing_id_number" placeholder="1-XXXX-XXXXX-XX-X" maxlength="30" autocomplete="off">
                         </div>
                     </div>
 
                     <h5 class="fw-bold text-secondary mb-3 mt-4"><i class="fa-solid fa-dna"></i> ลักษณะรูปพรรณสัณฐาน</h5>
                     <div class="row g-3 mb-4">
-                        <div class="col-md-3 col-6"><label class="form-label fw-bold text-primary">ส่วนสูง (ซม.)</label><input type="number" class="form-control border-primary" id="missing_height" name="missing_height" min="0" placeholder="เช่น 170"></div>
-                        <div class="col-md-3 col-6">
-                            <label class="form-label fw-bold">สีผิว</label>
+                        <div class="col-md-4 col-6"><label class="form-label fw-bold text-primary req" for="missing_height">ส่วนสูง (ซม.)</label><input type="number" class="form-control border-primary" id="missing_height" name="missing_height" min="30" max="250" step="1" inputmode="numeric" placeholder="เช่น 170"></div>
+                        <div class="col-md-4 col-6">
+                            <label class="form-label fw-bold req" for="skin_color_select">สีผิว</label>
                             <select class="form-select physical-select" id="skin_color_select" name="skin_color" data-other="skin_other_div">
                                 <option value="ผิวขาว">ผิวขาว</option>
                                 <option value="ผิวขาวเหลือง">ผิวขาวเหลือง</option>
@@ -417,10 +412,10 @@
                                 <option value="ผิวคล้ำ">ผิวคล้ำ</option>
                                 <option value="อื่นๆ">อื่นๆ (ระบุเอง)</option>
                             </select>
-                            <div class="mt-2" id="skin_other_div" style="display:none;"><input type="text" class="form-control form-control-sm" id="skin_other_val" name="skin_color_other" placeholder="ระบุสีผิว..."></div>
+                            <div class="mt-2" id="skin_other_div" style="display:none;"><input type="text" class="form-control form-control-sm" id="skin_other_val" name="skin_color_other" maxlength="100" placeholder="ระบุสีผิว..." aria-label="ระบุสีผิว"></div>
                         </div>
-                        <div class="col-md-3 col-6">
-                            <label class="form-label fw-bold">รูปร่าง</label>
+                        <div class="col-md-4 col-6">
+                            <label class="form-label fw-bold req" for="body_shape_select">รูปร่าง</label>
                             <select class="form-select physical-select" id="body_shape_select" name="body_shape" data-other="body_other_div">
                                 <option value="ผอม">ผอม</option>
                                 <option value="สมส่วน">สมส่วน</option>
@@ -428,26 +423,38 @@
                                 <option value="อ้วน">อ้วน</option>
                                 <option value="อื่นๆ">อื่นๆ (ระบุเอง)</option>
                             </select>
-                            <div class="mt-2" id="body_other_div" style="display:none;"><input type="text" class="form-control form-control-sm" id="body_other_val" name="body_shape_other" placeholder="ระบุรูปร่าง..."></div>
+                            <div class="mt-2" id="body_other_div" style="display:none;"><input type="text" class="form-control form-control-sm" id="body_other_val" name="body_shape_other" maxlength="100" placeholder="ระบุรูปร่าง..." aria-label="ระบุรูปร่าง"></div>
                         </div>
-                        <div class="col-md-3 col-6">
-                            <label class="form-label fw-bold">ลักษณะผม</label>
+                        <div class="col-md-6 col-6">
+                            <label class="form-label fw-bold req" for="hair_style_select">ลักษณะผม</label>
                             <select class="form-select physical-select" id="hair_style_select" name="hair_style" data-other="hair_other_div">
-                                <option value="ผมดำสั้น">ผมดำสั้น</option>
-                                <option value="ผมดำยาว">ผมดำยาว</option>
-                                <option value="ผมหงอก/ขาว">ผมหงอก / ผมขาว</option>
+                                <option value="ผมสั้น">ผมสั้น</option>
+                                <option value="ผมยาว">ผมยาว</option>
+                                <option value="ผมหยิก/ดัด">ผมหยิก / ดัด</option>
                                 <option value="หัวล้าน/สกินเฮด">หัวล้าน / สกินเฮด</option>
                                 <option value="อื่นๆ">อื่นๆ (ระบุเอง)</option>
                             </select>
-                            <div class="mt-2" id="hair_other_div" style="display:none;"><input type="text" class="form-control form-control-sm" id="hair_other_val" name="hair_style_other" placeholder="ระบุลักษณะผม..."></div>
+                            <div class="mt-2" id="hair_other_div" style="display:none;"><input type="text" class="form-control form-control-sm" id="hair_other_val" name="hair_style_other" maxlength="100" placeholder="ระบุลักษณะผม..." aria-label="ระบุลักษณะผม"></div>
+                        </div>
+                        <div class="col-md-6 col-6">
+                            <label class="form-label fw-bold req" for="hair_color_select">สีผม</label>
+                            <select class="form-select" id="hair_color_select" name="hair_color">
+                                <option value="ดำ">ดำ</option>
+                                <option value="น้ำตาล">น้ำตาล</option>
+                                <option value="ทอง/บลอนด์">ทอง / บลอนด์</option>
+                                <option value="หงอก/ขาว">หงอก / ขาว</option>
+                                <option value="ย้อมสีอื่น">ย้อมสีอื่น</option>
+                                <option value="ไม่มีผม">ไม่มีผม</option>
+                            </select>
                         </div>
                     </div>
 
                     <h5 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-camera"></i> รูปภาพอัตลักษณ์บุคคล</h5>
                     <div class="row g-3">
                         <div class="col-12 bg-light p-4 rounded border text-center">
-                            <label class="form-label fw-bold text-primary d-block mb-3"><i class="fa-solid fa-image"></i> อัปโหลดรูปภาพคนหาย (หน้าตรงหรือชัดเจนที่สุด)</label>
+                            <label class="form-label fw-bold text-primary d-block mb-3 req" for="missing_img_input"><i class="fa-solid fa-image"></i> อัปโหลดรูปภาพคนหาย (หน้าตรงหรือชัดเจนที่สุด)</label>
                             <input type="file" class="form-control mx-auto" style="max-width: 400px;" id="missing_img_input" name="missing_image" accept="image/*" onchange="previewImage(this, 'missing_img_preview')">
+                            <div class="form-text">ไฟล์รูปภาพ (JPG, PNG, WEBP) ขนาดไม่เกิน 10 MB</div>
                             <img id="missing_img_preview" class="upload-preview mx-auto mt-3" alt="รูปคนหาย">
                         </div>
                     </div>
@@ -456,35 +463,45 @@
                 <!-- Step 5 -->
                 <div class="form-step" id="step5">
                     <h4 class="fw-bold mb-4 text-primary"><i class="fa-solid fa-building-shield"></i> 5. สถานีตำรวจที่รับแจ้งความ</h4>
-                    
+
                     <div class="row g-3 mb-4">
                         <div class="col-md-6 col-12">
-                            <label class="form-label fw-bold">เลือกจังหวัดของ สน./สภ.</label>
-                            <select class="form-select" id="police_province_select" name="police_province"> <!-- 🌟 เพิ่ม name -->
+                            <label class="form-label fw-bold req" for="police_province_select">เลือกจังหวัดของ สน./สภ.</label>
+                            <select class="form-select" id="police_province_select" name="police_province">
                                 <option value="">-- เลือกจังหวัด --</option>
                             </select>
                         </div>
                         <div class="col-md-6 col-12">
-                            <label class="form-label fw-bold">สถานีตำรวจที่รับผิดชอบ</label>
-                            <select class="form-select" id="police_station_select" name="police_station" disabled> <!-- 🌟 เพิ่ม name -->
+                            <label class="form-label fw-bold req" for="police_station_select">สถานีตำรวจที่รับผิดชอบ</label>
+                            <select class="form-select" id="police_station_select" name="police_station" disabled>
                                 <option value="">-- โปรดเลือกจังหวัดก่อน --</option>
                             </select>
                         </div>
-                        <div class="col-12"><label class="form-label fw-bold">เบอร์โทรศัพท์สถานีตำรวจ</label><input type="text" class="form-control bg-light fw-bold text-primary" id="police_station_phone" readonly></div>
+                        <div class="col-12"><label class="form-label fw-bold" for="police_station_phone">เบอร์โทรศัพท์สถานีตำรวจ</label><input type="text" class="form-control bg-light fw-bold text-primary" id="police_station_phone" readonly></div>
                     </div>
 
                     <div class="row g-3 mb-4">
                         <div class="col-12 bg-light p-4 rounded border text-center">
-                            <label class="form-label fw-bold text-success d-block mb-3"><i class="fa-solid fa-file-invoice"></i> อัปโหลดรูปใบแจ้งความ / บันทึกประจำวัน</label>
+                            <label class="form-label fw-bold text-success d-block mb-3 req" for="police_doc_input"><i class="fa-solid fa-file-invoice"></i> อัปโหลดรูปใบแจ้งความ / บันทึกประจำวัน</label>
                             <input type="file" class="form-control mx-auto" style="max-width: 400px;" id="police_doc_input" name="police_document" accept="image/*" onchange="previewImage(this, 'police_doc_preview')">
+                            <div class="form-text">อัปโหลดแล้วระบบจะอ่านข้อความอัตโนมัติ (OCR) และกรอกข้อมูลใบแจ้งความด้านล่างให้</div>
                             <img id="police_doc_preview" class="upload-preview mx-auto mt-3" alt="ใบแจ้งความ">
                         </div>
                     </div>
 
                     <div class="card p-3 shadow-sm border-info bg-light">
-                        <h6 class="fw-bold text-info m-0"><i class="fa-solid fa-wand-magic-sparkles"></i> ผลสแกนข้อความใบแจ้งความอัตโนมัติ (OCR)</h6>
-                        <div class="ocr-box mt-3 text-dark bg-white border" id="ocr_live_text" style="min-height: 100px;">
-                            <div class="text-muted text-center p-3">[ระบบจะดึงข้อความอัตโนมัติเมื่ออัปโหลดรูปใบแจ้งความ]</div>
+                        <h6 class="fw-bold text-info m-0"><i class="fa-solid fa-wand-magic-sparkles"></i> ข้อมูลใบแจ้งความ (อ่านอัตโนมัติด้วย OCR — ตรวจสอบและแก้ไขได้)</h6>
+                        <div class="ocr-box mt-3 text-dark bg-white border" id="ocr_live_text">
+                            <div class="text-muted text-center p-2">[ระบบจะดึงข้อความอัตโนมัติเมื่ออัปโหลดรูปใบแจ้งความ หรือกรอกข้อมูลเองด้านล่างได้]</div>
+                        </div>
+                        <div class="row g-3 mt-1" id="policeReportFields">
+                            <div class="col-md-6"><label class="form-label fw-bold req" for="policereport_number">เลขที่ใบแจ้งความ / เลขประจำวัน</label><input type="text" class="form-control" id="policereport_number" name="policereport_number" maxlength="100"></div>
+                            <div class="col-md-3 col-6"><label class="form-label fw-bold req" for="policereport_date">วันที่แจ้งความ</label><input type="date" class="form-control" id="policereport_date" name="policereport_date">
+                                <div class="form-text text-warning-emphasis" id="ocrDateHint"></div></div>
+                            <div class="col-md-3 col-6"><label class="form-label fw-bold" for="policereport_time">เวลาที่แจ้ง (ถ้ามี)</label><input type="time" class="form-control" id="policereport_time" name="policereport_time"></div>
+                            <div class="col-md-6"><label class="form-label fw-bold req" for="policereport_location">สถานที่แจ้ง (สน./สภ.)</label><input type="text" class="form-control" id="policereport_location" name="policereport_location" maxlength="150"></div>
+                            <div class="col-md-6"><label class="form-label fw-bold" for="policereport_name">ชื่อตำรวจผู้รับแจ้ง (ถ้ามี)</label><input type="text" class="form-control" id="policereport_name" name="policereport_name" maxlength="150"></div>
+                            <div class="col-12"><label class="form-label fw-bold req" for="policereport_purpose">รายละเอียด / วัตถุประสงค์การแจ้งความ</label><textarea class="form-control" id="policereport_purpose" name="policereport_purpose" rows="3" maxlength="2000"></textarea></div>
                         </div>
                     </div>
                 </div>
@@ -494,7 +511,10 @@
                     <h4 class="fw-bold mb-4 text-primary"><i class="fa-solid fa-circle-check"></i> 6. ตรวจสอบข้อมูลก่อนบันทึก</h4>
                     <div class="row g-4">
                         <div class="col-lg-8 col-12">
-                            <div class="alert alert-secondary p-4 rounded" id="previewBox" style="white-space: pre-line; line-height: 1.8; font-size: 15px; border-left: 5px solid var(--bs-primary); background-color: var(--bs-tertiary-bg);"></div>
+                            <div class="alert alert-secondary p-4 rounded" id="previewBox" style="line-height: 1.8; font-size: 15px; border-left: 5px solid var(--bs-primary); background-color: var(--bs-tertiary-bg);"></div>
+                            <label class="form-label fw-bold" for="case_notes_input">หมายเหตุเพิ่มเติมสำหรับเจ้าหน้าที่ (ถ้ามี)</label>
+                            <textarea class="form-control" id="case_notes_input" rows="3" maxlength="1000" placeholder="เช่น ข้อมูลการแต่งกายวันที่หาย โรคประจำตัว หรือบุคคลที่น่าจะติดต่อได้"></textarea>
+                            <div class="form-text">ระบบจะรวมช่องทางรับแจ้ง ช่วงเวลาที่หาย และข้อมูลเพิ่มเติมไว้ในบันทึกของเคสให้อัตโนมัติ</div>
                         </div>
                         <div class="col-lg-4 col-12">
                             <div class="bg-light p-3 rounded border text-center h-100">
@@ -510,14 +530,38 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- พบเคสซ้ำที่ยังเปิดอยู่ (409 duplicate_open_case) -->
+                    <div class="alert alert-warning mt-4 d-none" id="duplicatePanel" role="alert">
+                        <h6 class="fw-bold"><i class="fa-solid fa-triangle-exclamation me-1"></i> พบเคสของบุคคลนี้ที่กำลังดำเนินการอยู่แล้ว</h6>
+                        <p class="mb-2" id="duplicateText"></p>
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="#" target="_blank" rel="noopener" class="btn btn-outline-dark btn-sm fw-bold" id="duplicateLink"><i class="fa-solid fa-up-right-from-square me-1"></i> เปิดดูเคสเดิม</a>
+                            <button type="button" class="btn btn-warning btn-sm fw-bold" id="forceCreateBtn"><i class="fa-solid fa-plus me-1"></i> ยืนยันสร้างเคสใหม่</button>
+                        </div>
+                    </div>
+                    <div class="alert alert-danger mt-4 d-none" id="submitError" role="alert"></div>
                 </div>
 
-                <div class="d-flex justify-content-between mt-5 pt-3 border-top">
+                <div class="d-flex justify-content-between mt-5 pt-3 border-top" id="stepNav">
                     <button type="button" class="btn btn-outline-secondary px-4 py-2 fw-bold" id="prevBtn" onclick="changeStep(-1)" disabled>ย้อนกลับ</button>
                     <button type="button" class="btn btn-primary px-5 py-2 fw-bold shadow-sm" id="nextBtn" onclick="changeStep(1)">ถัดไป <i class="fa-solid fa-arrow-right ms-1"></i></button>
                 </div>
 
             </form>
+
+            <!-- บันทึกสำเร็จ -->
+            <div class="form-card text-center d-none" id="successPanel">
+                <div class="display-4 text-success mb-3"><i class="fa-solid fa-circle-check"></i></div>
+                <h3 class="fw-bold text-success">บันทึกเคสคนหายเรียบร้อยแล้ว</h3>
+                <p class="fs-5 mb-1">รหัสเคส: <strong id="successCaseId">-</strong></p>
+                <p class="text-body-secondary">สถานะเริ่มต้น: รับแจ้งเหตุ — เจ้าหน้าที่สามารถอัปเดตสถานะได้ที่หน้ารายละเอียดเคส</p>
+                <div class="d-flex justify-content-center flex-wrap gap-2 mt-4">
+                    <a href="#" class="btn btn-primary fw-bold" id="successDetailLink"><i class="fa-solid fa-folder-open me-1"></i> ดูรายละเอียดเคส</a>
+                    <a href="add-case.html" class="btn btn-outline-primary fw-bold"><i class="fa-solid fa-plus me-1"></i> เพิ่มเคสใหม่</a>
+                    <a href="Homepage.html" class="btn btn-outline-secondary fw-bold"><i class="fa-solid fa-house me-1"></i> กลับหน้าแรก</a>
+                </div>
+            </div>
                </div>
 
             </div>
@@ -530,6 +574,7 @@
         <option value="ด.ช.">ด.ช. (เด็กชาย)</option>
         <option value="ด.ญ.">ด.ญ. (เด็กหญิง)</option>
     </datalist>
+    <datalist id="provinceList"></datalist>
 
       </section>
    </div>
@@ -549,38 +594,69 @@
     <script src="zipcodeData.js"></script>
 
     <script>
-        const API_BASE_URL = window.location.origin;
+        // ======================================================================
+        // เพิ่มเคสคนหาย → POST /api/cases (multipart/form-data)
+        // ชื่อฟิลด์ตรงกับ Backend/route/missing.route.js:
+        //   ไฟล์: missing_image, police_document   | OCR: POST /api/ocr ฟิลด์ police_doc_ocr
+        //   causes = JSON [{ name, rank }]          | policereport_* จากผล OCR (แก้ไขได้)
+        // ======================================================================
+        const session = App.getSession();
+        const TOTAL_STEPS = 6;
+        const MAX_FILE_MB = 10;
+        const STEP_TITLES = { 1: 'ข้อมูลการแจ้ง', 2: 'ข้อมูลผู้แจ้ง', 3: 'วันเวลา/สถานที่', 4: 'ข้อมูลคนหาย', 5: 'สถานีตำรวจ' };
         let currentStep = 1;
         let selectedCauses = [];
+        let ocrState = 'idle';          // idle | scanning | done | failed
+        let ocrSeq = 0;
+        let submitting = false;
+        let submitted = false;
+        let formDirty = false;
 
-        function previewImage(input, previewId) {
-            const preview = document.getElementById(previewId);
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    preview.src = e.target.result;
-                    preview.style.display = 'block';
-                    if(previewId === 'missing_img_preview') document.getElementById('final_missing_preview').src = e.target.result;
-                    if(previewId === 'police_doc_preview') document.getElementById('final_police_preview').src = e.target.result;
-                }
-                reader.readAsDataURL(input.files[0]);
-            }
+        const $ = id => document.getElementById(id);
+        const val = id => ($(id) && $(id).value !== undefined ? String($(id).value).trim() : '');
+        const esc = App.escapeHtml;
+        const pad = n => String(n).padStart(2, '0');
+        const todayStr = () => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
+
+        // ---------------------------------------------------------------
+        // แสดงผล / ตรวจสอบไฟล์รูป
+        // ---------------------------------------------------------------
+        function checkImageFile(input, required, label) {
+            const file = input.files && input.files[0];
+            if (!file) return required ? `กรุณาอัปโหลด${label}` : '';
+            if (!/^image\//.test(file.type)) return `${label}ต้องเป็นไฟล์รูปภาพเท่านั้น`;
+            if (file.size > MAX_FILE_MB * 1024 * 1024) return `${label}มีขนาดเกิน ${MAX_FILE_MB} MB`;
+            return '';
         }
 
-        // เปิดใช้งาน Bootstrap Tooltip สำหรับไอคอนคำอธิบาย (แสดงเมื่อเมาส์ชี้เท่านั้น)
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
-        });
+        function previewImage(input, previewId) {
+            const preview = $(previewId);
+            const finalId = previewId === 'missing_img_preview' ? 'final_missing_preview' : 'final_police_preview';
+            const file = input.files && input.files[0];
+            if (!file || !/^image\//.test(file.type)) {
+                preview.removeAttribute('src');
+                preview.style.display = 'none';
+                $(finalId).removeAttribute('src');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = e => {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                $(finalId).src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
 
-        // คำนวณ "หมวดหมู่เพศ" จากเพศโดยกำเนิด + เพศสภาพในปัจจุบัน (ตามลักษณะภายนอกที่มองเห็นได้)
-        // หากไม่ตรงกัน (เช่น เกิดชาย ปัจจุบันหญิง) หรือเลือก LGBTQ+ ตรงๆ จะจัดเป็นหมวด LGBTQ+ ให้อัตโนมัติ
+        // ---------------------------------------------------------------
+        // เพศ: เพศโดยกำเนิด + เพศสภาพในปัจจุบัน → missing_gender (ชาย / หญิง / LGBTQ+)
+        // ---------------------------------------------------------------
         function updateGenderCategory() {
-            const birth = document.getElementById('missing_gender_birth').value;
-            const current = document.getElementById('missing_gender_current').value;
-            const finalInput = document.getElementById('missing_gender');
-            const badge = document.getElementById('gender_category_badge');
-            const descDiv = document.getElementById('gender_lgbtq_desc_div');
-
+            const birth = val('missing_gender_birth');
+            const current = val('missing_gender_current');
+            const finalInput = $('missing_gender');
+            const badge = $('gender_category_badge');
+            const descDiv = $('gender_lgbtq_desc_div');
             if (!birth || !current) {
                 finalInput.value = '';
                 badge.textContent = '- ยังไม่ได้ระบุ -';
@@ -588,7 +664,6 @@
                 descDiv.style.display = 'none';
                 return;
             }
-
             if (current === 'LGBTQ+' || birth !== current) {
                 finalInput.value = 'LGBTQ+';
                 badge.textContent = 'LGBTQ+';
@@ -602,328 +677,758 @@
             }
         }
 
-        // จัดการเลขบัตรประชาชนให้มีขีดอัตโนมัติ
-        function applyIdFormatter(inputId, typeId) {
-            const input = document.getElementById(inputId);
-            const typeSelect = document.getElementById(typeId);
-            input.addEventListener('input', function() {
-                let v = this.value.replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
-                const type = typeSelect.value;
-                if (type === 'บัตรประชาชน') {
-                    v = v.substring(0, 13);
-                    let m = v.match(/^(\d{0,1})(\d{0,4})(\d{0,5})(\d{0,2})(\d{0,1})$/);
-                    if (m) this.value = [m[1], m[2], m[3], m[4], m[5]].filter(Boolean).join('-');
-                    else this.value = v;
-                } else {
-                    this.value = v; // อื่นๆ ปล่อยผ่าน
-                }
+        // ---------------------------------------------------------------
+        // เลขเอกสารยืนยันตัวตน
+        // ---------------------------------------------------------------
+        const THIRTEEN_DIGIT_TYPES = ['บัตรประชาชน', 'บัตรต่างด้าว'];
+        const OPTIONAL_ID_TYPES = ['บัตรอื่นๆ', 'ไม่มีบัตร/อื่นๆ'];
+
+        function formatIdValue(type, raw) {
+            if (THIRTEEN_DIGIT_TYPES.includes(type)) return App.formatThaiIdInput(raw);
+            if (type === 'พาสปอร์ต') return String(raw).replace(/[^a-zA-Z0-9]/g, '').toUpperCase().substring(0, 20);
+            return String(raw).replace(/[^a-zA-Z0-9ก-๙ -]/g, '').substring(0, 30);
+        }
+
+        function applyIdFormatter(prefix) {
+            const input = $(`${prefix}_id_number`);
+            input.addEventListener('input', function () {
+                const type = val(`${prefix}_id_type`);
+                if (THIRTEEN_DIGIT_TYPES.includes(type)) return; // จัดการด้วย attachFormatter ด้านล่าง
+                const v = formatIdValue(type, this.value);
+                if (v !== this.value) this.value = v;
             });
+            App.attachFormatter(input, raw => THIRTEEN_DIGIT_TYPES.includes(val(`${prefix}_id_type`)) ? App.formatThaiIdInput(raw) : raw);
         }
 
         function handleIdTypeChange(prefix) {
-            const input = document.getElementById(`${prefix}_id_number`);
-            const type = document.getElementById(`${prefix}_id_type`).value;
+            const input = $(`${prefix}_id_number`);
+            const type = val(`${prefix}_id_type`);
+            const label = $(`${prefix}_id_label`);
             input.value = '';
-            if (type === 'บัตรประชาชน') input.placeholder = "1-1009-XXXXX-XX-X";
-            else if (type === 'พาสปอร์ต') input.placeholder = "AA-XXXXXXX";
-            else input.placeholder = "ระบุหมายเลขเอกสาร...";
+            clearFieldError(input);
+            if (THIRTEEN_DIGIT_TYPES.includes(type)) input.placeholder = '1-XXXX-XXXXX-XX-X';
+            else if (type === 'พาสปอร์ต') input.placeholder = 'เช่น AA1234567';
+            else input.placeholder = 'ระบุหมายเลขเอกสาร (ถ้ามี)';
+            label.classList.toggle('req', !OPTIONAL_ID_TYPES.includes(type));
         }
 
-        document.addEventListener("DOMContentLoaded", function() {
-            applyIdFormatter('reporter_id_number', 'reporter_id_type');
-            applyIdFormatter('missing_id_number', 'missing_id_type');
+        function idError(prefix, who) {
+            const type = val(`${prefix}_id_type`);
+            const raw = val(`${prefix}_id_number`);
+            if (THIRTEEN_DIGIT_TYPES.includes(type)) {
+                const digits = App.digitsOnly(raw);
+                if (!digits) return `กรุณากรอกเลขเอกสารยืนยันตัวตน${who}`;
+                if (digits.length !== 13) return `เลขเอกสารยืนยันตัวตน${who}ต้องมี 13 หลัก (กรอกแล้ว ${digits.length} หลัก)`;
+                return '';
+            }
+            if (type === 'พาสปอร์ต') {
+                if (!raw) return `กรุณากรอกเลขหนังสือเดินทาง${who}`;
+                if (!/^[A-Z0-9]{6,20}$/.test(raw)) return `เลขหนังสือเดินทาง${who}ต้องเป็นตัวอักษรภาษาอังกฤษ/ตัวเลข 6-20 ตัว`;
+            }
+            return '';
+        }
 
-            // จัดการเบอร์โทรให้มีขีด (เบอร์มือถือไทย)
-            document.getElementById('reporter_phone').addEventListener('input', function() {
-                let v = this.value.replace(/\D/g, '').substring(0, 10);
-                if (v.length > 6) this.value = v.substring(0,3) + '-' + v.substring(3,6) + '-' + v.substring(6);
-                else if (v.length > 3) this.value = v.substring(0,3) + '-' + v.substring(3);
-                else this.value = v;
-            });
+        // ---------------------------------------------------------------
+        // แสดงข้อผิดพลาดของแต่ละช่อง / แต่ละ Step
+        // ---------------------------------------------------------------
+        function feedbackFor(el) {
+            let fb = document.querySelector(`.invalid-feedback[data-for="${el.id}"]`);
+            if (!fb) {
+                fb = document.createElement('div');
+                fb.className = 'invalid-feedback';
+                fb.setAttribute('data-for', el.id);
+                el.insertAdjacentElement('afterend', fb);
+            }
+            return fb;
+        }
+        function setFieldError(el, message) {
+            el.classList.add('is-invalid');
+            el.setAttribute('aria-invalid', 'true');
+            const fb = feedbackFor(el);
+            fb.textContent = message;
+            el.setAttribute('aria-describedby', fb.id || (fb.id = `fb-${el.id}`));
+        }
+        function clearFieldError(el) {
+            if (!el) return;
+            el.classList.remove('is-invalid');
+            el.removeAttribute('aria-invalid');
+        }
+        function setGroupError(group, message) {
+            group.classList.add('group-invalid');
+            group.querySelector('.group-feedback').textContent = message;
+        }
+        function clearGroupError(group) {
+            if (group) group.classList.remove('group-invalid');
+        }
 
-            // ดึงจังหวัด สภ./สน.
-            const provinceSelect = document.getElementById('police_province_select');
-            if(typeof allThaiProvincesList !== 'undefined') {
-                allThaiProvincesList.sort((a, b) => a.localeCompare(b, 'th')).forEach(prov => {
-                    provinceSelect.innerHTML += `<option value="${prov}">${prov}</option>`;
-                });
+        function stepAlert(step) {
+            const stepEl = $(`step${step}`);
+            let a = stepEl.querySelector('.step-alert');
+            if (!a) {
+                a = document.createElement('div');
+                a.className = 'alert alert-danger step-alert d-none';
+                a.setAttribute('role', 'alert');
+                stepEl.querySelector('h4').insertAdjacentElement('afterend', a);
+            }
+            return a;
+        }
+        function clearStepErrors(step) {
+            const stepEl = $(`step${step}`);
+            stepEl.querySelectorAll('.is-invalid').forEach(clearFieldError);
+            stepEl.querySelectorAll('.group-invalid').forEach(clearGroupError);
+            stepAlert(step).classList.add('d-none');
+        }
+
+        // คืนค่ารายการข้อผิดพลาด [{ el, msg, group? }]
+        function validateStep(step) {
+            const errors = [];
+            const need = (id, msg) => { if (!val(id)) errors.push({ el: $(id), msg }); };
+            const group = (id, ok, msg) => { if (!ok) errors.push({ el: $(id), msg, group: true }); };
+
+            if (step === 1) {
+                group('causeGroup', selectedCauses.length > 0, 'กรุณาเลือกสาเหตุการสูญหายอย่างน้อย 1 ข้อ');
+                group('urgencyGroup', !!val('urgency_level'), 'กรุณาเลือกระดับความเร่งด่วน');
             }
 
-            // ระบบค้นหา รหัสไปรษณีย์
-            document.getElementById('zipcode').addEventListener('input', function() {
-                const zip = this.value.trim();
-                if(zip.length === 5 && typeof masterZipcodeDB !== 'undefined') {
-                    let foundData = masterZipcodeDB[zip] || Object.values(masterZipcodeDB).find(item => item.zipcode === zip || item.zip === zip);
-                    if(foundData) {
-                        const provName = foundData.province || foundData.changwat || "";
-                        document.getElementById('subdistrict').value = foundData.subdistrict || foundData.tambon || "";
-                        document.getElementById('district').value = foundData.district || foundData.amphoe || "";
-                        document.getElementById('province').value = provName;
+            if (step === 2) {
+                const src = val('reporter_contact_source');
+                group('contactGroup', !!src, 'กรุณาเลือกช่องทางที่ติดต่อเข้ามา');
+                if (src && src !== 'เบอร์โทรศัพท์') need('reporter_contact_detail', 'กรุณาระบุรายละเอียดของช่องทางที่ติดต่อเข้ามา');
+                need('reporter_title', 'กรุณาระบุคำนำหน้าชื่อ / ยศ ของผู้แจ้ง');
+                need('reporter_name', 'กรุณากรอกชื่อ-นามสกุลผู้แจ้ง');
+                if (!val('reporter_phone')) errors.push({ el: $('reporter_phone'), msg: 'กรุณากรอกเบอร์โทรศัพท์ผู้แจ้ง' });
+                else if (!App.PHONE_PATTERN.test(val('reporter_phone'))) errors.push({ el: $('reporter_phone'), msg: 'เบอร์โทรศัพท์ต้องเป็นเบอร์มือถือ 10 หลัก รูปแบบ 080-000-0000' });
+                const idMsg = idError('reporter', 'ของผู้แจ้ง');
+                if (idMsg) errors.push({ el: $('reporter_id_number'), msg: idMsg });
+                need('reporter_relationship', 'กรุณาเลือกความสัมพันธ์กับผู้สูญหาย');
+                if (val('reporter_relationship') === 'อื่นๆ') need('reporter_relationship_other', 'กรุณาระบุความสัมพันธ์กับผู้สูญหาย');
+            }
 
-                        const policeProvinceSelect = document.getElementById('police_province_select');
-                        if(Array.from(policeProvinceSelect.options).some(opt => opt.value === provName)) {
-                            policeProvinceSelect.value = provName;
-                            policeProvinceSelect.dispatchEvent(new Event('change'));
-                        }
-                    }
+            if (step === 3) {
+                const d = val('last_seen_date');
+                if (!d) errors.push({ el: $('last_seen_date'), msg: 'กรุณาเลือกวันที่หาย' });
+                else if (d > todayStr()) errors.push({ el: $('last_seen_date'), msg: 'วันที่หายต้องไม่เป็นวันในอนาคต' });
+                const period = val('time_period_val');
+                group('periodGroup', !!period, 'กรุณาเลือกช่วงเวลาที่คาดว่าสูญหาย');
+                if (period && period !== 'ไม่ทราบเวลาแน่ชัด' && !val('time_start')) {
+                    errors.push({ el: $('time_start'), msg: 'กรุณาระบุเวลาโดยประมาณที่หาย' });
                 }
-            });
+                const ts = val('time_start'), te = val('time_end');
+                if (ts && te && !/กลางคืน/.test(period) && te < ts) errors.push({ el: $('time_end'), msg: 'เวลาสิ้นสุดต้องไม่ก่อนเวลาเริ่มต้น' });
+                need('last_seen_place', 'กรุณากรอกสถานที่พบเห็นล่าสุด');
+                if (!/^\d{5}$/.test(val('zipcode'))) errors.push({ el: $('zipcode'), msg: 'กรุณากรอกรหัสไปรษณีย์ 5 หลัก' });
+                need('subdistrict', 'กรุณากรอกตำบล / แขวง');
+                need('district', 'กรุณากรอกอำเภอ / เขต');
+                const prov = val('province');
+                if (!prov) errors.push({ el: $('province'), msg: 'กรุณากรอกจังหวัด' });
+                else if (typeof allThaiProvincesList !== 'undefined' && !allThaiProvincesList.includes(prov)) {
+                    errors.push({ el: $('province'), msg: 'กรุณาเลือกจังหวัดจากรายการ (สะกดให้ตรง เช่น กรุงเทพมหานคร)' });
+                }
+            }
 
-            // เปิด-ปิดช่องกรอก "อื่นๆ" สำหรับลักษณะทางกายภาพ
-            document.querySelectorAll('.physical-select').forEach(select => {
-                select.addEventListener('change', function() {
-                    const otherDiv = document.getElementById(this.getAttribute('data-other'));
-                    otherDiv.style.display = (this.value === "อื่นๆ") ? "block" : "none";
-                });
+            if (step === 4) {
+                need('missing_title', 'กรุณาระบุคำนำหน้าชื่อคนหาย');
+                need('missing_name', 'กรุณากรอกชื่อ-นามสกุลคนหาย');
+                need('missing_gender_birth', 'กรุณาเลือกเพศโดยกำเนิด');
+                need('missing_gender_current', 'กรุณาเลือกเพศสภาพในปัจจุบัน');
+                const bd = val('missing_birthdate');
+                if (bd && bd > todayStr()) errors.push({ el: $('missing_birthdate'), msg: 'วันเกิดต้องไม่เป็นวันในอนาคต' });
+                else if (bd && val('last_seen_date') && bd > val('last_seen_date')) errors.push({ el: $('missing_birthdate'), msg: 'วันเกิดต้องอยู่ก่อนวันที่หาย' });
+                const ageRaw = val('missing_age');
+                const age = Number(ageRaw);
+                if (ageRaw === '') errors.push({ el: $('missing_age'), msg: 'กรุณากรอกอายุ (ปี)' });
+                else if (!Number.isInteger(age) || age < 0 || age > 120) errors.push({ el: $('missing_age'), msg: 'อายุต้องเป็นจำนวนเต็ม 0-120 ปี' });
+                else if (bd) {
+                    const expected = ageFromBirthdate(bd);
+                    if (expected !== null && Math.abs(expected - age) > 1) errors.push({ el: $('missing_age'), msg: `อายุไม่สอดคล้องกับวันเกิด (ควรประมาณ ${expected} ปี)` });
+                }
+                need('missing_nationality', 'กรุณากรอกสัญชาติ');
+                const idMsg = idError('missing', 'ของคนหาย');
+                if (idMsg) errors.push({ el: $('missing_id_number'), msg: idMsg });
+                const hRaw = val('missing_height');
+                const h = Number(hRaw);
+                if (hRaw === '') errors.push({ el: $('missing_height'), msg: 'กรุณากรอกส่วนสูง (ซม.)' });
+                else if (!Number.isInteger(h) || h < 30 || h > 250) errors.push({ el: $('missing_height'), msg: 'ส่วนสูงต้องเป็นจำนวนเต็ม 30-250 ซม.' });
+                [['skin_color_select', 'skin_other_val', 'สีผิว'], ['body_shape_select', 'body_other_val', 'รูปร่าง'], ['hair_style_select', 'hair_other_val', 'ลักษณะผม']]
+                    .forEach(([sel, other, label]) => { if (val(sel) === 'อื่นๆ' && !val(other)) errors.push({ el: $(other), msg: `กรุณาระบุ${label}` }); });
+                need('hair_color_select', 'กรุณาเลือกสีผม');
+                const imgMsg = checkImageFile($('missing_img_input'), true, 'รูปภาพคนหาย');
+                if (imgMsg) errors.push({ el: $('missing_img_input'), msg: imgMsg });
+            }
+
+            if (step === 5) {
+                need('police_province_select', 'กรุณาเลือกจังหวัดของสถานีตำรวจ');
+                if (!$('police_station_select').disabled) need('police_station_select', 'กรุณาเลือกสถานีตำรวจที่รับผิดชอบ');
+                const docMsg = checkImageFile($('police_doc_input'), true, 'รูปใบแจ้งความ');
+                if (docMsg) errors.push({ el: $('police_doc_input'), msg: docMsg });
+                if (ocrState === 'scanning') errors.push({ el: $('police_doc_input'), msg: 'กรุณารอให้ระบบอ่านใบแจ้งความ (OCR) เสร็จก่อน' });
+                need('policereport_number', 'กรุณากรอกเลขที่ใบแจ้งความ');
+                const pd = val('policereport_date');
+                if (!pd) errors.push({ el: $('policereport_date'), msg: 'กรุณาเลือกวันที่แจ้งความ' });
+                else if (pd > todayStr()) errors.push({ el: $('policereport_date'), msg: 'วันที่แจ้งความต้องไม่เป็นวันในอนาคต' });
+                else if (val('last_seen_date') && pd < val('last_seen_date')) errors.push({ el: $('policereport_date'), msg: 'วันที่แจ้งความต้องไม่ก่อนวันที่หาย' });
+                need('policereport_location', 'กรุณากรอกสถานที่แจ้งความ (สน./สภ.)');
+                need('policereport_purpose', 'กรุณากรอกรายละเอียด / วัตถุประสงค์การแจ้งความ');
+            }
+            return errors;
+        }
+
+        function stepAlertHtml(errors) {
+            return `<div class="fw-bold mb-1"><i class="fa-solid fa-circle-exclamation me-1"></i> กรุณากรอกข้อมูลให้ครบถ้วนก่อนไปขั้นตอนถัดไป (เหลือ ${errors.length} รายการ)</div>
+                <ul class="mb-0 ps-3 small">${errors.map(e => `<li>${esc(e.msg)}</li>`).join('')}</ul>`;
+        }
+
+        // เมื่อแก้ไขข้อมูลแล้ว อัปเดตรายการที่ยังขาดในกล่องแจ้งเตือน (ซ่อนเมื่อครบ)
+        const refreshStepAlert = App.debounce(() => {
+            if (currentStep >= TOTAL_STEPS) return;
+            const a = $(`step${currentStep}`).querySelector('.step-alert');
+            if (!a || a.classList.contains('d-none')) return;
+            const errors = validateStep(currentStep);
+            if (errors.length === 0) a.classList.add('d-none');
+            else a.innerHTML = stepAlertHtml(errors);
+        }, 200);
+
+        function showStepErrors(step, errors) {
+            clearStepErrors(step);
+            errors.forEach(e => {
+                if (e.group) setGroupError(e.el, e.msg);
+                else setFieldError(e.el, e.msg);
             });
+            const a = stepAlert(step);
+            a.innerHTML = stepAlertHtml(errors);
+            a.classList.remove('d-none');
+            const first = errors[0].group ? errors[0].el.querySelector('.selectable-box') : errors[0].el;
+            a.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // ย้ายโฟกัสไปช่องแรกที่ผิด (เฉพาะเมื่อผู้ใช้ยังไม่ได้คลิกไปช่องอื่นเอง)
+            const focusedBefore = document.activeElement;
+            if (first) setTimeout(() => {
+                if (document.activeElement === focusedBefore || document.activeElement === document.body) first.focus({ preventScroll: true });
+            }, 300);
+        }
+
+        // ลบสถานะผิดพลาดเมื่อผู้ใช้แก้ไขช่องนั้น
+        $('multiStepForm').addEventListener('input', e => { formDirty = true; clearFieldError(e.target); refreshStepAlert(); });
+        $('multiStepForm').addEventListener('change', e => { formDirty = true; clearFieldError(e.target); refreshStepAlert(); });
+        $('multiStepForm').addEventListener('click', e => { if (e.target.closest('.selectable-box')) refreshStepAlert(); });
+        $('multiStepForm').addEventListener('keydown', e => { if (e.target.closest('.selectable-box') && (e.key === 'Enter' || e.key === ' ')) refreshStepAlert(); });
+
+        // ---------------------------------------------------------------
+        // อายุจากวันเกิด (ณ วันที่หาย ถ้ามี ไม่เช่นนั้นใช้วันนี้)
+        // ---------------------------------------------------------------
+        function ageFromBirthdate(bd) {
+            const ref = val('last_seen_date') || todayStr();
+            const [by, bm, bdd] = bd.split('-').map(Number);
+            const [ry, rm, rd] = ref.split('-').map(Number);
+            if (!by || !ry) return null;
+            let age = ry - by;
+            if (rm < bm || (rm === bm && rd < bdd)) age--;
+            return age >= 0 ? age : null;
+        }
+        $('missing_birthdate').addEventListener('change', () => {
+            const bd = val('missing_birthdate');
+            if (!bd) return;
+            const age = ageFromBirthdate(bd);
+            if (age !== null) { $('missing_age').value = age; clearFieldError($('missing_age')); }
         });
 
-        // จัดการเลือกจังหวัด สถานีตำรวจ
-        document.getElementById('police_province_select').addEventListener('change', function() {
+        // ---------------------------------------------------------------
+        // รหัสไปรษณีย์ → ตำบล/อำเภอ/จังหวัด (zipcodeData.js) ถ้าไม่พบให้กรอกเอง
+        // ---------------------------------------------------------------
+        let zipAutoFilled = false;
+        function setAddressReadonly(readonly) {
+            ['subdistrict', 'district', 'province'].forEach(id => {
+                $(id).readOnly = readonly;
+                $(id).classList.toggle('bg-light', readonly);
+            });
+        }
+        function lookupZip(zip) {
+            if (typeof masterZipcodeDB === 'undefined') return null;
+            return masterZipcodeDB[zip] || Object.values(masterZipcodeDB).find(item => item.zipcode === zip || item.zip === zip) || null;
+        }
+        $('zipcode').addEventListener('input', function () {
+            const digits = this.value.replace(/\D/g, '').substring(0, 5);
+            if (digits !== this.value) this.value = digits;
+            const hint = $('zipHint');
+            if (digits.length < 5) {
+                hint.textContent = '';
+                if (zipAutoFilled) { ['subdistrict', 'district', 'province'].forEach(id => { $(id).value = ''; }); zipAutoFilled = false; setAddressReadonly(true); }
+                return;
+            }
+            const found = lookupZip(digits);
+            if (found) {
+                const provName = found.province || found.changwat || '';
+                $('subdistrict').value = found.subdistrict || found.tambon || '';
+                $('district').value = found.district || found.amphoe || '';
+                $('province').value = provName;
+                ['subdistrict', 'district', 'province'].forEach(id => clearFieldError($(id)));
+                zipAutoFilled = true;
+                setAddressReadonly(true);
+                hint.innerHTML = '<span class="text-success"><i class="fa-solid fa-circle-check me-1"></i>ดึงข้อมูลที่อยู่จากรหัสไปรษณีย์แล้ว</span>';
+                const policeProvinceSelect = $('police_province_select');
+                if (!policeProvinceSelect.value && [...policeProvinceSelect.options].some(opt => opt.value === provName)) {
+                    policeProvinceSelect.value = provName;
+                    policeProvinceSelect.dispatchEvent(new Event('change'));
+                }
+            } else {
+                if (zipAutoFilled) { ['subdistrict', 'district', 'province'].forEach(id => { $(id).value = ''; }); }
+                zipAutoFilled = false;
+                setAddressReadonly(false);
+                hint.innerHTML = '<span class="text-warning-emphasis"><i class="fa-solid fa-circle-info me-1"></i>ไม่พบรหัสไปรษณีย์นี้ในฐานข้อมูลของระบบ กรุณากรอกตำบล อำเภอ และจังหวัดเอง</span>';
+            }
+        });
+
+        // ---------------------------------------------------------------
+        // สถานีตำรวจ (policeData.js)
+        // ---------------------------------------------------------------
+        let locationAutoFilled = true;
+        function syncReportLocation() {
+            const station = val('police_station_select');
+            const loc = $('policereport_location');
+            if (station && (locationAutoFilled || !loc.value.trim())) {
+                loc.value = station;
+                locationAutoFilled = true;
+                clearFieldError(loc);
+            }
+        }
+        $('policereport_location').addEventListener('input', () => { locationAutoFilled = false; });
+
+        $('police_province_select').addEventListener('change', function () {
             const prov = this.value;
-            const select = document.getElementById('police_station_select');
+            const select = $('police_station_select');
             select.innerHTML = '';
-            
-            if(!prov) { 
+            if (!prov) {
                 select.innerHTML = '<option value="">-- โปรดเลือกจังหวัดก่อน --</option>';
-                select.disabled = true; 
-                document.getElementById('police_station_phone').value = "";
-                return; 
+                select.disabled = true;
+                $('police_station_phone').value = '';
+                return;
             }
             select.disabled = false;
-            
-            if(typeof masterPoliceDB !== 'undefined' && masterPoliceDB[prov] && masterPoliceDB[prov].length > 0) {
-                masterPoliceDB[prov].forEach(st => {
-                    select.innerHTML += `<option value="${st.name}" data-phone="${st.phone}">${st.name}</option>`;
-                });
-                document.getElementById('police_station_phone').value = select.options[0].getAttribute('data-phone') || "191";
-            } else {
-                select.innerHTML += `<option value="สภ.เมือง${prov}" data-phone="191">สภ.เมือง${prov}</option>`;
-                document.getElementById('police_station_phone').value = "191";
-            }
+            select.innerHTML = '<option value="">-- เลือกสถานีตำรวจ --</option>';
+            const stations = (typeof masterPoliceDB !== 'undefined' && masterPoliceDB[prov]) || [];
+            const list = stations.length ? stations : [{ name: `สภ.เมือง${prov}`, phone: '191' }];
+            list.forEach(st => {
+                select.insertAdjacentHTML('beforeend', `<option value="${esc(st.name)}" data-phone="${esc(st.phone || '191')}">${esc(st.name)}</option>`);
+            });
+            if (list.length === 1) select.value = list[0].name;
+            select.dispatchEvent(new Event('change'));
         });
-        document.getElementById('police_station_select').addEventListener('change', function() {
-            document.getElementById('police_station_phone').value = this.options[this.selectedIndex].getAttribute('data-phone') || "191";
+        $('police_station_select').addEventListener('change', function () {
+            const opt = this.options[this.selectedIndex];
+            $('police_station_phone').value = (opt && opt.value) ? (opt.getAttribute('data-phone') || '191') : '';
+            syncReportLocation();
         });
 
-        // สคริปต์กล่องเลือก Option ต่างๆ (UI Select Box)
-        function initBoxSelection(className, hiddenInputId) {
+        // ---------------------------------------------------------------
+        // กล่องตัวเลือก (selectable-box) — คลิกหรือกด Enter/Space ได้
+        // ---------------------------------------------------------------
+        function makeBoxAccessible(box, onActivate) {
+            box.tabIndex = 0;
+            box.setAttribute('role', 'button');
+            box.setAttribute('aria-pressed', 'false');
+            box.addEventListener('click', onActivate);
+            box.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onActivate.call(box, e); } });
+        }
+
+        function initBoxSelection(className, hiddenInputId, groupId) {
             document.querySelectorAll('.' + className).forEach(box => {
-                box.addEventListener('click', function() {
-                    document.querySelectorAll('.' + className).forEach(b => b.classList.remove('selected'));
+                makeBoxAccessible(box, function () {
+                    document.querySelectorAll('.' + className).forEach(b => { b.classList.remove('selected'); b.setAttribute('aria-pressed', 'false'); });
                     this.classList.add('selected');
-                    const val = this.getAttribute('data-value');
-                    document.getElementById(hiddenInputId).value = val;
-                    
-                    // ส่วนขยายเงื่อนไขแสดงกล่องเพิ่มเติม
+                    this.setAttribute('aria-pressed', 'true');
+                    const v = this.getAttribute('data-value');
+                    $(hiddenInputId).value = v;
+                    formDirty = true;
+                    clearGroupError($(groupId));
+
                     if (hiddenInputId === 'reporter_contact_source') {
-                        const detailDiv = document.getElementById('contact_detail_div');
-                        const detailLabel = document.getElementById('contact_detail_label');
-                        const detailInput = document.getElementById('reporter_contact_detail');
-                        
-                        detailDiv.style.display = "block";
-                        if (val === "Facebook") { detailLabel.innerHTML = '<i class="fa-brands fa-facebook"></i> ชื่อ Facebook หรือ ลิงก์โปรไฟล์'; detailInput.placeholder = "ระบุชื่อหรือวางลิงก์เฟสบุ๊ค..."; }
-                        else if (val === "Line") { detailLabel.innerHTML = '<i class="fa-brands fa-line"></i> LINE ID / ชื่อ Line'; detailInput.placeholder = "ระบุ ID Line เพื่อให้แอดมินแอดกลับ..."; }
-                        else if (val === "เบอร์โทรศัพท์") { detailLabel.innerHTML = '<i class="fa-solid fa-phone"></i> เบอร์โทรศัพท์ที่ติดต่อเข้ามา'; detailInput.placeholder = "ระบุเบอร์โทรฯเพิ่มเติมที่ใช้แจ้งเรื่อง..."; }
-                        else if (val === "มูลนิธิ") { detailLabel.innerHTML = '<i class="fa-solid fa-building-ngo"></i> ชื่อมูลนิธิ / หน่วยงาน'; detailInput.placeholder = "ระบุชื่อมูลนิธิหรือหน่วยงานที่ส่งเคสมา..."; }
-                        else { detailLabel.innerHTML = 'โปรดระบุช่องทางอื่นๆ'; detailInput.placeholder = "ระบุรายละเอียด..."; }
+                        const detailDiv = $('contact_detail_div');
+                        const detailLabel = $('contact_detail_label');
+                        const detailInput = $('reporter_contact_detail');
+                        detailDiv.style.display = 'block';
+                        const required = v !== 'เบอร์โทรศัพท์';
+                        if (v === 'Facebook') { detailLabel.innerHTML = '<i class="fa-brands fa-facebook"></i> ชื่อ Facebook หรือ ลิงก์โปรไฟล์'; detailInput.placeholder = 'ระบุชื่อหรือวางลิงก์เฟสบุ๊ค...'; }
+                        else if (v === 'Line') { detailLabel.innerHTML = '<i class="fa-brands fa-line"></i> LINE ID / ชื่อ Line'; detailInput.placeholder = 'ระบุ ID Line เพื่อให้แอดมินแอดกลับ...'; }
+                        else if (v === 'เบอร์โทรศัพท์') { detailLabel.innerHTML = '<i class="fa-solid fa-phone"></i> เบอร์โทรศัพท์ที่ติดต่อเข้ามา (ถ้าต่างจากเบอร์ผู้แจ้ง)'; detailInput.placeholder = 'ระบุเบอร์โทรฯ เพิ่มเติมที่ใช้แจ้งเรื่อง...'; }
+                        else if (v === 'มูลนิธิ') { detailLabel.innerHTML = '<i class="fa-solid fa-building-ngo"></i> ชื่อมูลนิธิ / หน่วยงาน'; detailInput.placeholder = 'ระบุชื่อมูลนิธิหรือหน่วยงานที่ส่งเคสมา...'; }
+                        else { detailLabel.innerHTML = 'โปรดระบุช่องทางอื่นๆ'; detailInput.placeholder = 'ระบุรายละเอียด...'; }
+                        detailLabel.classList.toggle('req', required);
+                        if (!required) clearFieldError(detailInput);
+                    }
+
+                    if (hiddenInputId === 'time_period_val') {
+                        const unknown = v === 'ไม่ทราบเวลาแน่ชัด';
+                        // เติมช่วงเวลาให้อัตโนมัติถ้ายังไม่ได้กรอกเอง (แก้ไขได้)
+                        if (!unknown && this.dataset.start && (!val('time_start') || $('time_start').dataset.auto === '1')) {
+                            $('time_start').value = this.dataset.start;
+                            $('time_end').value = this.dataset.end || '';
+                            $('time_start').dataset.auto = '1';
+                            clearFieldError($('time_start'));
+                            clearFieldError($('time_end'));
+                        }
+                        $('timeLabel').classList.toggle('req', !unknown);
+                        $('timeLabel').textContent = unknown ? 'ระบุเวลาประมาณคร่าวๆ (ถ้าทราบ):' : 'ระบุเวลาประมาณคร่าวๆ:';
+                        if (unknown) clearFieldError($('time_start'));
                     }
                 });
             });
         }
-        initBoxSelection('target-urgency', 'urgency_level');
-        initBoxSelection('target-period', 'time_period_val');
-        initBoxSelection('target-contact', 'reporter_contact_source');
+        $('time_start').addEventListener('input', () => { delete $('time_start').dataset.auto; });
+        initBoxSelection('target-urgency', 'urgency_level', 'urgencyGroup');
+        initBoxSelection('target-period', 'time_period_val', 'periodGroup');
+        initBoxSelection('target-contact', 'reporter_contact_source', 'contactGroup');
 
-        // จัดการคลิกเลือกสาเหตุ (เลือกได้มากกว่า 1)
+        // สาเหตุการสูญหาย (เลือกได้หลายข้อ เรียงลำดับตามที่เลือก)
         document.querySelectorAll('.cause-box').forEach(box => {
-            box.addEventListener('click', function() {
+            makeBoxAccessible(box, function () {
                 const name = this.getAttribute('data-cause');
                 const idx = selectedCauses.findIndex(c => c.name === name);
-                if (idx === -1) { selectedCauses.push({ name: name, rank: selectedCauses.length + 1 }); } 
-                else { selectedCauses.splice(idx, 1); selectedCauses.forEach((c, i) => c.rank = i + 1); }
-                
+                if (idx === -1) selectedCauses.push({ name, rank: selectedCauses.length + 1 });
+                else { selectedCauses.splice(idx, 1); selectedCauses.forEach((c, i) => { c.rank = i + 1; }); }
                 document.querySelectorAll('.cause-box').forEach(bx => {
                     const found = selectedCauses.find(c => c.name === bx.getAttribute('data-cause'));
                     const badge = bx.querySelector('.rank-badge');
-                    if (found) { badge.innerText = found.rank; bx.classList.add('selected'); } 
-                    else { bx.classList.remove('selected'); }
+                    if (found) { badge.innerText = found.rank; bx.classList.add('selected'); bx.setAttribute('aria-pressed', 'true'); }
+                    else { bx.classList.remove('selected'); bx.setAttribute('aria-pressed', 'false'); }
                 });
+                formDirty = true;
+                clearGroupError($('causeGroup'));
             });
         });
 
-        // สคริปต์ประมวลผล OCR เมื่ออัปโหลดไฟล์
-        document.getElementById('police_doc_input').addEventListener('change', async function() {
-            const ocrBox = document.getElementById('ocr_live_text');
-            if(this.files.length > 0) {
-                const file = this.files[0];
-                ocrBox.innerHTML = `<div class="text-center p-4"><strong><i class="fa-solid fa-spinner fa-spin text-primary"></i> กำลังสแกนเอกสาร...</strong><br><small class="text-muted">โปรดรอสักครู่ ระบบกำลังดึงข้อความ</small></div>`;
-                
-                const formData = new FormData();
-                formData.append('police_doc_ocr', file);
-                
-                try {
-                    const response = await fetch(`${API_BASE_URL}/api/ocr`, { method: 'POST', body: formData });
-                    const result = await response.json(); 
-                    
-                    console.log("✅ ข้อมูลจาก Backend:", result);
-                    
-                    if (result.success && result.data) {
-                        const ocrData = result.data;
-                        window.scannedOcrData = ocrData; 
-                        
-                        const formattedText = 
-`เลขที่ใบแจ้งความ: ${ocrData.policereport_number || '-'}
-วันที่: ${ocrData.policereport_date || '-'} | เวลา: ${ocrData.policereport_time || '-'}
-สน./สภ.: ${ocrData.policereport_location || '-'}
-ชื่อตำรวจผู้รับแจ้ง: ${ocrData.policereport_name || '-'}
+        // ---------------------------------------------------------------
+        // OCR ใบแจ้งความ → POST /api/ocr (ฟิลด์ไฟล์: police_doc_ocr)
+        // ผลลัพธ์: { success, data: { policereport_number, _date, _time, _location, _name, _purpose } }
+        // ---------------------------------------------------------------
+        const THAI_MONTHS = [
+            ['มกราคม', 'ม.ค.'], ['กุมภาพันธ์', 'ก.พ.'], ['มีนาคม', 'มี.ค.'], ['เมษายน', 'เม.ย.'], ['พฤษภาคม', 'พ.ค.'], ['มิถุนายน', 'มิ.ย.'],
+            ['กรกฎาคม', 'ก.ค.'], ['สิงหาคม', 'ส.ค.'], ['กันยายน', 'ก.ย.'], ['ตุลาคม', 'ต.ค.'], ['พฤศจิกายน', 'พ.ย.'], ['ธันวาคม', 'ธ.ค.'],
+        ];
+        const thaiDigitsToArabic = s => String(s || '').replace(/[๐-๙]/g, d => String('๐๑๒๓๔๕๖๗๘๙'.indexOf(d)));
 
-รายละเอียด/วัตถุประสงค์:
-${ocrData.policereport_purpose || '-'}`;
+        function toIsoDate(y, m, d) {
+            if (y > 2400) y -= 543;               // พ.ศ. → ค.ศ.
+            else if (y < 100) y = y + 2500 - 543;  // ปี 2 หลัก เช่น 69 → 2569 → 2026
+            if (m < 1 || m > 12 || d < 1 || d > 31) return '';
+            const dt = new Date(y, m - 1, d);
+            if (dt.getMonth() !== m - 1) return '';
+            return `${y}-${pad(m)}-${pad(d)}`;
+        }
 
-                        ocrBox.innerHTML = `
-                            <strong>🟢 ตรวจพบข้อความในเอกสาร:</strong> <small class="text-muted">(คุณสามารถตรวจสอบและแก้ไขได้)</small>
-                            <textarea class="form-control mt-2 p-3 bg-light border-success text-dark fw-bold" style="height: 220px; font-size: 14px;" id="ocr_result_text">${formattedText}</textarea>
-                        `;
-                    } else {
-                        ocrBox.innerHTML = `<div class="alert alert-warning mb-0">⚠️ ไม่พบข้อความ หรือรูปไม่ชัดเจน กรุณาตรวจรูปภาพอีกครั้ง</div>`;
-                    }
-                } catch (error) {
-                    console.error("❌ Fetch Error:", error);
-                    ocrBox.innerHTML = `<div class="alert alert-danger mb-0"><strong>❌ ขออภัย เกิดข้อผิดพลาดในการเชื่อมต่อกับระบบ AI</strong></div>`;
-                }
-            } else {
-                ocrBox.innerHTML = `<div class="text-muted text-center p-3">[ระบบจะดึงข้อความอัตโนมัติเมื่ออัปโหลดรูปใบแจ้งความ]</div>`;
+        // แปลงวันที่ที่ OCR อ่านได้ ("5 ก.ค. 2569", "05/07/2569", "2026-07-05") เป็น YYYY-MM-DD
+        function parseThaiDate(text) {
+            const s = thaiDigitsToArabic(text).trim();
+            if (!s) return '';
+            let m = s.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+            if (m) return toIsoDate(+m[1], +m[2], +m[3]);
+            m = s.match(/(\d{1,2})\s*[\/.\-]\s*(\d{1,2})\s*[\/.\-]\s*(\d{2,4})/);
+            if (m) return toIsoDate(+m[3], +m[2], +m[1]);
+            const compact = s.replace(/\s+/g, ' ');
+            for (let i = 0; i < 12; i++) {
+                const [full, abbr] = THAI_MONTHS[i];
+                const variants = [full, abbr, abbr.replace(/\./g, '')].map(v => v.replace(/\./g, '\\.?'));
+                const re = new RegExp(`(\\d{1,2})\\s*(?:เดือน\\s*)?(?:${variants.join('|')})\\s*(?:พ\\.?ศ\\.?)?\\s*(\\d{2,4})`);
+                const mm = compact.match(re);
+                if (mm) return toIsoDate(+mm[2], i + 1, +mm[1]);
             }
-        });
+            return '';
+        }
+        function parseTime(text) {
+            const m = thaiDigitsToArabic(text).match(/(\d{1,2})\s*[:.]\s*(\d{2})/);
+            if (!m) return '';
+            const h = +m[1], mi = +m[2];
+            return (h <= 23 && mi <= 59) ? `${pad(h)}:${pad(mi)}` : '';
+        }
 
-       // 🌟 🌟 🌟 ฟังก์ชันเลื่อน Step และสร้างรีวิวข้อมูล (Preview)
-        function changeStep(n) {
-            if (currentStep === 6 && n === 1) {
-                const nextBtn = document.getElementById('nextBtn');
-                nextBtn.disabled = true;
-                nextBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> กำลังบันทึกข้อมูล...';
+        function setOcrBox(html) { $('ocr_live_text').innerHTML = html; }
 
-                // 1. ดึงข้อมูลจากฟอร์มทั้งหมด (FormData จะกวาดข้อมูลจาก input ที่มี name อัตโนมัติ)
-                const finalFormData = new FormData(document.getElementById('multiStepForm'));
-
-                // 2. เติมข้อมูลส่วนที่ FormData ดึงปกติไม่ได้ (เช่น Array สาเหตุคนหาย)
-                // ใช้ .set แทน .append เผื่อป้องกันการซ้ำซ้อน
-                finalFormData.set('causes', JSON.stringify(selectedCauses));
-                
-                // 3. เติมข้อมูลจังหวัดและสภ. (ถ้า input ติด disabled อยู่ FormData จะไม่เอาข้อมูลไป เราจึงบังคับเอาไปใส่เลย)
-                // ใช้ .set เพื่อป้องกันข้อมูลกลายเป็น Array หากมี name อยู่แล้ว
-                finalFormData.set('police_province', document.getElementById('police_province_select').value);
-                finalFormData.set('police_station', document.getElementById('police_station_select').value);
-
-                // 4. เอาข้อมูล OCR ที่ AI สแกนได้ ยัดเพิ่มเข้าไปใน FormData
-                if (window.scannedOcrData) {
-                    finalFormData.set('policereport_number', window.scannedOcrData.policereport_number || '');
-                    finalFormData.set('policereport_date', window.scannedOcrData.policereport_date || '');
-                    finalFormData.set('policereport_time', window.scannedOcrData.policereport_time || '');
-                    finalFormData.set('policereport_location', window.scannedOcrData.policereport_location || '');
-                    finalFormData.set('policereport_name', window.scannedOcrData.policereport_name || '');
-                    finalFormData.set('policereport_purpose', window.scannedOcrData.policereport_purpose || '');
-                }
-
-                // 5. ยิง Fetch ไปที่ Backend ของจริงเพื่อบันทึกลงฐานข้อมูล 
-                fetch(`${API_BASE_URL}/api/cases`, { 
-                    method: 'POST',
-                    body: finalFormData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    alert("🎉 บันทึกข้อมูลลงฐานข้อมูลเรียบร้อยแล้ว!");
-                    setTimeout(() => { window.location.href = 'Homepage.html'; }, 1000);
-                })
-                .catch(error => {
-                    console.error('Error saving data:', error);
-                    alert("❌ เกิดข้อผิดพลาดในการบันทึกข้อมูล");
-                    nextBtn.disabled = false;
-                    nextBtn.innerHTML = 'ยืนยันส่งข้อมูล <i class="fa-solid fa-paper-plane ms-1"></i>';
-                });
-
-                return; // หยุดการทำงานตรงนี้ ไม่ให้มันพยายามเปลี่ยนหน้า Step
+        async function runOcr() {
+            const input = $('police_doc_input');
+            const file = input.files && input.files[0];
+            const seq = ++ocrSeq;
+            $('ocrDateHint').textContent = '';
+            if (!file) {
+                ocrState = 'idle';
+                setOcrBox('<div class="text-muted text-center p-2">[ระบบจะดึงข้อความอัตโนมัติเมื่ออัปโหลดรูปใบแจ้งความ หรือกรอกข้อมูลเองด้านล่างได้]</div>');
+                return;
             }
-            // ==========================================
-            // โค้ดส่วนนี้คือส่วนเปลี่ยนหน้า UI ไป Step ถัดไป
-            // ==========================================
-            document.getElementById(`step${currentStep}`).classList.remove('active');
-            document.getElementById(`stepIndicator${currentStep}`).classList.remove('active');
-            if (n === 1) document.getElementById(`stepIndicator${currentStep}`).classList.add('completed');
+            const fileMsg = checkImageFile(input, true, 'รูปใบแจ้งความ');
+            if (fileMsg) {
+                ocrState = 'failed';
+                setFieldError(input, fileMsg);
+                setOcrBox(`<div class="alert alert-danger mb-0 py-2">${esc(fileMsg)}</div>`);
+                return;
+            }
+            ocrState = 'scanning';
+            setOcrBox(`<div class="text-center p-3"><strong><i class="fa-solid fa-spinner fa-spin text-primary"></i> กำลังสแกนเอกสาร...</strong><br><small class="text-muted">โปรดรอสักครู่ ระบบกำลังดึงข้อความ (อาจใช้เวลาถึง 1 นาที)</small></div>`);
 
-            currentStep += n;
+            const formData = new FormData();
+            formData.append('police_doc_ocr', file);
+            try {
+                const result = await App.api('/ocr', { method: 'POST', body: formData, timeout: 90000 });
+                if (seq !== ocrSeq) return; // มีการเปลี่ยนไฟล์ระหว่างรอ
+                const d = (result && result.data) || {};
+                const filled = [];
+                const fill = (id, value, label) => {
+                    const v = App.textOr(value, '');
+                    if (!v) return;
+                    $(id).value = v;
+                    clearFieldError($(id));
+                    filled.push(label);
+                };
+                fill('policereport_number', d.policereport_number, 'เลขที่');
+                const isoDate = parseThaiDate(d.policereport_date);
+                if (isoDate) fill('policereport_date', isoDate, 'วันที่');
+                else if (App.textOr(d.policereport_date, '')) $('ocrDateHint').textContent = `ระบบอ่านได้ว่า "${d.policereport_date}" กรุณาเลือกวันที่ให้ถูกต้อง`;
+                const t = parseTime(d.policereport_time);
+                if (t) fill('policereport_time', t, 'เวลา');
+                if (App.textOr(d.policereport_location, '')) { fill('policereport_location', d.policereport_location, 'สน./สภ.'); locationAutoFilled = false; }
+                fill('policereport_name', d.policereport_name, 'ชื่อตำรวจ');
+                fill('policereport_purpose', d.policereport_purpose, 'รายละเอียด');
+                ocrState = 'done';
+                refreshStepAlert();
+                setOcrBox(filled.length
+                    ? `<div class="text-success fw-bold"><i class="fa-solid fa-circle-check me-1"></i> อ่านเอกสารสำเร็จ — กรอกให้แล้ว: ${esc(filled.join(', '))}</div><small class="text-muted">กรุณาตรวจสอบความถูกต้องและแก้ไขในช่องด้านล่างได้</small>`
+                    : `<div class="text-warning-emphasis fw-bold"><i class="fa-solid fa-circle-exclamation me-1"></i> อ่านเอกสารได้แต่ไม่พบข้อมูลใบแจ้งความ กรุณากรอกข้อมูลเอง</div>`);
+            } catch (err) {
+                if (seq !== ocrSeq) return;
+                console.error('OCR Error:', err);
+                ocrState = 'failed';
+                refreshStepAlert();
+                setOcrBox(`<div class="alert alert-warning mb-0 py-2 d-flex flex-wrap align-items-center gap-2">
+                    <span><i class="fa-solid fa-triangle-exclamation me-1"></i> อ่านใบแจ้งความอัตโนมัติไม่สำเร็จ: ${esc(err.message)} — กรอกข้อมูลเองด้านล่างได้</span>
+                    <button type="button" class="btn btn-sm btn-outline-dark" id="retryOcrBtn"><i class="fa-solid fa-rotate-right me-1"></i> สแกนอีกครั้ง</button></div>`);
+                $('retryOcrBtn').addEventListener('click', runOcr);
+            }
+        }
+        $('police_doc_input').addEventListener('change', runOcr);
 
-            document.getElementById(`step${currentStep}`).classList.add('active');
-            document.getElementById(`stepIndicator${currentStep}`).classList.add('active');
-
-            document.getElementById('prevBtn').disabled = (currentStep === 1);
-            
-            if (currentStep === 6) {
-                document.getElementById('nextBtn').innerHTML = 'ยืนยันส่งข้อมูล <i class="fa-solid fa-paper-plane ms-1"></i>';
-                document.getElementById('nextBtn').classList.replace('btn-primary', 'btn-success');
+        // ---------------------------------------------------------------
+        // เลื่อน Step
+        // ---------------------------------------------------------------
+        function showStep(step) {
+            for (let i = 1; i <= TOTAL_STEPS; i++) {
+                $(`step${i}`).classList.toggle('active', i === step);
+                const ind = $(`stepIndicator${i}`);
+                ind.classList.toggle('active', i === step);
+                ind.classList.toggle('completed', i < step);
+            }
+            currentStep = step;
+            $('prevBtn').disabled = step === 1;
+            const nextBtn = $('nextBtn');
+            if (step === TOTAL_STEPS) {
+                nextBtn.innerHTML = 'ยืนยันส่งข้อมูล <i class="fa-solid fa-paper-plane ms-1"></i>';
+                nextBtn.classList.replace('btn-primary', 'btn-success');
                 generateReportPreview();
             } else {
-                document.getElementById('nextBtn').innerHTML = 'ถัดไป <i class="fa-solid fa-arrow-right ms-1"></i>';
-                document.getElementById('nextBtn').classList.replace('btn-success', 'btn-primary');
+                nextBtn.innerHTML = 'ถัดไป <i class="fa-solid fa-arrow-right ms-1"></i>';
+                nextBtn.classList.replace('btn-success', 'btn-primary');
             }
-            
-            // เลื่อนหน้าจอกลับไปด้านบนสุดเมื่อเปลี่ยน Step
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // สรุปข้อมูล (Report Summary Generator)
+        function changeStep(n) {
+            if (submitting) return;
+            if (n < 0) {
+                clearStepErrors(currentStep);
+                $('duplicatePanel').classList.add('d-none');
+                $('submitError').classList.add('d-none');
+                showStep(Math.max(1, currentStep + n));
+                return;
+            }
+            if (currentStep === TOTAL_STEPS) { submitCase(false); return; }
+            const errors = validateStep(currentStep);
+            if (errors.length) { showStepErrors(currentStep, errors); return; }
+            clearStepErrors(currentStep);
+            showStep(currentStep + 1);
+        }
+
+        // ---------------------------------------------------------------
+        // รวมข้อมูลที่ Backend ยังไม่มีคอลัมน์ ไว้ใน case_notes
+        // ---------------------------------------------------------------
+        function composeCaseNotes() {
+            const lines = [];
+            const extra = val('case_notes_input');
+            if (extra) lines.push(extra);
+            const src = val('reporter_contact_source');
+            if (src) lines.push(`ช่องทางรับแจ้ง: ${src}${val('reporter_contact_detail') ? ` (${val('reporter_contact_detail')})` : ''}`);
+            const period = val('time_period_val');
+            if (period) {
+                const ts = val('time_start'), te = val('time_end');
+                lines.push(`ช่วงเวลาที่คาดว่าสูญหาย: ${period}${ts ? ` | เวลาโดยประมาณ ${ts}${te ? `-${te}` : ''} น.` : ''}`);
+            }
+            if (val('zipcode')) lines.push(`รหัสไปรษณีย์จุดที่หาย: ${val('zipcode')}`);
+            if (val('missing_gender') === 'LGBTQ+') {
+                lines.push(`เพศโดยกำเนิด: ${val('missing_gender_birth')} / เพศสภาพปัจจุบัน: ${val('missing_gender_current')}${val('missing_gender_desc') ? ` / ${val('missing_gender_desc')}` : ''}`);
+            }
+            return lines.join('\n');
+        }
+
+        function buildFormData(forceCreate) {
+            const fd = new FormData($('multiStepForm'));
+            fd.set('causes', JSON.stringify(selectedCauses));
+            fd.set('urgency_level', val('urgency_level'));
+            fd.set('police_province', val('police_province_select'));
+            fd.set('police_station', val('police_station_select'));
+            fd.set('missing_gender', val('missing_gender'));
+            fd.set('case_notes', composeCaseNotes());
+            if (session && session.role === 'admin') fd.set('staff_id', String(session.user_id));
+            if (forceCreate) fd.set('force_create', 'true');
+            // ช่องที่ใช้เฉพาะบนหน้าเว็บ (Backend ไม่ได้ใช้ และรวมไว้ใน case_notes แล้ว)
+            ['time_period_val', 'time_end', 'zipcode', 'reporter_contact_source', 'reporter_contact_detail', 'missing_gender_desc'].forEach(k => fd.delete(k));
+            return fd;
+        }
+
+        function setSubmitting(busy, label) {
+            submitting = busy;
+            const nextBtn = $('nextBtn');
+            nextBtn.disabled = busy;
+            $('prevBtn').disabled = busy;
+            $('forceCreateBtn').disabled = busy;
+            nextBtn.innerHTML = busy
+                ? `<span class="spinner-border spinner-border-sm me-1"></span> ${label || 'กำลังบันทึกข้อมูล...'}`
+                : 'ยืนยันส่งข้อมูล <i class="fa-solid fa-paper-plane ms-1"></i>';
+        }
+
+        async function submitCase(forceCreate) {
+            if (submitting || submitted) return;
+            $('submitError').classList.add('d-none');
+            // ตรวจทุก Step อีกครั้งก่อนส่ง
+            for (let st = 1; st < TOTAL_STEPS; st++) {
+                const errors = validateStep(st);
+                if (errors.length) { showStep(st); showStepErrors(st, errors); return; }
+            }
+            setSubmitting(true, forceCreate ? 'กำลังสร้างเคสใหม่...' : 'กำลังบันทึกข้อมูล...');
+            try {
+                const data = await App.api('/cases', { method: 'POST', body: buildFormData(forceCreate), timeout: 120000 });
+                submitted = true;
+                formDirty = false;
+                showSuccess(data.case_id);
+            } catch (err) {
+                console.error('POST /api/cases ล้มเหลว:', err);
+                setSubmitting(false);
+                if (err.status === 409 && err.data && err.data.warning === 'duplicate_open_case') {
+                    const id = err.data.existing_case_id;
+                    $('duplicateText').textContent = err.message;
+                    $('duplicateLink').href = `case-detail.html?id=${encodeURIComponent(id)}`;
+                    $('duplicatePanel').classList.remove('d-none');
+                    $('duplicatePanel').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    return;
+                }
+                const detail = err.data && err.data.error ? `<div class="small mt-1 text-body-secondary">รายละเอียดจากเซิร์ฟเวอร์: ${esc(err.data.error)}</div>` : '';
+                $('submitError').innerHTML = `<i class="fa-solid fa-triangle-exclamation me-1"></i> บันทึกข้อมูลไม่สำเร็จ: ${esc(err.message)}${detail}
+                    <div class="small mt-1">ข้อมูลที่กรอกยังอยู่ครบ สามารถกด "ยืนยันส่งข้อมูล" เพื่อลองใหม่ได้</div>`;
+                $('submitError').classList.remove('d-none');
+                $('submitError').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+        $('forceCreateBtn').addEventListener('click', () => {
+            $('duplicatePanel').classList.add('d-none');
+            submitCase(true);
+        });
+
+        function showSuccess(caseId) {
+            $('multiStepForm').classList.add('d-none');
+            for (let i = 1; i <= TOTAL_STEPS; i++) {
+                $(`stepIndicator${i}`).classList.remove('active');
+                $(`stepIndicator${i}`).classList.add('completed');
+            }
+            $('successCaseId').textContent = caseId !== undefined ? caseId : '-';
+            $('successDetailLink').href = `case-detail.html?id=${encodeURIComponent(caseId)}`;
+            $('successPanel').classList.remove('d-none');
+            App.toast(`บันทึกเคสสำเร็จ (รหัสเคส ${caseId})`, 'success');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        window.addEventListener('beforeunload', e => {
+            if (formDirty && !submitted) { e.preventDefault(); e.returnValue = ''; }
+        });
+
+        // ---------------------------------------------------------------
+        // สรุปข้อมูลก่อนบันทึก
+        // ---------------------------------------------------------------
         function generateReportPreview() {
-            // ดึงค่าทั้งหมดมาสรุป
-            const causes = selectedCauses.length > 0 ? selectedCauses.map(c => c.name).join(', ') : '- ไม่ได้ระบุ -';
-            const urgency = document.getElementById('urgency_level').value || '-';
-            
-            const contactSrc = document.getElementById('reporter_contact_source').value || '-';
-            const contactDetail = document.getElementById('reporter_contact_detail').value || '';
-            const finalContact = contactSrc !== '-' ? `${contactSrc} ${contactDetail ? `(${contactDetail})` : ''}` : '-';
-
-            const repName = `${document.getElementById('reporter_title').value}${document.getElementById('reporter_name').value}` || '-';
-            const repPhone = document.getElementById('reporter_phone').value || '-';
-            const repRel = document.getElementById('reporter_relationship').value === "อื่นๆ" ? document.getElementById('reporter_relationship_other').value : document.getElementById('reporter_relationship').value;
-            const lastPlace = `${document.getElementById('last_seen_place').value} ต.${document.getElementById('subdistrict').value} อ.${document.getElementById('district').value} จ.${document.getElementById('province').value}`;
-            
-            const misName = `${document.getElementById('missing_title').value}${document.getElementById('missing_name').value}` || '-';
-            const misGender = document.getElementById('missing_gender').value || '-';
-            const misAge = document.getElementById('missing_age').value || '-';
-            const misHeight = document.getElementById('missing_height').value || '-';
-            const misNat = document.getElementById('missing_nationality').value || 'ไทย';
-
-            const polStation = document.getElementById('police_station_select').value || '-';
-            const polProv = document.getElementById('police_province_select').value || '-';
-
-            const html = `
+            const v = id => esc(val(id)) || '-';
+            const causes = selectedCauses.length ? selectedCauses.map(c => `${c.rank}. ${esc(c.name)}`).join(', ') : '-';
+            const contactSrc = val('reporter_contact_source');
+            const finalContact = contactSrc ? `${esc(contactSrc)}${val('reporter_contact_detail') ? ` (${esc(val('reporter_contact_detail'))})` : ''}` : '-';
+            const repRel = val('reporter_relationship') === 'อื่นๆ' ? val('reporter_relationship_other') : val('reporter_relationship');
+            const lastPlace = `${esc(val('last_seen_place'))} ต.${v('subdistrict')} อ.${v('district')} จ.${v('province')} ${v('zipcode')}`;
+            const time = val('time_start') ? `${esc(val('time_start'))}${val('time_end') ? `-${esc(val('time_end'))}` : ''} น.` : 'ไม่ระบุเวลา';
+            const fmtDate = id => val(id) ? esc(App.formatThaiDate(val(id), { month: 'long' })) : '-';
+            const skin = val('skin_color_select') === 'อื่นๆ' ? val('skin_other_val') : val('skin_color_select');
+            const body = val('body_shape_select') === 'อื่นๆ' ? val('body_other_val') : val('body_shape_select');
+            const hair = val('hair_style_select') === 'อื่นๆ' ? val('hair_other_val') : val('hair_style_select');
+            const idText = prefix => {
+                const n = val(`${prefix}_id_number`);
+                return `${esc(val(`${prefix}_id_type`))}${n ? `: ${esc(n)}` : ''}`;
+            };
+            $('previewBox').innerHTML = `
                 <h5 class="fw-bold mb-3 text-dark border-bottom pb-2">📄 สรุปข้อมูลเคสคนหาย</h5>
-                <p><strong>🚨 สาเหตุการหาย:</strong> ${causes} <strong>| ระดับ:</strong> <span class="text-danger">${urgency}</span></p>
+                <p class="mb-1"><strong>🚨 สาเหตุการหาย:</strong> ${causes}</p>
+                <p class="mb-1"><strong>ระดับความเร่งด่วน:</strong> <span class="text-danger fw-bold">${v('urgency_level')}</span></p>
                 <p><strong>📞 ช่องทางรับแจ้งเรื่อง:</strong> <span class="text-primary">${finalContact}</span></p>
-                
+
                 <h6 class="fw-bold mt-4 text-secondary">👤 ข้อมูลผู้แจ้ง</h6>
                 <ul class="mb-3">
-                    <li><strong>ชื่อ-สกุล:</strong> ${repName} (โทร: ${repPhone})</li>
-                    <li><strong>ความสัมพันธ์กับผู้สูญหาย:</strong> ${repRel || '-'}</li>
+                    <li><strong>ชื่อ-สกุล:</strong> ${v('reporter_title')} ${v('reporter_name')} (โทร: ${v('reporter_phone')})</li>
+                    <li><strong>เอกสารยืนยันตัวตน:</strong> ${idText('reporter')}</li>
+                    <li><strong>ความสัมพันธ์กับผู้สูญหาย:</strong> ${esc(repRel) || '-'}</li>
                 </ul>
 
                 <h6 class="fw-bold mt-4 text-secondary">📍 ข้อมูลการหาย</h6>
                 <ul class="mb-3">
-                    <li><strong>วันที่และเวลา:</strong> ${document.getElementById('last_seen_date').value || '-'} (ช่วงเวลา: ${document.getElementById('time_period_val').value || '-'})</li>
+                    <li><strong>วันที่และเวลา:</strong> ${fmtDate('last_seen_date')} — ${v('time_period_val')} (${time})</li>
                     <li><strong>สถานที่พบล่าสุด:</strong> ${lastPlace}</li>
                 </ul>
 
                 <h6 class="fw-bold mt-4 text-secondary">🔎 ข้อมูลคนหาย</h6>
                 <ul class="mb-3">
-                    <li><strong>ชื่อ-สกุล:</strong> <span class="text-primary fw-bold">${misName}</span></li>
-                    <li><strong>ลักษณะบุคคล:</strong> เพศ ${misGender} | อายุ ${misAge} ปี | <u>ส่วนสูง ${misHeight} ซม.</u> | สัญชาติ ${misNat}</li>
+                    <li><strong>ชื่อ-สกุล:</strong> <span class="text-primary fw-bold">${v('missing_title')} ${v('missing_name')}</span></li>
+                    <li><strong>เพศ:</strong> ${v('missing_gender')} | <strong>อายุ:</strong> ${v('missing_age')} ปี | <strong>วันเกิด:</strong> ${fmtDate('missing_birthdate')} | <strong>สัญชาติ:</strong> ${v('missing_nationality')}</li>
+                    <li><strong>เอกสารยืนยันตัวตน:</strong> ${idText('missing')}</li>
+                    <li><strong>รูปพรรณ:</strong> สูง ${v('missing_height')} ซม. | ${esc(skin) || '-'} | รูปร่าง${esc(body) || '-'} | ${esc(hair) || '-'} สี${v('hair_color_select')}</li>
                 </ul>
 
                 <h6 class="fw-bold mt-4 text-secondary">👮 ข้อมูลคดี (สภ./สน.)</h6>
-                <p class="mb-0"><strong>รับผิดชอบโดย:</strong> ${polStation} (จ.${polProv})</p>
-            `;
-            document.getElementById('previewBox').innerHTML = html;
+                <ul class="mb-0">
+                    <li><strong>รับผิดชอบโดย:</strong> ${v('police_station_select')} (จ.${v('police_province_select')}) โทร ${v('police_station_phone')}</li>
+                    <li><strong>ใบแจ้งความเลขที่:</strong> ${v('policereport_number')} | <strong>วันที่:</strong> ${fmtDate('policereport_date')}${val('policereport_time') ? ` ${esc(val('policereport_time'))} น.` : ''}</li>
+                    <li><strong>สถานที่แจ้ง:</strong> ${v('policereport_location')} | <strong>ผู้รับแจ้ง:</strong> ${v('policereport_name')}</li>
+                    <li><strong>รายละเอียด:</strong> <span style="white-space: pre-line;">${v('policereport_purpose')}</span></li>
+                </ul>`;
         }
+
+        // ---------------------------------------------------------------
+        // เริ่มต้นหน้า
+        // ---------------------------------------------------------------
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
+        });
+
+        (function init() {
+            const today = todayStr();
+            ['last_seen_date', 'missing_birthdate', 'policereport_date'].forEach(id => $(id).setAttribute('max', today));
+            applyIdFormatter('reporter');
+            applyIdFormatter('missing');
+            handleIdTypeChange('reporter');
+            handleIdTypeChange('missing');
+            App.attachFormatter($('reporter_phone'), App.formatPhoneInput);
+
+            const provinceSelect = $('police_province_select');
+            if (typeof allThaiProvincesList !== 'undefined') {
+                const sorted = [...allThaiProvincesList].sort((a, b) => a.localeCompare(b, 'th'));
+                sorted.forEach(prov => provinceSelect.insertAdjacentHTML('beforeend', `<option value="${esc(prov)}">${esc(prov)}</option>`));
+                $('provinceList').innerHTML = sorted.map(p => `<option value="${esc(p)}"></option>`).join('');
+            }
+
+            // เปิด-ปิดช่องกรอก "อื่นๆ" สำหรับลักษณะทางกายภาพ
+            document.querySelectorAll('.physical-select').forEach(select => {
+                select.addEventListener('change', function () {
+                    const otherDiv = $(this.getAttribute('data-other'));
+                    otherDiv.style.display = (this.value === 'อื่นๆ') ? 'block' : 'none';
+                });
+            });
+        })();
     </script>
 </body>
 </html>

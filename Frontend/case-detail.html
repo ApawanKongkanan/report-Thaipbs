@@ -11,11 +11,14 @@
     <link rel="stylesheet" href="assets/nifty/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/nifty/css/nifty.min.css">
     <link rel="stylesheet" href="assets/nifty/css/overrides.css">
+    <script src="common.js"></script>
+    <script>App.guardPage(['admin', 'relative']);</script>
     <style>
         .profile-img { width: 100%; max-width: 200px; height: 250px; object-fit: cover; border-radius: 10px; border: 3px solid var(--bs-border-color); margin-bottom: 15px; }
         .info-label { font-size: 13px; color: var(--bs-secondary-color); font-weight: 600; margin-bottom: 2px; }
         .info-value { font-size: 15px; font-weight: bold; margin-bottom: 15px; }
-        .status-badge { padding: 6px 15px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+        .status-badge { padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 13px; }
+        .profile-img { background: #e9ecef; }
 
         /* Timeline Styles */
         .timeline { position: relative; padding-left: 30px; margin-top: 20px; }
@@ -68,11 +71,11 @@
                      <div class="dropdown-menu dropdown-menu-end">
                         <div class="d-flex align-items-center border-bottom px-3 py-2">
                            <div class="flex-grow-1">
-                              <h6 class="mb-0">เจ้าหน้าที่ (ผู้ดูแลระบบ)</h6>
-                              <small class="text-body-secondary">Thai PBS Center</small>
+                              <h6 class="mb-0" data-auth-name>ผู้ใช้งาน</h6>
+                              <small class="text-body-secondary" data-auth-role-label>-</small>
                            </div>
                         </div>
-                        <a href="login.html" class="dropdown-item" onclick="localStorage.clear();">
+                        <a href="login.html" class="dropdown-item" data-logout>
                            <i class="fa-solid fa-right-from-bracket fs-6 me-2"></i> ออกจากระบบ
                         </a>
                      </div>
@@ -98,29 +101,13 @@
                      <div class="d-grid">
                         <button class="mainnav-widget-toggle d-block btn border-0 p-2" data-bs-toggle="collapse" data-bs-target="#usernav" aria-expanded="false" aria-controls="usernav">
                            <span class="dropdown-toggle d-flex justify-content-center align-items-center">
-                              <h5 class="mb-0 me-3">เจ้าหน้าที่ (ผู้ดูแลระบบ)</h5>
+                              <h5 class="mb-0 me-3" data-auth-name>ผู้ใช้งาน</h5>
                            </span>
-                           <small class="text-body-secondary">ผู้ดูแลระบบ</small>
+                           <small class="text-body-secondary" data-auth-role-label>-</small>
                         </button>
 
                         <div id="usernav" class="nav flex-column collapse">
-                           <a href="#" class="nav-link d-flex justify-content-between align-items-center">
-                              <span><i class="fa-solid fa-envelope fs-5 me-2"></i><span class="ms-1">ข้อความ</span></span>
-                              <span class="badge bg-danger rounded-pill">14</span>
-                           </a>
-                           <a href="#" class="nav-link">
-                              <i class="fa-solid fa-user fs-5 me-2"></i>
-                              <span class="ms-1">โปรไฟล์</span>
-                           </a>
-                           <a href="#" class="nav-link">
-                              <i class="fa-solid fa-gear fs-5 me-2"></i>
-                              <span class="ms-1">ตั้งค่า</span>
-                           </a>
-                           <a href="#" class="nav-link">
-                              <i class="fa-solid fa-lock fs-5 me-2"></i>
-                              <span class="ms-1">ล็อกหน้าจอ</span>
-                           </a>
-                           <a href="login.html" class="nav-link" onclick="localStorage.clear();">
+                           <a href="login.html" class="nav-link" data-logout>
                               <i class="fa-solid fa-right-from-bracket fs-5 me-2"></i>
                               <span class="ms-1">ออกจากระบบ</span>
                            </a>
@@ -151,7 +138,7 @@
                         </a>
                      </li>
 
-                     <li class="nav-item">
+                     <li class="nav-item" data-role-only="admin">
                         <a href="add-case.html" class="nav-link mininav-toggle"><i class="fa-solid fa-plus fs-5 me-2"></i>
                            <span class="nav-label mininav-content ms-1">
                               <span data-popper-arrow class="arrow"></span>
@@ -169,7 +156,7 @@
                         </a>
                      </li>
 
-                     <li class="nav-item">
+                     <li class="nav-item" data-role-only="admin">
                         <a href="dashboard.html" class="nav-link mininav-toggle"><i class="fa-solid fa-chart-pie fs-5 me-2"></i>
                            <span class="nav-label mininav-content ms-1">
                               <span data-popper-arrow class="arrow"></span>
@@ -192,103 +179,57 @@
             <div class="content__wrap py-4">
 
                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-                  <a href="Homepage.html" class="btn-link text-decoration-none fw-bold"><i class="fa-solid fa-arrow-left me-2"></i> กลับหน้าหลัก</a>
-                  <h1 class="page-title m-0 h4"><i class="fa-solid fa-folder-open me-2"></i>รายละเอียดเคส: <span id="header_case_id">TH-2026-0001</span></h1>
-                  <button class="btn btn-outline-secondary btn-sm fw-bold"><i class="fa-solid fa-print"></i> พิมพ์</button>
+                  <a href="track.html" class="btn-link text-decoration-none fw-bold no-print" id="backLink"><i class="fa-solid fa-arrow-left me-2"></i> กลับรายการเคส</a>
+                  <h1 class="page-title m-0 h4"><i class="fa-solid fa-folder-open me-2"></i>รายละเอียดเคส: <span id="header_case_id">-</span></h1>
+                  <button type="button" class="btn btn-outline-secondary btn-sm fw-bold no-print" onclick="window.print()"><i class="fa-solid fa-print"></i> พิมพ์</button>
                </div>
 
-               <div class="row g-4">
+               <div id="pageState"></div>
+
+               <div class="row g-4 d-none" id="caseContent">
 
                   <div class="col-lg-4">
-                     <div class="card sticky-top" style="top: 20px;">
-                        <div class="card-body">
-                           <div class="text-center">
-                              <img src="https://via.placeholder.com/200x250?text=Missing+Person" class="profile-img" alt="ภาพคนหาย">
-                              <h5 class="fw-bold text-primary mb-1">ด.ช. สมมติ ทดสอบ (น้องเอ)</h5>
-                              <p class="text-body-secondary small mb-3">อายุ 12 ปี • เพศ ชาย</p>
-                              <span class="status-badge bg-danger text-white d-inline-block mb-4"><i class="fa-solid fa-search"></i> กำลังค้นหา (เร่งด่วน)</span>
-                           </div>
-
-                           <h6 class="fw-bold border-bottom pb-2"><i class="fa-solid fa-circle-info"></i> ข้อมูลการสูญหาย</h6>
-                           <div class="row mt-3">
-                              <div class="col-12"><div class="info-label">วันเวลาที่หาย</div><div class="info-value">1 กรกฎาคม 2569 (ช่วงเย็น)</div></div>
-                              <div class="col-12"><div class="info-label">สถานที่พบล่าสุด</div><div class="info-value">หน้าตลาดบางกะปิ เขตบางกะปิ กทม. 10240</div></div>
-                              <div class="col-12"><div class="info-label">สาเหตุเบื้องต้น</div><div class="info-value text-danger">พลัดหลงออกจากบ้าน</div></div>
-                           </div>
-
-                           <h6 class="fw-bold border-bottom pb-2 mt-2"><i class="fa-solid fa-dna"></i> รูปพรรณสัณฐาน</h6>
-                           <div class="row mt-3">
-                              <div class="col-6"><div class="info-label">ส่วนสูง</div><div class="info-value">145 ซม.</div></div>
-                              <div class="col-6"><div class="info-label">สีผิว</div><div class="info-value">ผิวสองสี</div></div>
-                              <div class="col-6"><div class="info-label">รูปร่าง</div><div class="info-value">ผอม</div></div>
-                              <div class="col-6"><div class="info-label">เส้นผม</div><div class="info-value">ผมดำสั้น</div></div>
-                           </div>
-
-                           <h6 class="fw-bold border-bottom pb-2 mt-2"><i class="fa-solid fa-building-shield"></i> ข้อมูลคดี</h6>
-                           <div class="row mt-3">
-                              <div class="col-12"><div class="info-label">สถานีตำรวจรับผิดชอบ</div><div class="info-value">สน.ลาดพร้าว (จ.กรุงเทพมหานคร)</div></div>
-                              <div class="col-12"><div class="info-label">ผู้แจ้งความ</div><div class="info-value">นาง สมศรี ทดสอบ (แม่)</div></div>
-                           </div>
-                        </div>
+                     <div class="card">
+                        <div class="card-body" id="profileCard"></div>
                      </div>
                   </div>
 
                   <div class="col-lg-8">
+                     <!-- เจ้าหน้าที่: อัปเดตสถานะเคส (POST /api/cases/:id/<action>) -->
+                     <div class="card mb-4 d-none no-print" id="statusCard">
+                        <div class="card-body">
+                           <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                              <h5 class="fw-bold m-0 text-primary"><i class="fa-solid fa-list-check me-2"></i>อัปเดตสถานะเคส</h5>
+                              <div>สถานะปัจจุบัน: <span id="currentStatusBadge"></span></div>
+                           </div>
+                           <div id="statusActions" class="d-flex flex-wrap gap-2"></div>
+                           <div id="statusConfirm" class="mt-3 p-3 border rounded bg-body-tertiary d-none">
+                              <div class="fw-bold mb-2" id="statusConfirmText"></div>
+                              <label for="statusDescription" class="form-label small fw-bold text-body-secondary">รายละเอียดการดำเนินการ (ถ้ามี)</label>
+                              <textarea id="statusDescription" class="form-control mb-2" rows="2" maxlength="500" placeholder="เช่น ประสานสถานีตำรวจแล้ว / พบตัวที่..."></textarea>
+                              <div id="statusError" class="alert alert-danger py-2 small d-none" role="alert"></div>
+                              <div class="d-flex gap-2">
+                                 <button type="button" class="btn btn-primary btn-sm fw-bold" id="statusConfirmBtn">ยืนยัน</button>
+                                 <button type="button" class="btn btn-outline-secondary btn-sm" id="statusCancelBtn">ยกเลิก</button>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+
+                     <div class="card mb-4">
+                        <div class="card-body">
+                           <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3 flex-wrap gap-2">
+                              <h4 class="fw-bold m-0 text-primary"><i class="fa-solid fa-route me-2"></i>ไทม์ไลน์สถานะเคส</h4>
+                              <a href="add-clue.html" class="btn btn-primary fw-bold no-print" id="addClueLink"><i class="fa-solid fa-plus me-1"></i> แจ้งเบาะแสเพิ่ม</a>
+                           </div>
+                           <div class="timeline" id="timeline"></div>
+                        </div>
+                     </div>
+
                      <div class="card">
                         <div class="card-body">
-                           <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
-                              <h4 class="fw-bold m-0 text-primary"><i class="fa-solid fa-route me-2"></i>ไทม์ไลน์เบาะแส</h4>
-                              <a href="add-clue.html" class="btn btn-primary fw-bold"><i class="fa-solid fa-plus me-1"></i> แจ้งเบาะแสเพิ่ม</a>
-                           </div>
-
-                           <div class="timeline">
-
-                              <div class="timeline-item">
-                                 <div class="timeline-marker status-pending"></div>
-                                 <div class="timeline-content">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                       <h6 class="fw-bold m-0 text-primary"><i class="fa-solid fa-location-dot me-1"></i> พบเห็นที่ ซอยรามคำแหง 39</h6>
-                                       <span class="badge bg-warning text-dark"><i class="fa-solid fa-hourglass-half"></i> รอดำเนินการ</span>
-                                    </div>
-                                    <p class="text-body-secondary small mb-2"><i class="fa-solid fa-calendar-days"></i> รับแจ้งเมื่อ: 5 ก.ค. 2569 เวลา 14:30 น. (ผ่าน Facebook)</p>
-                                    <p class="mb-2"><strong>รายละเอียด:</strong> เจอเด็กผู้ชายหน้าตาคล้ายในรูป ใส่เสื้อยืดสีขาว กางเกงขาสั้น เดินอยู่แถวร้านสะดวกซื้อในซอยรามคำแหง 39 ท่าทางหิวข้าว</p>
-                                    <div class="alert alert-info py-2 px-3 m-0 mb-2 small">
-                                       <i class="fa-solid fa-user-secret"></i> <strong>ผู้แจ้ง:</strong> คุณสมชาย (081-XXX-XXXX) | <strong>ความมั่นใจ:</strong> ค่อนข้างมั่นใจ
-                                    </div>
-
-                                    <div class="mt-3 pt-2 border-top">
-                                       <span class="small fw-bold text-body-secondary me-2">อัปเดตสถานะเบาะแส:</span>
-                                       <button class="btn btn-outline-success btn-sm"><i class="fa-solid fa-check"></i> เป็นประโยชน์</button>
-                                       <button class="btn btn-outline-danger btn-sm"><i class="fa-solid fa-xmark"></i> ข้อมูลเท็จ</button>
-                                    </div>
-                                 </div>
-                              </div>
-
-                              <div class="timeline-item">
-                                 <div class="timeline-marker status-verified"></div>
-                                 <div class="timeline-content">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                       <h6 class="fw-bold m-0 text-primary"><i class="fa-solid fa-location-dot me-1"></i> ภาพจากกล้อง CCTV ปากซอยบ้าน</h6>
-                                       <span class="badge bg-success"><i class="fa-solid fa-check-circle"></i> ยืนยันแล้ว/เป็นประโยชน์</span>
-                                    </div>
-                                    <p class="text-body-secondary small mb-2"><i class="fa-solid fa-calendar-days"></i> รับแจ้งเมื่อ: 2 ก.ค. 2569 เวลา 09:15 น. (ผ่าน มูลนิธิกระจกเงา)</p>
-                                    <p class="mb-2"><strong>รายละเอียด:</strong> ดึงภาพจากกล้องวงจรปิดหน้าหมู่บ้าน พบว่าน้องเดินออกไปทางถนนใหญ่คนเดียวเมื่อเวลา 17.40 น. ของวันเกิดเหตุ</p>
-                                    <img src="https://via.placeholder.com/300x150?text=CCTV+Footage" class="clue-img" alt="หลักฐานวงจรปิด">
-                                 </div>
-                              </div>
-
-                              <div class="timeline-item">
-                                 <div class="timeline-marker"></div>
-                                 <div class="timeline-content bg-body border-primary border-2">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                       <h6 class="fw-bold m-0 text-primary"><i class="fa-solid fa-bullhorn me-1"></i> เปิดรับแจ้งคดีคนหายเข้าสู่ระบบ</h6>
-                                    </div>
-                                    <p class="text-body-secondary small m-0"><i class="fa-solid fa-calendar-days"></i> 1 กรกฎาคม 2569 เวลา 20:00 น.</p>
-                                    <p class="mt-2 m-0">ระบบได้ทำการบันทึกข้อมูลและประกาศตามหาบุคคลสูญหายอย่างเป็นทางการ</p>
-                                 </div>
-                              </div>
-
-                           </div>
+                           <h4 class="fw-bold mb-3 text-primary border-bottom pb-3"><i class="fa-solid fa-file-shield me-2"></i>ใบแจ้งความ</h4>
+                           <div id="policeReports"></div>
                         </div>
                      </div>
                   </div>
@@ -312,5 +253,261 @@
    <script src="assets/nifty/vendors/bootstrap/bootstrap.min.js"></script>
    <script src="assets/nifty/js/nifty.min.js"></script>
 
+    <script>
+        const session = App.getSession();
+        const isAdmin = session && session.role === 'admin';
+        const caseId = new URLSearchParams(location.search).get('id');
+        const S = App.CASE_STATUS;
+
+        // ลำดับสถานะที่ Backend อนุญาต (allowedTransitions ใน missing.route.js)
+        const TRANSITIONS = {
+            [S.RECEIVED]:   [{ to: S.REVIEWING, endpoint: 'start-review', label: 'เริ่มตรวจสอบข้อมูล', icon: 'fa-magnifying-glass-chart', cls: 'btn-info' }],
+            [S.REVIEWING]:  [{ to: S.SEARCHING, endpoint: 'start-search', label: 'เริ่มค้นหา / ประกาศโพสต์หา', icon: 'fa-bullhorn', cls: 'btn-warning' }],
+            [S.SEARCHING]:  [{ to: S.FOUND_SAFE, endpoint: 'found-safe', label: 'พบเจอ - ปลอดภัย', icon: 'fa-circle-check', cls: 'btn-success' },
+                             { to: S.FOUND_DEAD, endpoint: 'found-dead', label: 'พบเจอ - เสียชีวิต', icon: 'fa-ribbon', cls: 'btn-dark' }],
+            [S.FOUND_SAFE]: [{ to: S.CLOSED, endpoint: 'close', label: 'ปิดเคส', icon: 'fa-folder-closed', cls: 'btn-secondary' }],
+            [S.FOUND_DEAD]: [{ to: S.CLOSED, endpoint: 'close', label: 'ปิดเคส', icon: 'fa-folder-closed', cls: 'btn-secondary' }],
+            [S.CLOSED]:     [{ to: S.RESUMED, endpoint: 'resume-search', label: 'กลับมาค้นหาอีกครั้ง', icon: 'fa-rotate-right', cls: 'btn-outline-warning' }],
+            [S.RESUMED]:    [{ to: S.SEARCHING, endpoint: 'start-search', label: 'เริ่มค้นหาอีกครั้ง', icon: 'fa-bullhorn', cls: 'btn-warning' }],
+        };
+
+        const esc = App.escapeHtml;
+        const t = (v, f) => App.textOr(v, f);
+        let pendingAction = null;
+
+        // ญาติเห็นเลขเอกสารแบบปิดบางส่วน
+        function maskIdentity(identity) {
+            const s = t(identity, '');
+            if (!s || isAdmin) return s || '-';
+            const idx = s.indexOf(':');
+            const type = idx >= 0 ? s.slice(0, idx + 1) : '';
+            const num = idx >= 0 ? s.slice(idx + 1) : s;
+            const total = (num.match(/[0-9A-Za-z]/g) || []).length;
+            let seen = 0;
+            const masked = num.replace(/[0-9A-Za-z]/g, ch => (++seen > total - 3 ? ch : 'X'));
+            return `${type}${masked}`.trim();
+        }
+
+        function info(label, value, cls) {
+            return `<div class="${cls || 'col-12'}"><div class="info-label">${esc(label)}</div><div class="info-value">${value}</div></div>`;
+        }
+
+        function renderProfile(c) {
+            const name = App.fullName(c.missingperson_title, c.missingperson_name);
+            const age = t(c.missingperson_age, '');
+            const meta = [age !== '' ? `อายุ ${age} ปี` : '', t(c.missingperson_gender, '') ? `เพศ ${t(c.missingperson_gender)}` : '']
+                .filter(Boolean).join(' • ') || 'ไม่ระบุอายุ/เพศ';
+            const time = App.formatTime(c.Last_Seen_time);
+            const lastSeenWhen = `${App.formatThaiDate(c.Last_Seen_date, { month: 'long' })}${time ? ` เวลา ${time}` : ''}`;
+            const place = [t(c.Last_Seen_place, ''),
+                t(c.Last_Seen_subdistrict, '') && `ต.${t(c.Last_Seen_subdistrict)}`,
+                t(c.Last_Seen_district, '') && `อ.${t(c.Last_Seen_district)}`,
+                t(c.Last_Seen_province, '') && `จ.${t(c.Last_Seen_province)}`].filter(Boolean).join(' ') || '-';
+            const causes = App.parseCauses(c.case_missing_reason);
+            const causesHtml = causes.length
+                ? `<ol class="mb-0 ps-3">${causes.map(x => `<li>${esc(x)}</li>`).join('')}</ol>` : '-';
+            const station = t(c.policestation_name, '');
+            const stationHtml = station
+                ? `${esc(station)}${t(c.policestation_province, '') ? ` (จ.${esc(c.policestation_province)})` : ''}${t(c.policestation_phone, '') ? `<div class="small fw-normal"><i class="fa-solid fa-phone me-1"></i><a href="tel:${esc(App.digitsOnly(c.policestation_phone))}">${esc(c.policestation_phone)}</a></div>` : ''}`
+                : '-';
+            const height = t(c.character_height_cm, '');
+
+            document.getElementById('profileCard').innerHTML = `
+                <div class="text-center">
+                    <img src="${esc(App.imageUrl(c.character_image_url))}" ${App.imgFallbackAttr()} class="profile-img" alt="ภาพบุคคลสูญหาย">
+                    <h5 class="fw-bold text-primary mb-1">${esc(name)}</h5>
+                    <p class="text-body-secondary small mb-3">${esc(meta)}</p>
+                    <div class="d-flex justify-content-center flex-wrap gap-1 mb-4">
+                        ${App.statusBadge(c.case_latest_status, 'status-badge')}
+                        ${App.priorityBadge(c.case_priority, 'status-badge')}
+                    </div>
+                </div>
+
+                <h6 class="fw-bold border-bottom pb-2"><i class="fa-solid fa-circle-info"></i> ข้อมูลการสูญหาย</h6>
+                <div class="row mt-3">
+                    ${info('วันเวลาที่หาย', esc(lastSeenWhen))}
+                    ${info('สถานที่พบเห็นล่าสุด', esc(place))}
+                    ${info('สาเหตุเบื้องต้น (เรียงตามลำดับ)', `<span class="text-danger">${causesHtml}</span>`)}
+                    ${info('วันที่รับแจ้ง', esc(App.formatThaiDate(c.case_received_date, { month: 'long', withTime: true })))}
+                </div>
+
+                <h6 class="fw-bold border-bottom pb-2 mt-2"><i class="fa-solid fa-dna"></i> รูปพรรณสัณฐาน</h6>
+                <div class="row mt-3">
+                    ${info('ส่วนสูง', height !== '' ? `${esc(height)} ซม.` : '-', 'col-6')}
+                    ${info('สีผิว', esc(t(c.character_skin_color)), 'col-6')}
+                    ${info('รูปร่าง', esc(t(c.character_body_shape)), 'col-6')}
+                    ${info('ลักษณะผม', esc(t(c.character_hair_style)), 'col-6')}
+                    ${info('สีผม', esc(t(c.character_hair_color)), 'col-6')}
+                    ${info('สัญชาติ', esc(t(c.missingperson_race)), 'col-6')}
+                    ${info('วันเกิด', esc(App.formatThaiDate(c.missingperson_birthday, { month: 'long' })), 'col-12')}
+                    ${info('เอกสารยืนยันตัวตน', esc(maskIdentity(c.missingperson_identity)), 'col-12')}
+                </div>
+
+                <h6 class="fw-bold border-bottom pb-2 mt-2"><i class="fa-solid fa-building-shield"></i> ข้อมูลคดี</h6>
+                <div class="row mt-3">
+                    ${info('สถานีตำรวจรับผิดชอบ', stationHtml)}
+                    ${info('ความสัมพันธ์ของผู้แจ้งกับผู้สูญหาย', esc(t(c.case_relation_to_missing)))}
+                    ${t(c.case_notes, '') ? info('บันทึกเพิ่มเติม', `<span class="fw-normal" style="white-space: pre-line;">${esc(c.case_notes)}</span>`) : ''}
+                </div>`;
+        }
+
+        function markerClass(status) {
+            if (status === S.FOUND_SAFE) return 'status-verified';
+            if (status === S.FOUND_DEAD) return 'status-invalid';
+            if (status === S.CLOSED) return '';
+            return 'status-pending';
+        }
+
+        function renderTimeline(logs) {
+            const box = document.getElementById('timeline');
+            const list = (Array.isArray(logs) ? logs : []).slice().sort((a, b) =>
+                (App.toDate(b.log_logged_date) || 0) - (App.toDate(a.log_logged_date) || 0) || (b.log_id - a.log_id));
+            if (list.length === 0) {
+                App.renderState(box, 'empty', 'ยังไม่มีประวัติการเปลี่ยนสถานะ');
+                return;
+            }
+            box.innerHTML = list.map((log, i) => `
+                <div class="timeline-item">
+                    <div class="timeline-marker ${markerClass(log.log_case_status)}"></div>
+                    <div class="timeline-content ${i === 0 ? 'bg-body border-primary border-2' : ''}">
+                        <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-2">
+                            <h6 class="fw-bold m-0 text-primary">${App.statusBadge(log.log_case_status)}</h6>
+                            ${i === 0 ? '<span class="badge bg-primary">ล่าสุด</span>' : ''}
+                        </div>
+                        <p class="text-body-secondary small mb-2"><i class="fa-solid fa-calendar-days"></i>
+                            ${esc(App.formatThaiDate(log.log_logged_date, { month: 'long', withTime: true }))}
+                            ${t(log.log_logged_by, '') ? ` • โดย ${esc(log.log_logged_by)}` : ''}</p>
+                        <p class="m-0">${esc(t(log.log_description))}</p>
+                    </div>
+                </div>`).join('');
+        }
+
+        function renderPoliceReports(reports) {
+            const box = document.getElementById('policeReports');
+            const list = Array.isArray(reports) ? reports : [];
+            if (list.length === 0) {
+                App.renderState(box, 'empty', 'ยังไม่มีใบแจ้งความในเคสนี้');
+                return;
+            }
+            box.innerHTML = list.map(r => {
+                const doc = t(r.policereport_document, '');
+                const time = App.formatTime(r.policereport_time);
+                return `
+                <div class="border rounded p-3 mb-3">
+                    <div class="row g-3">
+                        <div class="${doc ? 'col-md-8' : 'col-12'}">
+                            <div class="row">
+                                ${info('เลขที่ใบแจ้งความ', esc(t(r.policereport_number)), 'col-sm-6')}
+                                ${info('วันเวลาที่แจ้ง', esc(`${App.formatThaiDate(r.policereport_date, { month: 'long' })}${time ? ` ${time}` : ''}`), 'col-sm-6')}
+                                ${info('สถานที่แจ้ง (สน./สภ.)', esc(t(r.policereport_location)), 'col-sm-6')}
+                                ${info('เจ้าหน้าที่ตำรวจผู้รับแจ้ง', esc(t(r.policereport_name)), 'col-sm-6')}
+                                ${info('รายละเอียด / วัตถุประสงค์', `<span class="fw-normal" style="white-space: pre-line;">${esc(t(r.policereport_purpose))}</span>`)}
+                            </div>
+                        </div>
+                        ${doc ? `<div class="col-md-4 text-center">
+                            <a href="${esc(App.imageUrl(doc))}" target="_blank" rel="noopener" title="เปิดเอกสารฉบับเต็ม">
+                                <img src="${esc(App.imageUrl(doc))}" ${App.imgFallbackAttr()} class="clue-img" alt="ภาพใบแจ้งความ">
+                            </a>
+                            <div class="small mt-1"><a href="${esc(App.imageUrl(doc))}" target="_blank" rel="noopener">เปิดเอกสาร <i class="fa-solid fa-up-right-from-square"></i></a></div>
+                        </div>` : ''}
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function renderStatusActions(c) {
+            const card = document.getElementById('statusCard');
+            if (!isAdmin) { card.remove(); return; }
+            card.classList.remove('d-none');
+            document.getElementById('currentStatusBadge').innerHTML = App.statusBadge(c.case_latest_status);
+            const actions = TRANSITIONS[c.case_latest_status] || [];
+            const box = document.getElementById('statusActions');
+            box.innerHTML = actions.length
+                ? actions.map((a, i) => `<button type="button" class="btn ${a.cls} btn-sm fw-bold" data-action="${i}"><i class="fa-solid ${a.icon} me-1"></i>${esc(a.label)}</button>`).join('')
+                : '<span class="text-body-secondary small">ไม่มีขั้นตอนถัดไปสำหรับสถานะนี้</span>';
+            box.querySelectorAll('[data-action]').forEach(btn => btn.addEventListener('click', () => {
+                pendingAction = actions[+btn.dataset.action];
+                document.getElementById('statusConfirmText').innerHTML =
+                    `ยืนยันเปลี่ยนสถานะเป็น ${App.statusBadge(pendingAction.to)} ?`;
+                document.getElementById('statusDescription').value = '';
+                document.getElementById('statusError').classList.add('d-none');
+                document.getElementById('statusConfirm').classList.remove('d-none');
+                document.getElementById('statusDescription').focus();
+            }));
+        }
+
+        document.getElementById('statusCancelBtn').addEventListener('click', () => {
+            pendingAction = null;
+            document.getElementById('statusConfirm').classList.add('d-none');
+        });
+
+        document.getElementById('statusConfirmBtn').addEventListener('click', async () => {
+            if (!pendingAction) return;
+            const btn = document.getElementById('statusConfirmBtn');
+            const errBox = document.getElementById('statusError');
+            errBox.classList.add('d-none');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> กำลังบันทึก...';
+            try {
+                const description = document.getElementById('statusDescription').value.trim();
+                const res = await App.api(`/cases/${encodeURIComponent(caseId)}/${pendingAction.endpoint}`, {
+                    method: 'POST',
+                    json: { logged_by: (session && session.name) || 'เจ้าหน้าที่', ...(description ? { description } : {}) },
+                });
+                App.toast(res.message || 'อัปเดตสถานะเรียบร้อยแล้ว', 'success');
+                pendingAction = null;
+                document.getElementById('statusConfirm').classList.add('d-none');
+                await loadCase(true);
+            } catch (err) {
+                console.error('อัปเดตสถานะไม่สำเร็จ:', err);
+                errBox.textContent = `อัปเดตสถานะไม่สำเร็จ: ${err.message}`;
+                errBox.classList.remove('d-none');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'ยืนยัน';
+            }
+        });
+
+        // GET /api/cases/:id → { success, case, status_logs, police_reports }
+        async function loadCase(silent) {
+            const stateBox = document.getElementById('pageState');
+            const content = document.getElementById('caseContent');
+            if (!caseId || !/^\d+$/.test(caseId)) {
+                App.renderState(stateBox, 'error', 'ไม่พบรหัสเคสในลิงก์ กรุณาเลือกเคสจากหน้ารายการเคส');
+                return;
+            }
+            document.getElementById('header_case_id').textContent = caseId;
+            document.getElementById('addClueLink').href = `add-clue.html?case_id=${encodeURIComponent(caseId)}`;
+            if (!silent) {
+                content.classList.add('d-none');
+                App.renderState(stateBox, 'loading', 'กำลังโหลดรายละเอียดเคส...');
+            }
+            try {
+                const data = await App.api(`/cases/${encodeURIComponent(caseId)}`);
+                // รองรับทั้งรูปแบบ { case, status_logs, police_reports } และแบบส่งแถวเคสตรงๆ
+                const c = (data && data.case) ? data.case : data;
+                if (!c || c.case_id === undefined) throw new App.ApiError('ข้อมูลเคสที่ได้รับไม่ถูกต้อง', 200, data);
+                let logs = data.status_logs;
+                if (!Array.isArray(logs)) {
+                    try { logs = (await App.api(`/cases/${encodeURIComponent(caseId)}/status-logs`)).status_logs; }
+                    catch (e) { console.warn('โหลดประวัติสถานะไม่สำเร็จ:', e); logs = []; }
+                }
+                document.title = `เคส ${c.case_id} - ${App.fullName(c.missingperson_title, c.missingperson_name)} - Thai PBS Center`;
+                renderProfile(c);
+                renderTimeline(logs);
+                renderPoliceReports(data.police_reports);
+                renderStatusActions(c);
+                stateBox.innerHTML = '';
+                content.classList.remove('d-none');
+            } catch (err) {
+                console.error('GET /api/cases/:id ล้มเหลว:', err);
+                if (silent) { App.toast(`โหลดข้อมูลล่าสุดไม่สำเร็จ: ${err.message}`, 'danger'); return; }
+                const msg = err.status === 404 ? 'ไม่พบเคสนี้ในระบบ' : `โหลดรายละเอียดเคสไม่สำเร็จ: ${err.message}`;
+                App.renderState(stateBox, 'error', msg, err.status === 404 ? {} : { onRetry: () => loadCase() });
+            }
+        }
+
+        loadCase();
+    </script>
 </body>
 </html>

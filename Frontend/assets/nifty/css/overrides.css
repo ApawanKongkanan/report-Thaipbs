@@ -38,3 +38,29 @@
 .table-hover > tbody > tr:hover {
     box-shadow: inset 4px 0 0 var(--bs-primary);
 }
+
+/* --------------------------------------------------------------------------
+   3) กล่องสถานะ loading / error / empty (สร้างจาก App.renderState ใน common.js)
+   -------------------------------------------------------------------------- */
+.state-box {
+    text-align: center;
+    padding: 1.5rem 1rem;
+    font-weight: 500;
+}
+.state-box.state-error { color: #b42318 !important; }
+
+/* ช่องที่ต้องกรอก */
+.req::after { content: " *"; color: #d63939; font-weight: 700; }
+
+/* กลุ่มตัวเลือกแบบกล่อง (selectable-box) ที่ยังไม่ได้เลือก */
+.group-invalid .selectable-box { border-color: #d63939 !important; }
+.group-feedback { display: none; width: 100%; margin-top: .35rem; font-size: .875em; color: #d63939; }
+.group-invalid > .group-feedback, .group-invalid .group-feedback { display: block; }
+
+.selectable-box:focus-visible { outline: 3px solid rgba(36, 68, 127, .45); outline-offset: 2px; }
+
+@media print {
+    .header, .mainnav, .scroll-container, .no-print { display: none !important; }
+    .root { display: block !important; }
+    .card:hover { transform: none; box-shadow: none; }
+}

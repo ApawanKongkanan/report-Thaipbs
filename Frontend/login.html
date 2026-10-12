@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="assets/nifty/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/nifty/css/nifty.min.css">
     <link rel="stylesheet" href="assets/nifty/css/overrides.css">
+    <script src="common.js"></script>
     <style>
         .login-header { background-color: var(--bs-primary); padding: 30px; text-align: center; color: white; border-radius: var(--bs-card-border-radius) var(--bs-card-border-radius) 0 0; }
         .login-header h3 { margin: 0; font-weight: 600; font-size: 22px; color: #ffffff; }
@@ -38,31 +39,41 @@
                   </div>
                   <div class="card-body p-4">
 
-                     <div id="registeredAlert" class="alert alert-success d-none" role="status">
-                        <i class="fa-solid fa-circle-check me-1"></i> ลงทะเบียนสำเร็จ กรุณาเข้าสู่ระบบด้วยรหัสผ่านที่ตั้งไว้
-                     </div>
+                     <div id="noticeAlert" class="alert d-none" role="status"></div>
+                     <div id="loginAlert" class="alert alert-danger d-none" role="alert"></div>
 
-                     <form id="loginForm" class="mt-2">
+                     <form id="loginForm" class="mt-2" novalidate>
                         <div class="mb-3">
-                           <label for="role" class="form-label fw-bold"><i class="fa-solid fa-user-shield me-2"></i>ประเภทผู้ใช้งาน</label>
-                           <select id="role" class="form-select" required>
-                              <option value="relative" selected>ญาติผู้สูญหาย</option>
-                              <option value="admin">เจ้าหน้าที่</option>
-                           </select>
+                           <span class="form-label fw-bold d-block mb-2"><i class="fa-solid fa-user-shield me-2"></i>ประเภทผู้ใช้งาน</span>
+                           <div class="btn-group w-100" role="group" aria-label="ประเภทผู้ใช้งาน">
+                              <input type="radio" class="btn-check" name="role" id="roleRelative" value="relative" autocomplete="off" checked>
+                              <label class="btn btn-outline-primary fw-bold" for="roleRelative"><i class="fa-solid fa-people-roof me-1"></i> ญาติผู้สูญหาย</label>
+                              <input type="radio" class="btn-check" name="role" id="roleAdmin" value="admin" autocomplete="off">
+                              <label class="btn btn-outline-primary fw-bold" for="roleAdmin"><i class="fa-solid fa-user-tie me-1"></i> เจ้าหน้าที่</label>
+                           </div>
                         </div>
 
                         <div class="mb-3">
-                           <label for="username" class="form-label fw-bold"><i class="fa-solid fa-id-card me-2"></i>บัญชีผู้ใช้</label>
-                           <input type="text" id="username" class="form-control" placeholder="เบอร์โทร / เลขบัตรฯ / ไอดีเจ้าหน้าที่" required>
+                           <label for="username" class="form-label fw-bold" id="usernameLabel"><i class="fa-solid fa-id-card me-2"></i>ชื่อผู้ใช้</label>
+                           <input type="text" id="username" class="form-control" placeholder="ชื่อผู้ใช้ที่ลงทะเบียนไว้" maxlength="100"
+                                  autocomplete="username" autocapitalize="none" spellcheck="false" required>
+                           <div class="invalid-feedback">กรุณากรอกชื่อผู้ใช้งาน</div>
                         </div>
 
                         <div class="mb-4">
                            <label for="password" class="form-label fw-bold"><i class="fa-solid fa-lock me-2"></i>รหัสผ่าน</label>
-                           <input type="password" id="password" class="form-control" placeholder="กรอกรหัสผ่านของคุณ" required>
+                           <div class="input-group has-validation">
+                              <input type="password" id="password" class="form-control" placeholder="กรอกรหัสผ่านของคุณ" maxlength="72"
+                                     autocomplete="current-password" required>
+                              <button class="btn btn-outline-secondary" type="button" id="togglePassword" aria-label="แสดงรหัสผ่าน">
+                                 <i class="fa-solid fa-eye"></i>
+                              </button>
+                              <div class="invalid-feedback">กรุณากรอกรหัสผ่าน</div>
+                           </div>
                         </div>
 
                         <div class="d-grid mt-4">
-                           <button class="btn btn-primary btn-lg" type="submit">
+                           <button class="btn btn-primary btn-lg" type="submit" id="loginBtn">
                               <i class="fa-solid fa-right-to-bracket me-2"></i> เข้าสู่ระบบ
                            </button>
                         </div>
@@ -82,79 +93,138 @@
    <!-- END - PAGE CONTAINER -->
 
 <script>
-    // 1. เปลี่ยนข้อความในช่องกรอก ตามประเภทผู้ใช้งาน
-    document.getElementById("role").addEventListener("change", function() {
-        const role = this.value;
-        const usernameInput = document.getElementById("username");
-        const passwordContainer = document.getElementById("password").closest('.mb-4');
-        const passwordInput = document.getElementById("password");
+    const params = new URLSearchParams(window.location.search);
+    const nextParam = params.get('next');
+    const form = document.getElementById('loginForm');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const loginBtn = document.getElementById('loginBtn');
+    const loginAlert = document.getElementById('loginAlert');
+    const noticeAlert = document.getElementById('noticeAlert');
 
-        if (role === "relative") {
-            // ญาติเข้าได้ทั้งชื่อผู้ใช้ (สมัครเอง) และเบอร์โทรศัพท์ (บัญชีที่เจ้าหน้าที่สร้างให้)
-            usernameInput.placeholder = "ชื่อผู้ใช้ หรือ เบอร์โทรศัพท์";
-
-            passwordContainer.style.display = "block";
-            passwordInput.required = true;
-            passwordInput.placeholder = "รหัสผ่าน";
-            passwordInput.type = "password";
-            document.getElementById("registerLink").style.display = "block";
-        } else {
-            usernameInput.placeholder = "username";
-
-            passwordContainer.style.display = "block";
-            passwordInput.required = true;
-            passwordInput.placeholder = "password";
-            passwordInput.type = "password"; // ของแอดมินปิดเป็นจุดๆ เหมือนเดิม
-            document.getElementById("registerLink").style.display = "none"; // เจ้าหน้าที่สมัครเองไม่ได้
-        }
-    });
-
-    // สั่งให้ทำงาน 1 ครั้งตอนโหลดหน้าเว็บ
-    document.getElementById("role").dispatchEvent(new Event('change'));
-
-    // กลับมาจากหน้าลงทะเบียน: แสดงข้อความสำเร็จ และกรอกชื่อผู้ใช้ให้
-    if (new URLSearchParams(window.location.search).get("registered") === "1") {
-        document.getElementById("registeredAlert").classList.remove("d-none");
-        document.getElementById("role").value = "relative";
-        document.getElementById("role").dispatchEvent(new Event('change'));
-        const registeredUsername = sessionStorage.getItem("registeredUsername");
-        if (registeredUsername) {
-            document.getElementById("username").value = registeredUsername;
-            document.getElementById("password").focus();
-            sessionStorage.removeItem("registeredUsername");
-        }
-        history.replaceState(null, "", window.location.pathname); // ไม่ให้ข้อความขึ้นซ้ำเมื่อรีเฟรช
+    function selectedRole() {
+        return document.querySelector('input[name="role"]:checked').value;
     }
 
-    // 2. จัดการเมื่อกดปุ่ม "เข้าสู่ระบบ"
-    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+    function showNotice(type, html) {
+        noticeAlert.className = `alert alert-${type}`;
+        noticeAlert.innerHTML = html;
+    }
+
+    function showError(message) {
+        loginAlert.innerHTML = `<i class="fa-solid fa-triangle-exclamation me-1"></i> ${App.escapeHtml(message)}`;
+        loginAlert.classList.remove('d-none');
+    }
+
+    // หน้าที่จะไปหลังเข้าสู่ระบบ: ?next= (ถ้า role นั้นเข้าได้) ไม่เช่นนั้นไปหน้าแรก
+    function destinationFor(role) {
+        return App.safeNext(nextParam, role) || App.HOME_PAGE;
+    }
+
+    // 1. เปลี่ยนข้อความในช่องกรอก ตามประเภทผู้ใช้งาน
+    function applyRoleUi() {
+        const role = selectedRole();
+        const label = document.getElementById('usernameLabel');
+        if (role === 'relative') {
+            label.innerHTML = '<i class="fa-solid fa-id-card me-2"></i>ชื่อผู้ใช้';
+            usernameInput.placeholder = 'ชื่อผู้ใช้ที่ลงทะเบียนไว้';
+            document.getElementById('registerLink').style.display = 'block';
+        } else {
+            label.innerHTML = '<i class="fa-solid fa-id-badge me-2"></i>บัญชีเจ้าหน้าที่';
+            usernameInput.placeholder = 'ชื่อบัญชีเจ้าหน้าที่';
+            document.getElementById('registerLink').style.display = 'none'; // เจ้าหน้าที่สมัครเองไม่ได้
+        }
+        loginAlert.classList.add('d-none');
+    }
+    document.querySelectorAll('input[name="role"]').forEach(r => r.addEventListener('change', applyRoleUi));
+
+    // ข้อความแจ้งเตือนจากหน้าอื่น
+    if (params.get('registered') === '1') {
+        document.getElementById('roleRelative').checked = true;
+        showNotice('success', '<i class="fa-solid fa-circle-check me-1"></i> ลงทะเบียนสำเร็จ กรุณาเข้าสู่ระบบด้วยชื่อผู้ใช้และรหัสผ่านที่ตั้งไว้');
+        let registeredUsername = null;
+        try { registeredUsername = sessionStorage.getItem('registeredUsername'); sessionStorage.removeItem('registeredUsername'); } catch (_) {}
+        if (registeredUsername) {
+            usernameInput.value = registeredUsername;
+            setTimeout(() => passwordInput.focus(), 0);
+        }
+    } else if (params.get('logout') === '1') {
+        showNotice('secondary', '<i class="fa-solid fa-right-from-bracket me-1"></i> ออกจากระบบเรียบร้อยแล้ว');
+    } else if (params.get('expired') === '1') {
+        showNotice('warning', '<i class="fa-solid fa-clock me-1"></i> เซสชันหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง');
+    } else if (nextParam) {
+        showNotice('info', '<i class="fa-solid fa-lock me-1"></i> กรุณาเข้าสู่ระบบก่อนใช้งานหน้านี้');
+    }
+    // ไม่ให้ข้อความขึ้นซ้ำเมื่อรีเฟรช (เก็บ ?next ไว้)
+    if (params.has('registered') || params.has('logout') || params.has('expired')) {
+        history.replaceState(null, '', window.location.pathname + (nextParam ? `?next=${encodeURIComponent(nextParam)}` : ''));
+    }
+
+    // เข้าสู่ระบบอยู่แล้ว → ไปหน้าที่ต้องการเลย
+    const existing = App.getSession();
+    if (existing && params.get('logout') !== '1') {
+        window.location.replace(destinationFor(existing.role));
+    }
+
+    applyRoleUi();
+
+    // แสดง/ซ่อนรหัสผ่าน
+    document.getElementById('togglePassword').addEventListener('click', function() {
+        const show = passwordInput.type === 'password';
+        passwordInput.type = show ? 'text' : 'password';
+        this.querySelector('i').className = show ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
+        this.setAttribute('aria-label', show ? 'ซ่อนรหัสผ่าน' : 'แสดงรหัสผ่าน');
+    });
+
+    [usernameInput, passwordInput].forEach(el => el.addEventListener('input', () => {
+        el.classList.remove('is-invalid');
+        loginAlert.classList.add('d-none');
+    }));
+
+    function setBusy(busy) {
+        [usernameInput, passwordInput, ...document.querySelectorAll('input[name="role"]')].forEach(el => el.disabled = busy);
+        loginBtn.disabled = busy;
+        loginBtn.innerHTML = busy
+            ? '<span class="spinner-border spinner-border-sm me-2"></span> กำลังเข้าสู่ระบบ...'
+            : '<i class="fa-solid fa-right-to-bracket me-2"></i> เข้าสู่ระบบ';
+    }
+
+    // 2. กดปุ่ม "เข้าสู่ระบบ" → POST /api/login { username, password, role }
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
+        loginAlert.classList.add('d-none');
 
-        const username = document.getElementById("username").value;
-        const password = document.getElementById("password").value;
-        const role = document.getElementById("role").value;
+        const role = selectedRole();
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value;
 
+        const usernameOk = username.length > 0;
+        const passwordOk = password.trim().length > 0;
+        usernameInput.classList.toggle('is-invalid', !usernameOk);
+        passwordInput.classList.toggle('is-invalid', !passwordOk);
+        if (!usernameOk || !passwordOk) {
+            (usernameOk ? passwordInput : usernameInput).focus();
+            return;
+        }
+
+        setBusy(true);
         try {
-            const response = await fetch(`${window.location.origin}/api/login`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username, password, role })
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                localStorage.setItem("userId", data.user.user_id);
-                localStorage.setItem("userRole", data.user.role);
-                localStorage.setItem("userName", data.user.name);
-
-                window.location.href = "Homepage.html";
-            } else {
-                alert("❌ เข้าสู่ระบบไม่สำเร็จ: " + data.message);
+            const data = await App.api('/login', { method: 'POST', json: { username, password, role } });
+            const user = data && data.user;
+            if (!user || user.user_id === undefined || user.role !== role) {
+                throw new App.ApiError('ข้อมูลผู้ใช้ที่ได้รับจากเซิร์ฟเวอร์ไม่ถูกต้อง', 200, data);
             }
+            App.saveSession(user);
+            loginBtn.innerHTML = '<i class="fa-solid fa-circle-check me-2"></i> เข้าสู่ระบบสำเร็จ';
+            window.location.href = destinationFor(user.role);
         } catch (err) {
-            console.error("Login Error:", err);
-            alert("🌐 ไม่สามารถติดต่อเซิร์ฟเวอร์หลังบ้านได้");
+            console.error('Login Error:', err);
+            setBusy(false);
+            showError(err.message || 'เข้าสู่ระบบไม่สำเร็จ');
+            if (err.status === 401) {
+                passwordInput.value = '';
+                passwordInput.focus();
+            }
         }
     });
 </script>

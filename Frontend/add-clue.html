@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="assets/nifty/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/nifty/css/nifty.min.css">
     <link rel="stylesheet" href="assets/nifty/css/overrides.css">
+    <script src="common.js"></script>
+    <script>App.guardPage(['admin', 'relative']);</script>
     <style>
 
         /* Step Indicator (4 Steps) */
@@ -81,11 +83,11 @@
                      <div class="dropdown-menu dropdown-menu-end">
                         <div class="d-flex align-items-center border-bottom px-3 py-2">
                            <div class="flex-grow-1">
-                              <h6 class="mb-0">เจ้าหน้าที่ (ผู้ดูแลระบบ)</h6>
-                              <small class="text-body-secondary">Thai PBS Center</small>
+                              <h6 class="mb-0" data-auth-name>ผู้ใช้งาน</h6>
+                              <small class="text-body-secondary" data-auth-role-label>-</small>
                            </div>
                         </div>
-                        <a href="login.html" class="dropdown-item" onclick="localStorage.clear();">
+                        <a href="login.html" class="dropdown-item" data-logout>
                            <i class="fa-solid fa-right-from-bracket fs-6 me-2"></i> ออกจากระบบ
                         </a>
                      </div>
@@ -111,29 +113,13 @@
                      <div class="d-grid">
                         <button class="mainnav-widget-toggle d-block btn border-0 p-2" data-bs-toggle="collapse" data-bs-target="#usernav" aria-expanded="false" aria-controls="usernav">
                            <span class="dropdown-toggle d-flex justify-content-center align-items-center">
-                              <h5 class="mb-0 me-3">เจ้าหน้าที่ (ผู้ดูแลระบบ)</h5>
+                              <h5 class="mb-0 me-3" data-auth-name>ผู้ใช้งาน</h5>
                            </span>
-                           <small class="text-body-secondary">ผู้ดูแลระบบ</small>
+                           <small class="text-body-secondary" data-auth-role-label>-</small>
                         </button>
 
                         <div id="usernav" class="nav flex-column collapse">
-                           <a href="#" class="nav-link d-flex justify-content-between align-items-center">
-                              <span><i class="fa-solid fa-envelope fs-5 me-2"></i><span class="ms-1">ข้อความ</span></span>
-                              <span class="badge bg-danger rounded-pill">14</span>
-                           </a>
-                           <a href="#" class="nav-link">
-                              <i class="fa-solid fa-user fs-5 me-2"></i>
-                              <span class="ms-1">โปรไฟล์</span>
-                           </a>
-                           <a href="#" class="nav-link">
-                              <i class="fa-solid fa-gear fs-5 me-2"></i>
-                              <span class="ms-1">ตั้งค่า</span>
-                           </a>
-                           <a href="#" class="nav-link">
-                              <i class="fa-solid fa-lock fs-5 me-2"></i>
-                              <span class="ms-1">ล็อกหน้าจอ</span>
-                           </a>
-                           <a href="login.html" class="nav-link" onclick="localStorage.clear();">
+                           <a href="login.html" class="nav-link" data-logout>
                               <i class="fa-solid fa-right-from-bracket fs-5 me-2"></i>
                               <span class="ms-1">ออกจากระบบ</span>
                            </a>
@@ -164,7 +150,7 @@
                         </a>
                      </li>
 
-                     <li class="nav-item">
+                     <li class="nav-item" data-role-only="admin">
                         <a href="add-case.html" class="nav-link mininav-toggle"><i class="fa-solid fa-plus fs-5 me-2"></i>
                            <span class="nav-label mininav-content ms-1">
                               <span data-popper-arrow class="arrow"></span>
@@ -182,7 +168,7 @@
                         </a>
                      </li>
 
-                     <li class="nav-item">
+                     <li class="nav-item" data-role-only="admin">
                         <a href="dashboard.html" class="nav-link mininav-toggle"><i class="fa-solid fa-chart-pie fs-5 me-2"></i>
                            <span class="nav-label mininav-content ms-1">
                               <span data-popper-arrow class="arrow"></span>
@@ -220,14 +206,16 @@
                         <h4 class="fw-bold mb-4 text-primary"><i class="fa-solid fa-magnifying-glass me-2"></i>1. ค้นหาเคสบุคคลสูญหายอ้างอิง</h4>
 
                         <div class="alert alert-info border-0 shadow-sm">
-                           <label class="form-label fw-bold">🔎 ค้นหาเคส (รหัสเคส / ชื่อ-สกุลคนหาย / เลขบัตร)</label>
+                           <label class="form-label fw-bold req" for="search_case_input">🔎 ค้นหาเคส (รหัสเคส / ชื่อ-สกุลคนหาย / เลขบัตร)</label>
                            <div class="input-group mb-3">
-                              <input type="text" class="form-control form-control-lg" id="search_case_input" placeholder="พิมพ์ชื่อเพื่อค้นหาเคส..." onkeypress="if(event.key==='Enter'){event.preventDefault(); searchCase();}">
+                              <input type="search" class="form-control form-control-lg" id="search_case_input" maxlength="100" placeholder="พิมพ์ชื่อ รหัสเคส หรือเลขบัตรเพื่อค้นหา..." aria-label="ค้นหาเคส" onkeypress="if(event.key==='Enter'){event.preventDefault(); searchCase();}">
                               <button class="btn btn-primary px-4 fw-bold" type="button" onclick="searchCase()"><i class="fa-solid fa-search"></i> ค้นหา</button>
                            </div>
                         </div>
 
-                        <!-- กล่องแสดงผลลัพธ์การค้นหา (ดึงจากระบบจริง) -->
+                        <div id="selectedCaseBanner" class="alert alert-success d-none" role="status"></div>
+
+                        <!-- กล่องแสดงผลลัพธ์การค้นหา (GET /api/cases?search=) -->
                         <div class="mt-4" id="case_result_box">
                            <p class="text-body-secondary text-center py-4"><i class="fa-solid fa-magnifying-glass me-1"></i> กรอกคำค้นหาแล้วกดปุ่ม "ค้นหา" เพื่อดึงรายชื่อเคสจากระบบ</p>
                         </div>
@@ -238,8 +226,8 @@
                      <div class="form-step" id="step2">
                         <h4 class="fw-bold mb-4 text-primary"><i class="fa-solid fa-user-secret me-2"></i>2. ข้อมูลผู้แจ้งเบาะแส</h4>
 
-                        <div class="mb-4 p-3 bg-body-tertiary rounded border">
-                           <label class="form-label fw-bold">ช่องทางที่รับแจ้งเบาะแส</label>
+                        <div class="mb-4 p-3 bg-body-tertiary rounded border" id="contactGroup">
+                           <label class="form-label fw-bold req">ช่องทางที่รับแจ้งเบาะแส</label>
                            <div class="row g-2 mb-2">
                               <div class="col-6 col-md-3"><div class="selectable-box target-contact" data-value="Facebook"><i class="fa-brands fa-facebook text-primary fs-5"></i> Facebook</div></div>
                               <div class="col-6 col-md-3"><div class="selectable-box target-contact" data-value="Line"><i class="fa-brands fa-line text-success fs-5"></i> LINE</div></div>
@@ -247,10 +235,11 @@
                               <div class="col-6 col-md-3"><div class="selectable-box target-contact" data-value="อื่นๆ"><i class="fa-solid fa-ellipsis fs-5"></i> อื่นๆ</div></div>
                            </div>
                            <input type="hidden" id="clue_contact_source">
+                           <div class="group-feedback"></div>
 
                            <div class="mt-3" id="contact_detail_div" style="display:none; animation: fadeIn 0.3s ease;">
-                              <label class="form-label fw-bold text-primary" id="contact_detail_label">รายละเอียดช่องทาง</label>
-                              <input type="text" class="form-control border-primary" id="clue_contact_detail" placeholder="ระบุรายละเอียดเพิ่มเติม...">
+                              <label class="form-label fw-bold text-primary" for="clue_contact_detail" id="contact_detail_label">รายละเอียดช่องทาง</label>
+                              <input type="text" class="form-control border-primary" id="clue_contact_detail" maxlength="255" placeholder="ระบุรายละเอียดเพิ่มเติม...">
                            </div>
                         </div>
 
@@ -263,8 +252,8 @@
                         </div>
 
                         <div class="row g-3 mb-4" id="informant_details_section">
-                           <div class="col-md-6 col-12"><label class="form-label fw-bold">ชื่อ-นามสกุล ผู้แจ้งเบาะแส</label><input type="text" class="form-control" id="informant_name" placeholder="ระบุชื่อ (ถ้ามี)"></div>
-                           <div class="col-md-6 col-12"><label class="form-label fw-bold">เบอร์โทรศัพท์ติดต่อ</label><input type="text" class="form-control phone-format" id="informant_phone" placeholder="08X-XXX-XXXX" maxlength="12"></div>
+                           <div class="col-md-6 col-12"><label class="form-label fw-bold" for="informant_name">ชื่อ-นามสกุล ผู้แจ้งเบาะแส (ถ้ามี)</label><input type="text" class="form-control" id="informant_name" maxlength="150" placeholder="ระบุชื่อ (ถ้ามี)"></div>
+                           <div class="col-md-6 col-12"><label class="form-label fw-bold" for="informant_phone">เบอร์โทรศัพท์ติดต่อ (ถ้ามี)</label><input type="tel" inputmode="numeric" class="form-control phone-format" id="informant_phone" placeholder="080-000-0000" maxlength="12"></div>
                         </div>
                      </div>
 
@@ -273,10 +262,10 @@
                         <h4 class="fw-bold mb-4 text-primary"><i class="fa-solid fa-map-location-dot me-2"></i>3. รายละเอียดและสถานที่พบเห็น</h4>
 
                         <div class="row g-3 mb-4">
-                           <div class="col-md-4 col-12"><label class="form-label fw-bold text-danger">วันที่พบเห็น *</label><input type="date" class="form-control border-danger" id="clue_date" required></div>
-                           <div class="col-md-4 col-12"><label class="form-label fw-bold">เวลาที่พบ (โดยประมาณ)</label><input type="time" class="form-control" id="clue_time"></div>
+                           <div class="col-md-4 col-12"><label class="form-label fw-bold req" for="clue_date">วันที่พบเห็น</label><input type="date" class="form-control" id="clue_date" required></div>
+                           <div class="col-md-4 col-12"><label class="form-label fw-bold" for="clue_time">เวลาที่พบ (โดยประมาณ)</label><input type="time" class="form-control" id="clue_time"></div>
                            <div class="col-md-4 col-12">
-                              <label class="form-label fw-bold">ความมั่นใจว่าใช่คนหาย</label>
+                              <label class="form-label fw-bold req" for="clue_confidence">ความมั่นใจว่าใช่คนหาย</label>
                               <select class="form-select" id="clue_confidence">
                                  <option value="มั่นใจมาก">มั่นใจมาก (80-100%)</option>
                                  <option value="ค่อนข้างมั่นใจ">ค่อนข้างมั่นใจ (50-79%)</option>
@@ -286,16 +275,17 @@
                         </div>
 
                         <div class="row g-3 mb-4 bg-body-tertiary p-3 rounded border">
-                           <div class="col-12"><label class="form-label fw-bold">ลักษณะที่พบเห็น / การแต่งกาย (เล่าเหตุการณ์)</label><textarea class="form-control" id="clue_description" rows="3" placeholder="เช่น ใส่เสื้อสีแดง กางเกงขาสั้นสีดำ เดินอยู่คนเดียวบริเวณป้ายรถเมล์ ท่าทางเหม่อลอย..."></textarea></div>
+                           <div class="col-12"><label class="form-label fw-bold req" for="clue_description">ลักษณะที่พบเห็น / การแต่งกาย (เล่าเหตุการณ์)</label><textarea class="form-control" id="clue_description" rows="3" maxlength="2000" placeholder="เช่น ใส่เสื้อสีแดง กางเกงขาสั้นสีดำ เดินอยู่คนเดียวบริเวณป้ายรถเมล์ ท่าทางเหม่อลอย..."></textarea></div>
                         </div>
 
                         <div class="row g-3 mb-4">
                            <h6 class="fw-bold w-100 mb-0"><i class="fa-solid fa-location-crosshairs"></i> พิกัดสถานที่ที่พบเห็นเบาะแส</h6>
-                           <div class="col-12"><label class="form-label fw-bold">จุดสังเกตสำคัญ (ชื่อร้าน, ซอย, ถนน)</label><input type="text" class="form-control" id="clue_location_detail" placeholder="ระบุจุดสังเกต..."></div>
-                           <div class="col-md-3 col-6"><label class="form-label fw-bold text-success">📮 รหัสไปรษณีย์</label><input type="text" class="form-control border-success fw-bold" id="zipcode" placeholder="เช่น 10900" maxlength="5"></div>
-                           <div class="col-md-3 col-6"><label class="form-label text-body-secondary">ตำบล / แขวง</label><input type="text" class="form-control bg-body-tertiary" id="subdistrict" readonly></div>
-                           <div class="col-md-3 col-6"><label class="form-label text-body-secondary">อำเภอ / เขต</label><input type="text" class="form-control bg-body-tertiary" id="district" readonly></div>
-                           <div class="col-md-3 col-6"><label class="form-label text-body-secondary">จังหวัด</label><input type="text" class="form-control bg-body-tertiary" id="province" readonly></div>
+                           <div class="col-12"><label class="form-label fw-bold req" for="clue_location_detail">จุดสังเกตสำคัญ (ชื่อร้าน, ซอย, ถนน)</label><input type="text" class="form-control" id="clue_location_detail" maxlength="500" placeholder="ระบุจุดสังเกต..."></div>
+                           <div class="col-md-3 col-6"><label class="form-label fw-bold text-success" for="zipcode">📮 รหัสไปรษณีย์ (ถ้าทราบ)</label><input type="text" inputmode="numeric" class="form-control border-success fw-bold" id="zipcode" placeholder="เช่น 10900" maxlength="5"></div>
+                           <div class="col-md-3 col-6"><label class="form-label text-body-secondary" for="subdistrict">ตำบล / แขวง</label><input type="text" class="form-control" id="subdistrict" maxlength="100"></div>
+                           <div class="col-md-3 col-6"><label class="form-label text-body-secondary" for="district">อำเภอ / เขต</label><input type="text" class="form-control" id="district" maxlength="100"></div>
+                           <div class="col-md-3 col-6"><label class="form-label text-body-secondary req" for="province">จังหวัด</label><input type="text" class="form-control" id="province" list="provinceList" maxlength="100"></div>
+                           <div class="col-12"><div class="small" id="zipHint" aria-live="polite"></div></div>
                         </div>
                      </div>
 
@@ -305,15 +295,16 @@
 
                         <div class="row g-3 mb-4">
                            <div class="col-12 bg-body-tertiary p-4 rounded border text-center">
-                              <label class="form-label fw-bold text-primary d-block mb-3"><i class="fa-solid fa-image"></i> อัปโหลดรูปภาพ / ภาพจากกล้องวงจรปิด (ถ้ามี)</label>
+                              <label class="form-label fw-bold text-primary d-block mb-3" for="clue_img_input"><i class="fa-solid fa-image"></i> อัปโหลดรูปภาพ / ภาพจากกล้องวงจรปิด (ถ้ามี)</label>
                               <input type="file" class="form-control mx-auto" style="max-width: 400px;" id="clue_img_input" accept="image/*" onchange="previewImage(this, 'clue_img_preview')">
                               <img id="clue_img_preview" class="upload-preview mx-auto mt-3" alt="รูปเบาะแส">
                            </div>
                         </div>
 
-                        <div class="alert alert-secondary p-4 rounded mt-4" id="previewBox" style="white-space: pre-line; line-height: 1.8; font-size: 15px; border-left: 5px solid var(--bs-primary);">
+                        <div class="alert alert-secondary p-4 rounded mt-4" id="previewBox" style="line-height: 1.8; font-size: 15px; border-left: 5px solid var(--bs-primary);">
                            <!-- Preview content goes here -->
                         </div>
+                        <div class="alert alert-danger mt-3 d-none" id="submitError" role="alert"></div>
                      </div>
 
                      <!-- Navigation Buttons -->
@@ -323,6 +314,18 @@
                      </div>
 
                   </form>
+
+                  <!-- ส่งเบาะแสสำเร็จ -->
+                  <div class="form-card text-center d-none" id="successPanel">
+                     <div class="display-4 text-success mb-3"><i class="fa-solid fa-circle-check"></i></div>
+                     <h3 class="fw-bold text-success">ส่งเบาะแสเรียบร้อยแล้ว</h3>
+                     <p class="text-body-secondary mb-1" id="successText">เจ้าหน้าที่จะตรวจสอบข้อมูลโดยเร็วที่สุด</p>
+                     <div class="d-flex justify-content-center flex-wrap gap-2 mt-4">
+                        <a href="#" class="btn btn-primary fw-bold" id="successCaseLink"><i class="fa-solid fa-folder-open me-1"></i> กลับไปที่เคส</a>
+                        <a href="add-clue.html" class="btn btn-outline-primary fw-bold"><i class="fa-solid fa-plus me-1"></i> แจ้งเบาะแสเพิ่ม</a>
+                        <a href="Homepage.html" class="btn btn-outline-secondary fw-bold"><i class="fa-solid fa-house me-1"></i> กลับหน้าแรก</a>
+                     </div>
+                  </div>
                </div>
 
             </div>
@@ -342,256 +345,410 @@
    <script src="assets/nifty/vendors/bootstrap/bootstrap.min.js"></script>
    <script src="assets/nifty/js/nifty.min.js"></script>
 
-    <script src="zipcodeData.js"></script> <!-- เรียกใช้ไฟล์ฐานข้อมูลรหัสไปรษณีย์เดิม -->
+    <script src="policeData.js"></script>
+    <script src="zipcodeData.js"></script>
+    <datalist id="provinceList"></datalist>
 
     <script>
+        // ======================================================================
+        // แจ้งเบาะแส
+        //  - ค้นหาเคส: GET /api/cases?search=...   - เปิดจากหน้าเคส: GET /api/cases/:id (?case_id=)
+        //  - ส่งเบาะแส: POST /api/clues (multipart) ← Backend ยังไม่มี route นี้ (ดูหมายเหตุใน submitClue)
+        // ======================================================================
+        const session = App.getSession();
+        const TOTAL_STEPS = 4;
+        const MAX_FILE_MB = 10;
         let currentStep = 1;
-        const API_URL = 'http://localhost:5000/api';
+        let selectedCase = null;
+        let searchSeq = 0;
+        let submitting = false;
 
-        // 1. ค้นหาเคสจริงจากระบบ (GET /api/cases แล้วกรองฝั่งหน้าเว็บ)
+        const $ = id => document.getElementById(id);
+        const val = id => ($(id) ? String($(id).value).trim() : '');
+        const esc = App.escapeHtml;
+        const pad = n => String(n).padStart(2, '0');
+        const todayStr = () => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
+
+        // ---------------- 1. ค้นหาและเลือกเคส ----------------
         async function searchCase() {
-            const query = document.getElementById('search_case_input').value.trim();
-            const resultBox = document.getElementById('case_result_box');
-
+            const query = val('search_case_input');
+            const resultBox = $('case_result_box');
             if (query === '') {
-                alert('กรุณากรอกข้อมูลเพื่อค้นหาเคส');
+                App.renderState(resultBox, 'error', 'กรุณากรอกชื่อ รหัสเคส หรือเลขบัตร เพื่อค้นหาเคส');
+                $('search_case_input').focus();
                 return;
             }
-
-            resultBox.innerHTML = '<p class="text-body-secondary text-center py-4"><i class="fa-solid fa-spinner fa-spin me-1"></i> กำลังค้นหา...</p>';
-
+            const seq = ++searchSeq;
+            App.renderState(resultBox, 'loading', 'กำลังค้นหาเคสจากระบบ...');
             try {
-                const response = await fetch(`${API_URL}/cases`);
-                if (!response.ok) throw new Error('Network response was not ok');
-                const cases = await response.json();
-
-                const q = query.toLowerCase();
-                const matches = cases.filter(c =>
-                    String(c.case_id || '').toLowerCase().includes(q) ||
-                    (c.missingperson_name || '').toLowerCase().includes(q) ||
-                    (c.missingperson_identity || '').toLowerCase().includes(q)
-                );
-
-                renderCaseResults(matches);
+                const cases = await App.api('/cases', { query: { search: query } });
+                if (seq !== searchSeq) return;
+                renderCaseResults(Array.isArray(cases) ? cases : []);
             } catch (err) {
+                if (seq !== searchSeq) return;
                 console.error('ค้นหาเคสไม่สำเร็จ:', err);
-                resultBox.innerHTML = '<p class="text-danger text-center py-4"><i class="fa-solid fa-triangle-exclamation"></i> ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ฐานข้อมูลได้ กรุณาลองใหม่อีกครั้ง</p>';
+                App.renderState(resultBox, 'error', `ค้นหาเคสไม่สำเร็จ: ${err.message}`, { onRetry: searchCase });
             }
         }
 
+        function caseCardHtml(c) {
+            const name = App.fullName(c.missingperson_title, c.missingperson_name);
+            const isSelected = selectedCase && String(selectedCase.case_id) === String(c.case_id);
+            return `
+            <div class="case-result-card shadow-sm ${isSelected ? 'border-success' : ''}" data-case-id="${esc(c.case_id)}">
+                <div class="d-flex align-items-center flex-wrap gap-3">
+                    <img src="${esc(App.imageUrl(c.character_image_url))}" ${App.imgFallbackAttr()} alt="ภาพบุคคลสูญหาย" class="rounded border" style="width: 100px; height: 120px; object-fit: cover;">
+                    <div>
+                        <div class="mb-2">${App.statusBadge(c.case_latest_status)} ${App.priorityBadge(c.case_priority)}</div>
+                        <h5 class="fw-bold mb-1 text-primary">${esc(name)}</h5>
+                        <p class="mb-1 text-body-secondary small"><i class="fa-solid fa-hashtag"></i> รหัสเคส: <strong>${esc(c.case_id)}</strong>
+                            ${App.textOr(c.Last_Seen_province, '') ? ` • <i class="fa-solid fa-location-dot"></i> ${esc(c.Last_Seen_province)}` : ''}</p>
+                        <p class="mb-0 text-body-secondary small"><i class="fa-solid fa-calendar-xmark"></i> วันที่หาย: ${esc(App.formatThaiDate(c.Last_Seen_date, { month: 'long' }))}</p>
+                    </div>
+                    <div class="ms-auto w-100 text-md-end mt-2 mt-md-0">
+                        <button type="button" class="btn ${isSelected ? 'btn-outline-success' : 'btn-success'} fw-bold px-4 select-case-btn">
+                            <i class="fa-solid fa-check-circle"></i> ${isSelected ? 'เลือกแล้ว' : 'เลือกเคสนี้'}</button>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        let lastResults = [];
         function renderCaseResults(matches) {
-            const resultBox = document.getElementById('case_result_box');
+            lastResults = matches;
+            const resultBox = $('case_result_box');
             if (matches.length === 0) {
-                resultBox.innerHTML = '<p class="text-body-secondary text-center py-4"><i class="fa-solid fa-circle-info"></i> ไม่พบเคสที่ตรงกับคำค้นหา</p>';
+                App.renderState(resultBox, 'empty', 'ไม่พบเคสที่ตรงกับคำค้นหา');
                 return;
             }
-            resultBox.innerHTML = matches.map(c => {
-                let imgUrl = c.character_image_url;
-                if (!imgUrl || String(imgUrl).trim().toLowerCase() === 'null' || String(imgUrl).trim() === '') {
-                    imgUrl = 'https://cdn-icons-png.flaticon.com/512/847/847969.png';
-                }
-                const dateObj = c.case_received_date ? new Date(c.case_received_date) : null;
-                const dateStr = dateObj ? dateObj.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' }) : 'ไม่ระบุ';
-                const name = `${c.missingperson_title || ''} ${c.missingperson_name || 'ไม่ระบุชื่อ'}`.trim();
-                return `
-                <div class="case-result-card shadow-sm">
-                    <div class="d-flex align-items-center flex-wrap gap-3">
-                        <img src="${imgUrl}" alt="ภาพเคส" class="rounded border" style="width: 100px; height: 120px; object-fit: cover;">
-                        <div>
-                            <span class="badge bg-danger mb-2">${c.case_priority || 'กำลังดำเนินการ'}</span>
-                            <h5 class="fw-bold mb-1 text-primary">${name}</h5>
-                            <p class="mb-1 text-body-secondary text-sm"><i class="fa-solid fa-id-card"></i> รหัสเคส: <strong>${c.case_id}</strong></p>
-                            <p class="mb-0 text-body-secondary text-sm"><i class="fa-solid fa-calendar-xmark"></i> วันที่รับแจ้ง: ${dateStr}</p>
-                        </div>
-                        <div class="ms-auto w-100 text-md-end mt-2 mt-md-0">
-                            <button type="button" class="btn btn-success fw-bold px-4" onclick="selectCase('${c.case_id}', this)"><i class="fa-solid fa-check-circle"></i> เลือกเคสนี้</button>
-                        </div>
-                    </div>
-                </div>`;
-            }).join('');
+            resultBox.innerHTML = `<div class="small text-body-secondary mb-2">พบ ${matches.length.toLocaleString('th-TH')} เคส</div>` + matches.map(caseCardHtml).join('');
+        }
+        $('case_result_box').addEventListener('click', e => {
+            const btn = e.target.closest('.select-case-btn');
+            if (!btn) return;
+            const id = btn.closest('[data-case-id]').dataset.caseId;
+            const c = lastResults.find(x => String(x.case_id) === id);
+            if (c) selectCase(c);
+        });
+
+        function selectCase(c) {
+            selectedCase = c;
+            $('selected_case_id').value = c.case_id;
+            $('nextBtn').disabled = false;
+            const banner = $('selectedCaseBanner');
+            banner.innerHTML = `<i class="fa-solid fa-circle-check me-1"></i> เลือกเคส <strong>#${esc(c.case_id)} ${esc(App.fullName(c.missingperson_title, c.missingperson_name))}</strong> แล้ว — กด "ถัดไป" เพื่อกรอกข้อมูลเบาะแส`;
+            banner.classList.remove('d-none');
+            if (lastResults.length) renderCaseResults(lastResults);
+            stepAlert(1).classList.add('d-none');
         }
 
-        // เมื่อกดเลือกเคส
-        function selectCase(caseId, btnEl) {
-            document.getElementById('selected_case_id').value = caseId;
-            document.getElementById('nextBtn').disabled = false; // ปลดล็อคปุ่มถัดไป
-            document.querySelectorAll('.case-result-card').forEach(c => c.classList.remove('border-success'));
-            if (btnEl) {
-                const card = btnEl.closest('.case-result-card');
-                if (card) card.classList.add('border-success');
+        // เปิดจากหน้ารายละเอียดเคส: add-clue.html?case_id=123
+        async function preselectFromUrl() {
+            const id = new URLSearchParams(location.search).get('case_id');
+            if (!id || !/^\d+$/.test(id)) return;
+            const resultBox = $('case_result_box');
+            App.renderState(resultBox, 'loading', `กำลังโหลดเคสรหัส ${id}...`);
+            try {
+                const data = await App.api(`/cases/${encodeURIComponent(id)}`);
+                const c = (data && data.case) ? data.case : data;
+                renderCaseResults([c]);
+                selectCase(c);
+            } catch (err) {
+                App.renderState(resultBox, 'error', err.status === 404 ? `ไม่พบเคสรหัส ${id} ในระบบ` : `โหลดเคสไม่สำเร็จ: ${err.message}`);
             }
-            alert('เลือกรหัสเคส: ' + caseId + ' เรียบร้อยแล้ว สามารถกดถัดไปได้เลย');
         }
 
-        // 2. จัดการกล่องตัวเลือก (ช่องทางติดต่อ)
+        // ---------------- 2. ช่องทาง / ผู้แจ้ง ----------------
         function initBoxSelection(className, hiddenInputId) {
             document.querySelectorAll('.' + className).forEach(box => {
-                box.addEventListener('click', function() {
-                    document.querySelectorAll('.' + className).forEach(b => b.classList.remove('selected'));
+                box.tabIndex = 0;
+                box.setAttribute('role', 'button');
+                const activate = function () {
+                    document.querySelectorAll('.' + className).forEach(b => { b.classList.remove('selected'); b.setAttribute('aria-pressed', 'false'); });
                     this.classList.add('selected');
-                    const val = this.getAttribute('data-value');
-                    document.getElementById(hiddenInputId).value = val;
-
-                    if (hiddenInputId === 'clue_contact_source') {
-                        const detailDiv = document.getElementById('contact_detail_div');
-                        const detailLabel = document.getElementById('contact_detail_label');
-                        const detailInput = document.getElementById('clue_contact_detail');
-
-                        detailDiv.style.display = "block";
-                        if (val === "Facebook") { detailLabel.innerHTML = '<i class="fa-brands fa-facebook"></i> ลิงก์โพสต์/ชื่อเฟสคนที่แจ้ง'; detailInput.placeholder = "ระบุข้อมูลเฟสบุ๊ค..."; }
-                        else if (val === "Line") { detailLabel.innerHTML = '<i class="fa-brands fa-line"></i> ชื่อ Line ที่แจ้งเข้ามา'; detailInput.placeholder = "ระบุชื่อ Line..."; }
-                        else if (val === "เบอร์โทรศัพท์") { detailLabel.innerHTML = '<i class="fa-solid fa-phone"></i> เบอร์โทรฯ ที่โทรแจ้ง'; detailInput.placeholder = "ระบุเบอร์โทรฯ..."; }
-                        else { detailLabel.innerHTML = 'โปรดระบุช่องทางอื่นๆ'; detailInput.placeholder = "ระบุรายละเอียด..."; }
-                    }
-                });
+                    this.setAttribute('aria-pressed', 'true');
+                    const v = this.getAttribute('data-value');
+                    $(hiddenInputId).value = v;
+                    $('contactGroup').classList.remove('group-invalid');
+                    const detailDiv = $('contact_detail_div');
+                    const detailLabel = $('contact_detail_label');
+                    const detailInput = $('clue_contact_detail');
+                    detailDiv.style.display = 'block';
+                    if (v === 'Facebook') { detailLabel.innerHTML = '<i class="fa-brands fa-facebook"></i> ลิงก์โพสต์/ชื่อเฟสคนที่แจ้ง'; detailInput.placeholder = 'ระบุข้อมูลเฟสบุ๊ค...'; }
+                    else if (v === 'Line') { detailLabel.innerHTML = '<i class="fa-brands fa-line"></i> ชื่อ Line ที่แจ้งเข้ามา'; detailInput.placeholder = 'ระบุชื่อ Line...'; }
+                    else if (v === 'เบอร์โทรศัพท์') { detailLabel.innerHTML = '<i class="fa-solid fa-phone"></i> เบอร์โทรฯ ที่โทรแจ้ง'; detailInput.placeholder = 'ระบุเบอร์โทรฯ...'; }
+                    else { detailLabel.innerHTML = 'โปรดระบุช่องทางอื่นๆ'; detailInput.placeholder = 'ระบุรายละเอียด...'; }
+                };
+                box.addEventListener('click', activate);
+                box.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate.call(box); } });
             });
         }
         initBoxSelection('target-contact', 'clue_contact_source');
 
-        // Toggle ปิดบังตัวตน
         function toggleAnonymous() {
-            const isAnon = document.getElementById('anonymous_toggle').checked;
-            const section = document.getElementById('informant_details_section');
-            if(isAnon) {
-                section.style.opacity = '0.4';
-                document.getElementById('informant_name').disabled = true;
-                document.getElementById('informant_phone').disabled = true;
-                document.getElementById('informant_name').value = 'ไม่ประสงค์ออกนาม';
-            } else {
-                section.style.opacity = '1';
-                document.getElementById('informant_name').disabled = false;
-                document.getElementById('informant_phone').disabled = false;
-                document.getElementById('informant_name').value = '';
-            }
+            const isAnon = $('anonymous_toggle').checked;
+            const section = $('informant_details_section');
+            section.style.opacity = isAnon ? '0.4' : '1';
+            $('informant_name').disabled = isAnon;
+            $('informant_phone').disabled = isAnon;
+            $('informant_name').value = isAnon ? 'ไม่ประสงค์ออกนาม' : '';
+            if (isAnon) { $('informant_phone').value = ''; clearFieldError($('informant_phone')); }
         }
+        App.attachFormatter($('informant_phone'), App.formatPhoneInput);
 
-        // จัดการเบอร์โทรให้มีขีด
-        document.getElementById('informant_phone').addEventListener('input', function() {
-            let v = this.value.replace(/\D/g, '').substring(0, 10);
-            if (v.length > 6) this.value = v.substring(0,3) + '-' + v.substring(3,6) + '-' + v.substring(6);
-            else if (v.length > 3) this.value = v.substring(0,3) + '-' + v.substring(3);
-            else this.value = v;
-        });
-
-        // 3. จัดการระบบ Zipcode (นำโค้ดจากหน้าเพิ่มเคสมาประยุกต์)
-        document.getElementById('zipcode').addEventListener('input', function() {
-            const zip = this.value.trim();
-            if(zip.length === 5 && typeof masterZipcodeDB !== 'undefined') {
-                let foundData = masterZipcodeDB[zip] || Object.values(masterZipcodeDB).find(item => item.zipcode === zip || item.zip === zip);
-                if(foundData) {
-                    document.getElementById('subdistrict').value = foundData.subdistrict || foundData.tambon || "";
-                    document.getElementById('district').value = foundData.district || foundData.amphoe || "";
-                    document.getElementById('province').value = foundData.province || foundData.changwat || "";
-                }
-            }
-        });
-
-        // Preview Image
-        function previewImage(input, previewId) {
-            const preview = document.getElementById(previewId);
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    preview.src = e.target.result;
-                    preview.style.display = 'block';
-                }
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-
-        // 4. การควบคุม Step หน้าจอ
-        function changeStep(n) {
-            // ถ้าถึงหน้าสุดท้ายแล้วกดยืนยัน
-            if (currentStep === 4 && n === 1) {
-                const nextBtn = document.getElementById('nextBtn');
-                nextBtn.disabled = true;
-                nextBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> กำลังส่งข้อมูล...';
-
-                // จำลองการ Submit API
-                setTimeout(() => {
-                    alert("🎉 บันทึกเบาะแสเข้าสู่ระบบเรียบร้อยแล้ว!");
-                    window.location.href = 'Homepage.html';
-                }, 1500);
+        // ---------------- 3. รหัสไปรษณีย์ (กรอกเองได้ถ้าไม่พบ) ----------------
+        let zipAutoFilled = false;
+        $('zipcode').addEventListener('input', function () {
+            const zip = this.value.replace(/\D/g, '').substring(0, 5);
+            if (zip !== this.value) this.value = zip;
+            const hint = $('zipHint');
+            if (zip.length < 5) {
+                hint.textContent = '';
+                if (zipAutoFilled) { ['subdistrict', 'district', 'province'].forEach(id => { $(id).value = ''; }); zipAutoFilled = false; }
                 return;
             }
-
-            document.getElementById(`step${currentStep}`).classList.remove('active');
-            document.getElementById(`stepIndicator${currentStep}`).classList.remove('active');
-            if (n === 1) document.getElementById(`stepIndicator${currentStep}`).classList.add('completed');
-
-            currentStep += n;
-
-            document.getElementById(`step${currentStep}`).classList.add('active');
-            document.getElementById(`stepIndicator${currentStep}`).classList.add('active');
-
-            // ปุ่มย้อนกลับ
-            document.getElementById('prevBtn').disabled = (currentStep === 1);
-
-            // ล็อคปุ่มถัดไปใน Step 1 ถ้ายังไม่ได้เลือกเคส
-            if (currentStep === 1 && !document.getElementById('selected_case_id').value) {
-                document.getElementById('nextBtn').disabled = true;
+            const found = typeof masterZipcodeDB !== 'undefined'
+                ? (masterZipcodeDB[zip] || Object.values(masterZipcodeDB).find(item => item.zipcode === zip || item.zip === zip)) : null;
+            if (found) {
+                $('subdistrict').value = found.subdistrict || found.tambon || '';
+                $('district').value = found.district || found.amphoe || '';
+                $('province').value = found.province || found.changwat || '';
+                ['subdistrict', 'district', 'province'].forEach(id => clearFieldError($(id)));
+                zipAutoFilled = true;
+                hint.innerHTML = '<span class="text-success"><i class="fa-solid fa-circle-check me-1"></i>ดึงข้อมูลที่อยู่จากรหัสไปรษณีย์แล้ว</span>';
             } else {
-                document.getElementById('nextBtn').disabled = false;
+                zipAutoFilled = false;
+                hint.innerHTML = '<span class="text-warning-emphasis"><i class="fa-solid fa-circle-info me-1"></i>ไม่พบรหัสไปรษณีย์นี้ในฐานข้อมูล กรุณากรอกตำบล อำเภอ และจังหวัดเอง</span>';
             }
+        });
 
-            // หน้าสุดท้าย (Preview)
-            if (currentStep === 4) {
-                document.getElementById('nextBtn').innerHTML = 'ยืนยันส่งข้อมูล <i class="fa-solid fa-paper-plane ms-1"></i>';
-                document.getElementById('nextBtn').classList.replace('btn-primary', 'btn-success');
+        // ---------------- 4. รูปภาพ ----------------
+        function checkImageFile(input) {
+            const file = input.files && input.files[0];
+            if (!file) return '';
+            if (!/^image\//.test(file.type)) return 'ไฟล์แนบต้องเป็นรูปภาพเท่านั้น';
+            if (file.size > MAX_FILE_MB * 1024 * 1024) return `รูปภาพมีขนาดเกิน ${MAX_FILE_MB} MB`;
+            return '';
+        }
+        function previewImage(input, previewId) {
+            const preview = $(previewId);
+            const file = input.files && input.files[0];
+            clearFieldError(input);
+            if (!file || !/^image\//.test(file.type)) { preview.style.display = 'none'; preview.removeAttribute('src'); if (file) setFieldError(input, checkImageFile(input)); return; }
+            const reader = new FileReader();
+            reader.onload = e => { preview.src = e.target.result; preview.style.display = 'block'; };
+            reader.readAsDataURL(file);
+        }
+
+        // ---------------- การตรวจสอบข้อมูล ----------------
+        function setFieldError(el, message) {
+            el.classList.add('is-invalid');
+            let fb = document.querySelector(`.invalid-feedback[data-for="${el.id}"]`);
+            if (!fb) { fb = document.createElement('div'); fb.className = 'invalid-feedback'; fb.setAttribute('data-for', el.id); el.insertAdjacentElement('afterend', fb); }
+            fb.textContent = message;
+        }
+        function clearFieldError(el) { if (el) el.classList.remove('is-invalid'); }
+        function stepAlert(step) {
+            const stepEl = $(`step${step}`);
+            let a = stepEl.querySelector('.step-alert');
+            if (!a) {
+                a = document.createElement('div');
+                a.className = 'alert alert-danger step-alert d-none';
+                a.setAttribute('role', 'alert');
+                stepEl.querySelector('h4').insertAdjacentElement('afterend', a);
+            }
+            return a;
+        }
+        const refreshStepAlert = App.debounce(() => {
+            const a = $(`step${currentStep}`).querySelector('.step-alert');
+            if (!a || a.classList.contains('d-none')) return;
+            const errors = validateStep(currentStep);
+            if (errors.length === 0) a.classList.add('d-none');
+            else a.innerHTML = stepAlertHtml(errors);
+        }, 200);
+        $('clueForm').addEventListener('input', e => { clearFieldError(e.target); refreshStepAlert(); });
+        $('clueForm').addEventListener('change', e => { clearFieldError(e.target); refreshStepAlert(); });
+        $('clueForm').addEventListener('click', e => { if (e.target.closest('.selectable-box')) refreshStepAlert(); });
+
+        function validateStep(step) {
+            const errors = [];
+            if (step === 1 && !selectedCase) errors.push({ el: $('search_case_input'), msg: 'กรุณาค้นหาและเลือกเคสที่ต้องการแจ้งเบาะแส' });
+            if (step === 2) {
+                if (!val('clue_contact_source')) errors.push({ el: $('contactGroup'), msg: 'กรุณาเลือกช่องทางที่รับแจ้งเบาะแส', group: true });
+                const phone = val('informant_phone');
+                if (!$('anonymous_toggle').checked && phone && !App.PHONE_PATTERN.test(phone)) errors.push({ el: $('informant_phone'), msg: 'เบอร์โทรศัพท์ต้องอยู่ในรูปแบบ 080-000-0000' });
+            }
+            if (step === 3) {
+                const d = val('clue_date');
+                if (!d) errors.push({ el: $('clue_date'), msg: 'กรุณาเลือกวันที่พบเห็น' });
+                else if (d > todayStr()) errors.push({ el: $('clue_date'), msg: 'วันที่พบเห็นต้องไม่เป็นวันในอนาคต' });
+                if (!val('clue_description')) errors.push({ el: $('clue_description'), msg: 'กรุณาเล่าลักษณะที่พบเห็น / การแต่งกาย' });
+                if (!val('clue_location_detail')) errors.push({ el: $('clue_location_detail'), msg: 'กรุณาระบุจุดสังเกตสถานที่ที่พบเห็น' });
+                const prov = val('province');
+                if (!prov) errors.push({ el: $('province'), msg: 'กรุณาระบุจังหวัดที่พบเห็น' });
+                else if (typeof allThaiProvincesList !== 'undefined' && !allThaiProvincesList.includes(prov)) errors.push({ el: $('province'), msg: 'กรุณาเลือกจังหวัดจากรายการ' });
+                if (val('zipcode') && !/^\d{5}$/.test(val('zipcode'))) errors.push({ el: $('zipcode'), msg: 'รหัสไปรษณีย์ต้องมี 5 หลัก' });
+            }
+            if (step === 4) {
+                const imgMsg = checkImageFile($('clue_img_input'));
+                if (imgMsg) errors.push({ el: $('clue_img_input'), msg: imgMsg });
+            }
+            return errors;
+        }
+
+        function stepAlertHtml(errors) {
+            return `<div class="fw-bold mb-1"><i class="fa-solid fa-circle-exclamation me-1"></i> กรุณากรอกข้อมูลให้ครบถ้วน (เหลือ ${errors.length} รายการ)</div>
+                <ul class="mb-0 ps-3 small">${errors.map(e => `<li>${esc(e.msg)}</li>`).join('')}</ul>`;
+        }
+
+        function showStepErrors(step, errors) {
+            const stepEl = $(`step${step}`);
+            stepEl.querySelectorAll('.is-invalid').forEach(clearFieldError);
+            stepEl.querySelectorAll('.group-invalid').forEach(g => g.classList.remove('group-invalid'));
+            errors.forEach(e => {
+                if (e.group) { e.el.classList.add('group-invalid'); e.el.querySelector('.group-feedback').textContent = e.msg; }
+                else setFieldError(e.el, e.msg);
+            });
+            const a = stepAlert(step);
+            a.innerHTML = stepAlertHtml(errors);
+            a.classList.remove('d-none');
+            const first = errors[0].group ? errors[0].el.querySelector('.selectable-box') : errors[0].el;
+            a.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // ย้ายโฟกัสไปช่องแรกที่ผิด (เฉพาะเมื่อผู้ใช้ยังไม่ได้คลิกไปช่องอื่นเอง)
+            const focusedBefore = document.activeElement;
+            if (first) setTimeout(() => {
+                if (document.activeElement === focusedBefore || document.activeElement === document.body) first.focus({ preventScroll: true });
+            }, 300);
+        }
+
+        // ---------------- การเลื่อน Step ----------------
+        function showStep(step) {
+            for (let i = 1; i <= TOTAL_STEPS; i++) {
+                $(`step${i}`).classList.toggle('active', i === step);
+                $(`stepIndicator${i}`).classList.toggle('active', i === step);
+                $(`stepIndicator${i}`).classList.toggle('completed', i < step);
+            }
+            currentStep = step;
+            $('prevBtn').disabled = step === 1;
+            $('nextBtn').disabled = step === 1 && !selectedCase;
+            if (step === TOTAL_STEPS) {
+                $('nextBtn').innerHTML = 'ยืนยันส่งข้อมูล <i class="fa-solid fa-paper-plane ms-1"></i>';
+                $('nextBtn').classList.replace('btn-primary', 'btn-success');
                 generateCluePreview();
             } else {
-                document.getElementById('nextBtn').innerHTML = 'ถัดไป <i class="fa-solid fa-arrow-right ms-1"></i>';
-                document.getElementById('nextBtn').classList.replace('btn-success', 'btn-primary');
+                $('nextBtn').innerHTML = 'ถัดไป <i class="fa-solid fa-arrow-right ms-1"></i>';
+                $('nextBtn').classList.replace('btn-success', 'btn-primary');
             }
-
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // สรุปข้อมูลเบาะแสเพื่อรีวิว
+        function changeStep(n) {
+            if (submitting) return;
+            if (n < 0) { $('submitError').classList.add('d-none'); showStep(Math.max(1, currentStep - 1)); return; }
+            const errors = validateStep(currentStep);
+            if (errors.length) { showStepErrors(currentStep, errors); return; }
+            stepAlert(currentStep).classList.add('d-none');
+            if (currentStep === TOTAL_STEPS) { submitClue(); return; }
+            showStep(currentStep + 1);
+        }
+
+        // ---------------- ส่งข้อมูล ----------------
+        function buildClueFormData() {
+            const fd = new FormData();
+            const isAnon = $('anonymous_toggle').checked;
+            fd.set('case_id', String(selectedCase.case_id));
+            fd.set('clue_contact_source', val('clue_contact_source'));
+            fd.set('clue_contact_detail', val('clue_contact_detail'));
+            fd.set('is_anonymous', isAnon ? 'true' : 'false');
+            fd.set('informant_name', isAnon ? '' : val('informant_name'));
+            fd.set('informant_phone', isAnon ? '' : val('informant_phone'));
+            fd.set('clue_date', val('clue_date'));
+            fd.set('clue_time', val('clue_time'));
+            fd.set('clue_confidence', val('clue_confidence'));
+            fd.set('clue_description', val('clue_description'));
+            fd.set('clue_location_detail', val('clue_location_detail'));
+            fd.set('zipcode', val('zipcode'));
+            fd.set('subdistrict', val('subdistrict'));
+            fd.set('district', val('district'));
+            fd.set('province', val('province'));
+            if (session) {
+                fd.set('reported_by_role', session.role);
+                fd.set(session.role === 'admin' ? 'staff_id' : 'people_id', String(session.user_id));
+            }
+            const file = $('clue_img_input').files[0];
+            if (file) fd.set('clue_image', file);
+            return fd;
+        }
+
+        async function submitClue() {
+            if (submitting) return;
+            const nextBtn = $('nextBtn');
+            const errBox = $('submitError');
+            errBox.classList.add('d-none');
+            submitting = true;
+            nextBtn.disabled = true;
+            $('prevBtn').disabled = true;
+            nextBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> กำลังส่งข้อมูล...';
+            try {
+                await App.api('/clues', { method: 'POST', body: buildClueFormData(), timeout: 60000 });
+                $('clueForm').classList.add('d-none');
+                for (let i = 1; i <= TOTAL_STEPS; i++) { $(`stepIndicator${i}`).classList.remove('active'); $(`stepIndicator${i}`).classList.add('completed'); }
+                $('successText').textContent = `บันทึกเบาะแสของเคสรหัส ${selectedCase.case_id} แล้ว เจ้าหน้าที่จะตรวจสอบข้อมูลโดยเร็วที่สุด`;
+                $('successCaseLink').href = `case-detail.html?id=${encodeURIComponent(selectedCase.case_id)}`;
+                $('successPanel').classList.remove('d-none');
+                App.toast('ส่งเบาะแสเรียบร้อยแล้ว', 'success');
+            } catch (err) {
+                console.error('POST /api/clues ล้มเหลว:', err);
+                // หมายเหตุ: ตอนนี้ Backend ยังไม่มี POST /api/clues จึงจะได้ 404 กลับมา
+                const msg = err.status === 404
+                    ? 'ระบบหลังบ้านยังไม่เปิดรับการบันทึกเบาะแส (ไม่พบ API POST /api/clues) ข้อมูลยังไม่ถูกบันทึก กรุณาติดต่อเจ้าหน้าที่โดยตรง'
+                    : `ส่งเบาะแสไม่สำเร็จ: ${err.message}`;
+                errBox.innerHTML = `<i class="fa-solid fa-triangle-exclamation me-1"></i> ${esc(msg)}<div class="small mt-1">ข้อมูลที่กรอกยังอยู่ครบ สามารถกดส่งใหม่ได้</div>`;
+                errBox.classList.remove('d-none');
+                errBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                nextBtn.innerHTML = 'ยืนยันส่งข้อมูล <i class="fa-solid fa-paper-plane ms-1"></i>';
+                nextBtn.disabled = false;
+                $('prevBtn').disabled = false;
+            } finally {
+                submitting = false;
+            }
+        }
+
+        // ---------------- สรุปข้อมูลเบาะแส ----------------
         function generateCluePreview() {
-            const caseId = document.getElementById('selected_case_id').value;
-
-            const contactSrc = document.getElementById('clue_contact_source').value || '-';
-            const contactDetail = document.getElementById('clue_contact_detail').value || '';
-            const finalContact = contactSrc !== '-' ? `${contactSrc} ${contactDetail ? `(${contactDetail})` : ''}` : '-';
-
-            const isAnon = document.getElementById('anonymous_toggle').checked;
-            const infName = isAnon ? '<span class="text-danger fw-bold">ไม่ประสงค์ออกนาม</span>' : (document.getElementById('informant_name').value || '-');
-            const infPhone = isAnon ? '<span class="text-danger">ปกปิดข้อมูล</span>' : (document.getElementById('informant_phone').value || '-');
-
-            const cDate = document.getElementById('clue_date').value || '-';
-            const cTime = document.getElementById('clue_time').value || '-';
-            const cConf = document.getElementById('clue_confidence').value || '-';
-            const cDesc = document.getElementById('clue_description').value || '-';
-
-            const locDetail = document.getElementById('clue_location_detail').value || '';
-            const subDist = document.getElementById('subdistrict').value || '';
-            const dist = document.getElementById('district').value || '';
-            const prov = document.getElementById('province').value || '';
-            const zip = document.getElementById('zipcode').value || '';
-            const finalLoc = `${locDetail} ต.${subDist} อ.${dist} จ.${prov} ${zip}`;
-
-            const html = `
+            const v = id => esc(val(id)) || '-';
+            const contactSrc = val('clue_contact_source');
+            const finalContact = contactSrc ? `${esc(contactSrc)}${val('clue_contact_detail') ? ` (${v('clue_contact_detail')})` : ''}` : '-';
+            const isAnon = $('anonymous_toggle').checked;
+            const infName = isAnon ? '<span class="text-danger fw-bold">ไม่ประสงค์ออกนาม</span>' : v('informant_name');
+            const infPhone = isAnon ? '<span class="text-danger">ปกปิดข้อมูล</span>' : v('informant_phone');
+            const loc = [val('clue_location_detail'), val('subdistrict') && `ต.${val('subdistrict')}`, val('district') && `อ.${val('district')}`,
+                val('province') && `จ.${val('province')}`, val('zipcode')].filter(Boolean).map(esc).join(' ');
+            $('previewBox').innerHTML = `
                 <h5 class="fw-bold mb-3 border-bottom pb-2">📄 สรุปรายงานแจ้งเบาะแส</h5>
-                <p><strong><i class="fa-solid fa-id-card text-primary"></i> อ้างอิงรหัสเคส:</strong> <span class="fw-bold text-primary">${caseId}</span></p>
+                <p><strong><i class="fa-solid fa-id-card text-primary"></i> อ้างอิงเคส:</strong> <span class="fw-bold text-primary">#${esc(selectedCase.case_id)} ${esc(App.fullName(selectedCase.missingperson_title, selectedCase.missingperson_name))}</span></p>
                 <p><strong>📞 รับแจ้งผ่านช่องทาง:</strong> ${finalContact}</p>
-
                 <h6 class="fw-bold mt-4">👤 ข้อมูลผู้แจ้งเบาะแส</h6>
-                <ul class="mb-3">
-                    <li><strong>ชื่อผู้แจ้ง:</strong> ${infName}</li>
-                    <li><strong>เบอร์ติดต่อ:</strong> ${infPhone}</li>
-                </ul>
-
+                <ul class="mb-3"><li><strong>ชื่อผู้แจ้ง:</strong> ${infName}</li><li><strong>เบอร์ติดต่อ:</strong> ${infPhone}</li></ul>
                 <h6 class="fw-bold mt-4">📍 รายละเอียดการพบเห็น</h6>
                 <ul class="mb-3">
-                    <li><strong>วันและเวลาที่พบ:</strong> ${cDate} เวลา ${cTime} น.</li>
-                    <li><strong>ความมั่นใจ:</strong> <span class="badge bg-warning text-dark">${cConf}</span></li>
-                    <li><strong>สถานที่พบ:</strong> ${finalLoc}</li>
-                    <li><strong>ลักษณะที่พบ/การแต่งกาย:</strong><br><span class="text-body-secondary">${cDesc}</span></li>
-                </ul>
-            `;
-            document.getElementById('previewBox').innerHTML = html;
+                    <li><strong>วันและเวลาที่พบ:</strong> ${val('clue_date') ? esc(App.formatThaiDate(val('clue_date'), { month: 'long' })) : '-'}${val('clue_time') ? ` เวลา ${v('clue_time')} น.` : ''}</li>
+                    <li><strong>ความมั่นใจ:</strong> <span class="badge bg-warning text-dark">${v('clue_confidence')}</span></li>
+                    <li><strong>สถานที่พบ:</strong> ${loc || '-'}</li>
+                    <li><strong>ลักษณะที่พบ/การแต่งกาย:</strong><br><span class="text-body-secondary" style="white-space: pre-line;">${v('clue_description')}</span></li>
+                    <li><strong>รูปภาพแนบ:</strong> ${$('clue_img_input').files[0] ? esc($('clue_img_input').files[0].name) : 'ไม่มี'}</li>
+                </ul>`;
         }
+
+        // ---------------- เริ่มต้นหน้า ----------------
+        (function init() {
+            $('clue_date').setAttribute('max', todayStr());
+            if (typeof allThaiProvincesList !== 'undefined') {
+                $('provinceList').innerHTML = [...allThaiProvincesList].sort((a, b) => a.localeCompare(b, 'th'))
+                    .map(p => `<option value="${esc(p)}"></option>`).join('');
+            }
+            preselectFromUrl();
+        })();
     </script>
 </body>
 </html>

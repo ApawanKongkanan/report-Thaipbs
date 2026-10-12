@@ -11,7 +11,9 @@
     <link rel="stylesheet" href="assets/nifty/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/nifty/css/nifty.min.css">
     <link rel="stylesheet" href="assets/nifty/css/overrides.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="common.js"></script>
+    <script>App.guardPage(['admin']);</script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
@@ -27,6 +29,7 @@
 
         .chart-container-lg { position: relative; height: 350px; width: 100%; }
         .chart-container-md { position: relative; height: 250px; width: 100%; }
+        .chart-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 1rem; color: var(--bs-secondary-color); font-weight: 600; background: color-mix(in srgb, var(--bs-card-bg) 85%, transparent); z-index: 3; }
     </style>
 </head>
 <body class="out-quart">
@@ -63,11 +66,11 @@
                      <div class="dropdown-menu dropdown-menu-end">
                         <div class="d-flex align-items-center border-bottom px-3 py-2">
                            <div class="flex-grow-1">
-                              <h6 class="mb-0">เจ้าหน้าที่ (ผู้ดูแลระบบ)</h6>
-                              <small class="text-body-secondary">Thai PBS Center</small>
+                              <h6 class="mb-0" data-auth-name>ผู้ใช้งาน</h6>
+                              <small class="text-body-secondary" data-auth-role-label>-</small>
                            </div>
                         </div>
-                        <a href="login.html" class="dropdown-item" onclick="localStorage.clear();">
+                        <a href="login.html" class="dropdown-item" data-logout>
                            <i class="fa-solid fa-right-from-bracket fs-6 me-2"></i> ออกจากระบบ
                         </a>
                      </div>
@@ -93,29 +96,13 @@
                      <div class="d-grid">
                         <button class="mainnav-widget-toggle d-block btn border-0 p-2" data-bs-toggle="collapse" data-bs-target="#usernav" aria-expanded="false" aria-controls="usernav">
                            <span class="dropdown-toggle d-flex justify-content-center align-items-center">
-                              <h5 class="mb-0 me-3">เจ้าหน้าที่ (ผู้ดูแลระบบ)</h5>
+                              <h5 class="mb-0 me-3" data-auth-name>ผู้ใช้งาน</h5>
                            </span>
-                           <small class="text-body-secondary">ผู้ดูแลระบบ</small>
+                           <small class="text-body-secondary" data-auth-role-label>-</small>
                         </button>
 
                         <div id="usernav" class="nav flex-column collapse">
-                           <a href="#" class="nav-link d-flex justify-content-between align-items-center">
-                              <span><i class="fa-solid fa-envelope fs-5 me-2"></i><span class="ms-1">ข้อความ</span></span>
-                              <span class="badge bg-danger rounded-pill">14</span>
-                           </a>
-                           <a href="#" class="nav-link">
-                              <i class="fa-solid fa-user fs-5 me-2"></i>
-                              <span class="ms-1">โปรไฟล์</span>
-                           </a>
-                           <a href="#" class="nav-link">
-                              <i class="fa-solid fa-gear fs-5 me-2"></i>
-                              <span class="ms-1">ตั้งค่า</span>
-                           </a>
-                           <a href="#" class="nav-link">
-                              <i class="fa-solid fa-lock fs-5 me-2"></i>
-                              <span class="ms-1">ล็อกหน้าจอ</span>
-                           </a>
-                           <a href="login.html" class="nav-link" onclick="localStorage.clear();">
+                           <a href="login.html" class="nav-link" data-logout>
                               <i class="fa-solid fa-right-from-bracket fs-5 me-2"></i>
                               <span class="ms-1">ออกจากระบบ</span>
                            </a>
@@ -146,7 +133,7 @@
                         </a>
                      </li>
 
-                     <li class="nav-item">
+                     <li class="nav-item" data-role-only="admin">
                         <a href="add-case.html" class="nav-link mininav-toggle"><i class="fa-solid fa-plus fs-5 me-2"></i>
                            <span class="nav-label mininav-content ms-1">
                               <span data-popper-arrow class="arrow"></span>
@@ -164,7 +151,7 @@
                         </a>
                      </li>
 
-                     <li class="nav-item">
+                     <li class="nav-item" data-role-only="admin">
                         <a href="dashboard.html" class="nav-link mininav-toggle active"><i class="fa-solid fa-chart-pie fs-5 me-2"></i>
                            <span class="nav-label mininav-content ms-1">
                               <span data-popper-arrow class="arrow"></span>
@@ -187,27 +174,30 @@
 
                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
                   <h1 class="page-title m-0">สถิติและข้อมูลบุคคลสูญหาย</h1>
-                  <div class="fw-bold text-primary fs-6"><i class="fa-solid fa-circle-user fs-5 align-middle me-1"></i> เจ้าหน้าที่วิเคราะห์ข้อมูล</div>
+                  <div class="fw-bold text-primary fs-6"><i class="fa-solid fa-circle-user fs-5 align-middle me-1"></i> <span data-auth-name>เจ้าหน้าที่</span></div>
                </div>
+
+               <div id="dataAlert" class="alert alert-danger d-none" role="alert"></div>
 
                <div class="card mb-4">
                   <div class="card-body d-flex flex-wrap gap-3 align-items-end">
                      <div class="fw-bold text-primary d-none d-md-block"><i class="fa-solid fa-filter"></i> ตัวกรอง:</div>
                      <div style="min-width: 150px;">
-                        <div class="filter-label">ปีที่รับแจ้ง</div>
-                        <select class="form-select form-select-sm"><option>ทั้งหมด</option><option>2567</option><option>2568</option><option>2569</option></select>
+                        <label class="filter-label d-block" for="f_year">ปีที่รับแจ้ง (พ.ศ.)</label>
+                        <select class="form-select form-select-sm" id="f_year"><option value="">ทั้งหมด</option></select>
                      </div>
                      <div style="min-width: 150px;">
-                        <div class="filter-label">จังหวัด</div>
-                        <select class="form-select form-select-sm"><option>ทั่วประเทศไทย</option><option>กรุงเทพมหานคร</option><option>เชียงใหม่</option></select>
+                        <label class="filter-label d-block" for="f_province">จังหวัดที่หาย</label>
+                        <select class="form-select form-select-sm" id="f_province"><option value="">ทั่วประเทศไทย</option></select>
                      </div>
                      <div style="min-width: 150px;">
-                        <div class="filter-label">เดือน</div>
-                        <select class="form-select form-select-sm"><option>ทุกเดือน</option><option>มกราคม</option><option>กุมภาพันธ์</option></select>
+                        <label class="filter-label d-block" for="f_month">เดือนที่รับแจ้ง</label>
+                        <select class="form-select form-select-sm" id="f_month"><option value="">ทุกเดือน</option></select>
                      </div>
+                     <div class="small text-body-secondary" id="filterSummary" aria-live="polite"></div>
                      <div class="ms-auto d-flex gap-2">
-                        <button class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-rotate-right"></i> ล้างค่า</button>
-                        <button class="btn btn-primary btn-sm"><i class="fa-solid fa-search"></i> ค้นหา</button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" id="resetFilters"><i class="fa-solid fa-rotate-right"></i> ล้างค่า</button>
+                        <button type="button" class="btn btn-primary btn-sm" id="reloadData"><i class="fa-solid fa-arrows-rotate"></i> โหลดข้อมูลล่าสุด</button>
                      </div>
                   </div>
                </div>
@@ -227,32 +217,28 @@
                <div id="overview" class="tab-pane active pt-4">
 
                   <div class="row g-3 mb-4">
-                     <div class="col"><div class="kpi-box border-start border-4 border-primary"><div class="kpi-title">บุคคลสูญหายทั้งหมด (คน)</div><div class="kpi-value">200</div></div></div>
-                     <div class="col"><div class="kpi-box border-start border-4 border-success"><div class="kpi-title">พบแล้ว (คน)</div><div class="kpi-value text-success">147</div></div></div>
-                     <div class="col"><div class="kpi-box border-start border-4" style="border-color: #ec4899 !important;"><div class="kpi-title">เพศหญิง (คน)</div><div class="kpi-value" style="color: #ec4899;">95</div></div></div>
-                     <div class="col"><div class="kpi-box border-start border-4 border-info"><div class="kpi-title">เพศชาย (คน)</div><div class="kpi-value text-info">90</div></div></div>
-                     <div class="col"><div class="kpi-box border-start border-4" style="border-color: #a855f7 !important;"><div class="kpi-title">LGBTQ+ (คน)</div><div class="kpi-value" style="color: #a855f7;">15</div></div></div>
-                     <div class="col"><div class="kpi-box border-start border-4 border-warning"><div class="kpi-title">อายุเฉลี่ยของบุคคลสูญหาย (ปี)</div><div class="kpi-value text-warning">48.3</div></div></div>
+                     <div class="col-6 col-md-4 col-xl"><div class="kpi-box border-start border-4 border-primary"><div class="kpi-title">บุคคลสูญหายทั้งหมด (คน)</div><div class="kpi-value" id="kpi-total">–</div></div></div>
+                     <div class="col-6 col-md-4 col-xl"><div class="kpi-box border-start border-4 border-success"><div class="kpi-title">พบแล้ว / ปิดเคส (คน)</div><div class="kpi-value text-success" id="kpi-resolved">–</div></div></div>
+                     <div class="col-6 col-md-4 col-xl"><div class="kpi-box border-start border-4" style="border-color: #ec4899 !important;"><div class="kpi-title">เพศหญิง (คน)</div><div class="kpi-value" style="color: #ec4899;" id="kpi-female">–</div></div></div>
+                     <div class="col-6 col-md-4 col-xl"><div class="kpi-box border-start border-4 border-info"><div class="kpi-title">เพศชาย (คน)</div><div class="kpi-value text-info" id="kpi-male">–</div></div></div>
+                     <div class="col-6 col-md-4 col-xl"><div class="kpi-box border-start border-4" style="border-color: #a855f7 !important;"><div class="kpi-title">LGBTQ+ (คน)</div><div class="kpi-value" style="color: #a855f7;" id="kpi-lgbtq">–</div></div></div>
+                     <div class="col-6 col-md-4 col-xl"><div class="kpi-box border-start border-4 border-warning"><div class="kpi-title">อายุเฉลี่ยของบุคคลสูญหาย (ปี)</div><div class="kpi-value text-warning" id="kpi-avgage">–</div></div></div>
                   </div>
 
                   <div class="row g-4">
                      <div class="col-lg-8">
                         <div class="card h-100">
-                           <div class="card-header border-0"><h3 class="h4 m-0">แนวโน้มจำนวนบุคคลสูญหายและผู้ที่พบแล้วรายปี</h3></div>
+                           <div class="card-header border-0"><h3 class="h4 m-0" id="trendTitle">แนวโน้มจำนวนบุคคลสูญหายและผู้ที่พบแล้วรายปี</h3></div>
                            <div class="card-body chart-container-lg"><canvas id="trendChart"></canvas></div>
                         </div>
                      </div>
 
                      <div class="col-lg-4">
                         <div class="card h-100">
-                           <div class="card-header border-0"><h3 class="h4 m-0">สัดส่วนผู้แจ้งเหตุ</h3></div>
+                           <div class="card-header border-0"><h3 class="h4 m-0">ความสัมพันธ์ของผู้แจ้งกับผู้สูญหาย</h3></div>
                            <div class="card-body">
                               <div class="chart-container-lg" style="height: 250px;"><canvas id="reporterChart"></canvas></div>
-                              <div class="mt-4 row text-center">
-                                 <div class="col-4"><h5 class="fw-bold text-danger m-0">72</h5><small class="text-body-secondary">เจ้าหน้าที่ตำรวจ</small></div>
-                                 <div class="col-4"><h5 class="fw-bold text-primary m-0">65</h5><small class="text-body-secondary">มูลนิธิกระจกเงา</small></div>
-                                 <div class="col-4"><h5 class="fw-bold text-warning m-0">63</h5><small class="text-body-secondary">ญาติ/บุคคลทั่วไป</small></div>
-                              </div>
+                              <div class="mt-4 row text-center" id="relationTop"></div>
                            </div>
                         </div>
                      </div>
@@ -295,11 +281,11 @@
                         <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
                            <h3 class="h4 m-0">ตารางข้อมูลรายเคสทั้งหมด</h3>
                            <div class="d-flex gap-2 w-100 w-md-auto">
-                              <input type="text" class="form-control form-control-sm" id="tableSearchInput" placeholder="ค้นหา รหัส, จังหวัด..." oninput="filterCasesTable(this.value)">
-                              <button class="btn btn-outline-success btn-sm text-nowrap"><i class="fa-solid fa-file-excel"></i> ส่งออกข้อมูล</button>
+                              <input type="search" class="form-control form-control-sm" id="tableSearchInput" placeholder="ค้นหา รหัส, ชื่อ, จังหวัด, สาเหตุ...">
+                              <button type="button" class="btn btn-outline-success btn-sm text-nowrap" id="exportBtn"><i class="fa-solid fa-file-csv"></i> ส่งออก CSV</button>
                            </div>
                         </div>
-                        <p class="text-body-secondary small mb-3"><i class="fa-solid fa-circle-info"></i> คลิกที่แถวเพื่อดูรายละเอียดเพิ่มเติมของแต่ละเคส</p>
+                        <p class="text-body-secondary small mb-3"><i class="fa-solid fa-circle-info"></i> คลิกที่แถวเพื่อดูรายละเอียดเพิ่มเติมของแต่ละเคส <span id="tableCount" class="ms-2"></span></p>
 
                         <div class="table-responsive" style="max-height: 550px; overflow-y: auto;">
                            <table class="table table-hover">
@@ -334,6 +320,7 @@
                   </div>
                   <div class="modal-body" id="modalCaseBody"></div>
                   <div class="modal-footer">
+                     <a href="#" class="btn btn-primary" id="modalDetailLink"><i class="fa-solid fa-up-right-from-square me-1"></i> เปิดหน้ารายละเอียดเคส</a>
                      <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">ปิด</button>
                   </div>
                </div>
@@ -355,201 +342,469 @@
    <script src="assets/nifty/js/nifty.min.js"></script>
 
     <script>
-        let map;
+        // ======================================================================
+        // แดชบอร์ด: ข้อมูลทั้งหมดมาจาก GET /api/cases และ GET /api/stats (ไม่มีข้อมูลตัวอย่างในหน้า)
+        // ======================================================================
+        const colors = { primary: '#24447f', success: '#57a805', danger: '#e45240', warning: '#fa9f1b', info: '#0db7f0', muted: '#b6bbc2', pink: '#ec4899', purple: '#a855f7' };
+        if (typeof Chart !== 'undefined') { Chart.defaults.font.family = "'Ubuntu', 'Segoe UI', Tahoma, sans-serif"; }
+
+        const MONTHS_TH = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+        const MONTHS_SHORT = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+        // ชื่อสาเหตุแบบสั้นสำหรับแกนกราฟ (ชื่อเต็มแสดงใน tooltip)
+        const CAUSE_SHORT = {
+            'พลัดหลงออกจากบ้าน': 'พลัดหลงจากบ้าน',
+            'ปัญหาการใช้สื่อโซเชียล': 'ปัญหาสื่อออนไลน์',
+            'มีปัญหากับครอบครัว/สมัครใจ': 'ปัญหาครอบครัว',
+            'มีอาการทางสมอง/ป่วย': 'ป่วย/สมองเสื่อม',
+            'การล่อลวงทางเพศ/แรงงาน': 'ถูกล่อลวง',
+        };
+        const AGE_BRACKETS = [
+            { label: 'เด็กเล็ก (0-5 ปี)', min: 0, max: 5, color: colors.info },
+            { label: 'เด็กโต (6-11 ปี)', min: 6, max: 11, color: colors.success },
+            { label: 'มัธยม (12-17 ปี)', min: 12, max: 17, color: colors.warning },
+            { label: 'มหาวิทยาลัย (18-22 ปี)', min: 18, max: 22, color: colors.primary },
+            { label: 'วัยทำงาน (23-59 ปี)', min: 23, max: 59, color: colors.muted },
+            { label: 'ผู้สูงอายุ (60 ปีขึ้นไป)', min: 60, max: 200, color: colors.danger },
+        ];
+        // พิกัดศาลากลางจังหวัด (ข้อมูลอ้างอิงสำหรับวางหมุดบนแผนที่)
+        const PROVINCE_COORDS = {
+            'กรุงเทพมหานคร': [13.7563, 100.5018], 'กระบี่': [8.0863, 98.9063], 'กาญจนบุรี': [14.0228, 99.5328], 'กาฬสินธุ์': [16.4322, 103.5061],
+            'กำแพงเพชร': [16.4828, 99.5227], 'ขอนแก่น': [16.4419, 102.8360], 'จันทบุรี': [12.6114, 102.1039], 'ฉะเชิงเทรา': [13.6904, 101.0779],
+            'ชลบุรี': [13.3611, 100.9847], 'ชัยนาท': [15.1851, 100.1251], 'ชัยภูมิ': [15.8068, 102.0315], 'ชุมพร': [10.4930, 99.1800],
+            'เชียงราย': [19.9105, 99.8406], 'เชียงใหม่': [18.7883, 98.9853], 'ตรัง': [7.5563, 99.6114], 'ตราด': [12.2428, 102.5175],
+            'ตาก': [16.8840, 99.1258], 'นครนายก': [14.2069, 101.2131], 'นครปฐม': [13.8199, 100.0621], 'นครพนม': [17.3920, 104.7695],
+            'นครราชสีมา': [14.9799, 102.0977], 'นครศรีธรรมราช': [8.4304, 99.9631], 'นครสวรรค์': [15.7047, 100.1372], 'นนทบุรี': [13.8621, 100.5144],
+            'นราธิวาส': [6.4255, 101.8253], 'น่าน': [18.7756, 100.7730], 'บึงกาฬ': [18.3609, 103.6466], 'บุรีรัมย์': [14.9930, 103.1029],
+            'ปทุมธานี': [14.0208, 100.5250], 'ประจวบคีรีขันธ์': [11.8124, 99.7973], 'ปราจีนบุรี': [14.0509, 101.3717], 'ปัตตานี': [6.8691, 101.2501],
+            'พระนครศรีอยุธยา': [14.3532, 100.5689], 'พะเยา': [19.1665, 99.9019], 'พังงา': [8.4501, 98.5255], 'พัทลุง': [7.6167, 100.0740],
+            'พิจิตร': [16.4429, 100.3487], 'พิษณุโลก': [16.8211, 100.2659], 'เพชรบุรี': [13.1112, 99.9447], 'เพชรบูรณ์': [16.4190, 101.1606],
+            'แพร่': [18.1446, 100.1403], 'ภูเก็ต': [7.8804, 98.3923], 'มหาสารคาม': [16.1851, 103.3026], 'มุกดาหาร': [16.5420, 104.7232],
+            'แม่ฮ่องสอน': [19.3020, 97.9654], 'ยโสธร': [15.7944, 104.1453], 'ยะลา': [6.5411, 101.2804], 'ร้อยเอ็ด': [16.0538, 103.6520],
+            'ระนอง': [9.9529, 98.6085], 'ระยอง': [12.6814, 101.2816], 'ราชบุรี': [13.5283, 99.8134], 'ลพบุรี': [14.7995, 100.6534],
+            'ลำปาง': [18.2888, 99.4909], 'ลำพูน': [18.5745, 99.0087], 'เลย': [17.4860, 101.7223], 'ศรีสะเกษ': [15.1186, 104.3220],
+            'สกลนคร': [17.1545, 104.1348], 'สงขลา': [7.1898, 100.5954], 'สตูล': [6.6238, 100.0674], 'สมุทรปราการ': [13.5991, 100.5998],
+            'สมุทรสงคราม': [13.4098, 100.0023], 'สมุทรสาคร': [13.5475, 100.2744], 'สระแก้ว': [13.8240, 102.0646], 'สระบุรี': [14.5289, 100.9101],
+            'สิงห์บุรี': [14.8936, 100.3967], 'สุโขทัย': [17.0056, 99.8264], 'สุพรรณบุรี': [14.4745, 100.1177], 'สุราษฎร์ธานี': [9.1382, 99.3217],
+            'สุรินทร์': [14.8818, 103.4936], 'หนองคาย': [17.8783, 102.7420], 'หนองบัวลำภู': [17.2218, 102.4260], 'อ่างทอง': [14.5896, 100.4551],
+            'อำนาจเจริญ': [15.8656, 104.6258], 'อุดรธานี': [17.4138, 102.7872], 'อุตรดิตถ์': [17.6200, 100.0993], 'อุทัยธานี': [15.3835, 100.0246],
+            'อุบลราชธานี': [15.2287, 104.8564],
+        };
+
+        let allCases = [];
+        let filteredCases = [];
+        let stats = null;
+        const charts = {};
+        let map = null;
+        let mapLayer = null;
         let mapInitialized = false;
 
-        // ฟังก์ชันสลับ Tab
-        function switchTab(tabId, btnElement) {
-            document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-            document.querySelectorAll('#dashboardTabs .nav-link').forEach(el => el.classList.remove('active'));
-            btnElement.classList.add('active');
-            if (tabId === 'location' && !mapInitialized) {
-                setTimeout(initMap, 100);
-                mapInitialized = true;
+        const esc = App.escapeHtml;
+        const fmt = n => (Number(n) || 0).toLocaleString('th-TH');
+
+        // ---------- ตัวช่วยจัดกลุ่มข้อมูล ----------
+        function normProvince(p) {
+            let s = App.textOr(p, '').replace(/^(จังหวัด|จ\.)\s*/, '').trim();
+            if (['กรุงเทพฯ', 'กรุงเทพ', 'กทม', 'กทม.'].includes(s)) s = 'กรุงเทพมหานคร';
+            return s;
+        }
+        function genderGroup(g) {
+            const s = App.textOr(g, '');
+            if (/lgbt/i.test(s)) return 'lgbtq';
+            if (s === 'หญิง') return 'female';
+            if (s === 'ชาย') return 'male';
+            return 'unknown';
+        }
+        const isResolved = c => App.isClosedStatus(c.case_latest_status);
+        function receivedDate(c) { return App.toDate(c.case_received_date); }
+        function countBy(list, keyFn) {
+            const m = new Map();
+            list.forEach(item => {
+                const keys = [].concat(keyFn(item)).filter(k => k !== null && k !== undefined && k !== '');
+                keys.forEach(k => m.set(k, (m.get(k) || 0) + 1));
+            });
+            return m;
+        }
+        function sortedEntries(m) { return [...m.entries()].sort((a, b) => b[1] - a[1] || String(a[0]).localeCompare(String(b[0]), 'th')); }
+
+        // ---------- กล่องข้อความทับกราฟ (กำลังโหลด / ไม่มีข้อมูล / ผิดพลาด) ----------
+        function setOverlay(canvasId, message) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            const parent = canvas.parentElement;
+            if (getComputedStyle(parent).position === 'static') parent.style.position = 'relative';
+            let ov = parent.querySelector(':scope > .chart-overlay');
+            if (!message) { if (ov) ov.remove(); return; }
+            if (!ov) { ov = document.createElement('div'); ov.className = 'chart-overlay'; parent.appendChild(ov); }
+            ov.innerHTML = message;
+        }
+        const CHART_IDS = ['trendChart', 'reporterChart', 'reasonChart', 'ageChart', 'provinceChart'];
+        function overlayAll(message) { CHART_IDS.forEach(id => setOverlay(id, message)); }
+
+        function drawChart(id, config, isEmpty) {
+            if (charts[id]) { charts[id].destroy(); delete charts[id]; }
+            if (typeof Chart === 'undefined') {
+                setOverlay(id, '<span><i class="fa-solid fa-triangle-exclamation me-1"></i> ไม่สามารถโหลดไลบรารีกราฟ (Chart.js) ได้ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต</span>');
+                return;
+            }
+            if (isEmpty) { setOverlay(id, '<span><i class="fa-regular fa-folder-open me-1"></i> ไม่มีข้อมูลตามตัวกรองที่เลือก</span>'); return; }
+            setOverlay(id, null);
+            try {
+                charts[id] = new Chart(document.getElementById(id), config);
+            } catch (e) {
+                console.error(`สร้างกราฟ ${id} ไม่สำเร็จ:`, e);
+                setOverlay(id, 'แสดงกราฟไม่สำเร็จ');
             }
         }
 
-        // ตั้งค่าสีกลาง (Theme Colors)
-        if (typeof Chart !== 'undefined') { Chart.defaults.font.family = "'Ubuntu', 'Segoe UI', Tahoma, sans-serif"; }
-        const colors = { primary: '#24447f', success: '#57a805', danger: '#e45240', warning: '#fa9f1b', info: '#0db7f0', muted: '#b6bbc2' };
+        // ---------- KPI ----------
+        function renderKpis(list, unfiltered) {
+            const useStats = unfiltered && stats;
+            document.getElementById('kpi-total').textContent = fmt(useStats ? stats.total : list.length);
+            document.getElementById('kpi-resolved').textContent = fmt(useStats ? stats.resolved : list.filter(isResolved).length);
+            const g = countBy(list, c => genderGroup(c.missingperson_gender));
+            document.getElementById('kpi-female').textContent = fmt(g.get('female'));
+            document.getElementById('kpi-male').textContent = fmt(g.get('male'));
+            document.getElementById('kpi-lgbtq').textContent = fmt(g.get('lgbtq'));
+            const validAges = list.map(c => c.missingperson_age).filter(a => a !== null && a !== undefined && a !== '' && Number.isFinite(Number(a))).map(Number);
+            document.getElementById('kpi-avgage').textContent = validAges.length
+                ? (validAges.reduce((s, a) => s + a, 0) / validAges.length).toLocaleString('th-TH', { maximumFractionDigits: 1 })
+                : '–';
+        }
 
-        document.addEventListener('DOMContentLoaded', function() {
-          try {
-            // 1. กราฟเส้น (แนวโน้มรายปี) - แกน X = ปี พ.ศ., แกน Y = จำนวนบุคคล (คน)
-            new Chart(document.getElementById('trendChart'), {
+        // ---------- กราฟ ----------
+        function renderTrend(list) {
+            const year = document.getElementById('f_year').value;
+            let labels, total, found, xTitle;
+            if (year) {
+                document.getElementById('trendTitle').textContent = `จำนวนบุคคลสูญหายและผู้ที่พบแล้วรายเดือน ปี พ.ศ. ${year}`;
+                labels = MONTHS_SHORT;
+                total = new Array(12).fill(0); found = new Array(12).fill(0);
+                list.forEach(c => { const d = receivedDate(c); if (!d) return; total[d.getMonth()]++; if (isResolved(c)) found[d.getMonth()]++; });
+                xTitle = 'เดือนที่รับแจ้ง';
+            } else {
+                document.getElementById('trendTitle').textContent = 'แนวโน้มจำนวนบุคคลสูญหายและผู้ที่พบแล้วรายปี';
+                const years = [...new Set(list.map(c => App.thaiYear(c.case_received_date)).filter(Boolean))].sort((a, b) => a - b);
+                labels = years.map(String);
+                total = years.map(y => list.filter(c => App.thaiYear(c.case_received_date) === y).length);
+                found = years.map(y => list.filter(c => App.thaiYear(c.case_received_date) === y && isResolved(c)).length);
+                xTitle = 'ปี (พ.ศ.)';
+            }
+            drawChart('trendChart', {
                 type: 'line',
-                data: {
-                    labels: ['2563', '2564', '2565', '2566', '2567', '2568'],
-                    datasets: [
-                        { label: 'รับแจ้งทั้งหมด', data: [15, 38, 42, 45, 40, 20], borderColor: colors.primary, backgroundColor: 'rgba(36, 68, 127, 0.1)', fill: true, tension: 0.4 },
-                        { label: 'พบแล้ว', data: [5, 18, 15, 12, 18, 10], borderColor: colors.success, backgroundColor: 'transparent', borderDash: [5, 5], tension: 0.4 }
-                    ]
-                },
+                data: { labels, datasets: [
+                    { label: 'รับแจ้งทั้งหมด', data: total, borderColor: colors.primary, backgroundColor: 'rgba(36, 68, 127, 0.1)', fill: true, tension: 0.35 },
+                    { label: 'พบแล้ว / ปิดเคส', data: found, borderColor: colors.success, backgroundColor: 'transparent', borderDash: [5, 5], tension: 0.35 },
+                ] },
                 options: {
                     responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { position: 'bottom' } },
                     scales: {
-                        x: { title: { display: true, text: 'ปี (พ.ศ.)' } },
-                        y: { title: { display: true, text: 'จำนวนบุคคล (คน)' }, beginAtZero: true }
-                    }
-                }
-            });
-
-            // 2. โดนัท (สัดส่วนผู้แจ้งเหตุ) - ไม่มีแกน
-            new Chart(document.getElementById('reporterChart'), {
-                type: 'doughnut',
-                data: {
-                    labels: ['เจ้าหน้าที่ตำรวจ', 'มูลนิธิกระจกเงา', 'ญาติ/บุคคลทั่วไป'],
-                    datasets: [{ data: [72, 65, 63], backgroundColor: [colors.danger, colors.primary, colors.warning], borderWidth: 0 }]
+                        x: { title: { display: true, text: xTitle } },
+                        y: { title: { display: true, text: 'จำนวนบุคคล (คน)' }, beginAtZero: true, ticks: { precision: 0 } },
+                    },
                 },
-                options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { position: 'bottom' } } }
-            });
+            }, list.length === 0);
+        }
 
-            // 3. กราฟแท่งแนวนอน (สาเหตุการสูญหาย) - แกน X = จำนวนบุคคล (คน), แกน Y = สาเหตุ
-            new Chart(document.getElementById('reasonChart'), {
+        function renderRelation(list) {
+            const entries = sortedEntries(countBy(list, c => App.textOr(c.case_relation_to_missing, 'ไม่ระบุ')));
+            const top = entries.slice(0, 5);
+            const rest = entries.slice(5).reduce((s, e) => s + e[1], 0);
+            if (rest > 0) top.push(['อื่นๆ', rest]);
+            const palette = [colors.danger, colors.primary, colors.warning, colors.success, colors.info, colors.muted];
+            drawChart('reporterChart', {
+                type: 'doughnut',
+                data: { labels: top.map(e => e[0]), datasets: [{ data: top.map(e => e[1]), backgroundColor: palette, borderWidth: 0 }] },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } } },
+            }, top.length === 0);
+            const textCls = ['text-danger', 'text-primary', 'text-warning'];
+            document.getElementById('relationTop').innerHTML = top.slice(0, 3).map((e, i) =>
+                `<div class="col-4"><h5 class="fw-bold ${textCls[i]} m-0">${fmt(e[1])}</h5><small class="text-body-secondary">${esc(e[0])}</small></div>`).join('');
+        }
+
+        function renderReasons(list) {
+            const entries = sortedEntries(countBy(list, c => App.parseCauses(c.case_missing_reason))).slice(0, 8);
+            drawChart('reasonChart', {
                 type: 'bar',
                 data: {
-                    labels: ['พลัดหลงจากบ้าน', 'ถูกลักพาตัว', 'ปัญหาสื่อออนไลน์', 'ป่วย/สมองเสื่อม', 'ถูกล่อลวง', 'ปัญหาครอบครัว'],
-                    datasets: [{ label: 'จำนวนบุคคล (คน)', data: [37, 33, 28, 28, 28, 24], backgroundColor: colors.warning }]
+                    labels: entries.map(e => CAUSE_SHORT[e[0]] || e[0]),
+                    datasets: [{ label: 'จำนวนบุคคล (คน)', data: entries.map(e => e[1]), backgroundColor: colors.warning }],
                 },
                 options: {
                     indexAxis: 'y', responsive: true, maintainAspectRatio: false,
                     layout: { padding: { left: 5, right: 15 } },
-                    plugins: { legend: { display: false } },
+                    plugins: { legend: { display: false }, tooltip: { callbacks: { title: items => entries[items[0].dataIndex][0] } } },
                     scales: {
-                        x: { title: { display: true, text: 'จำนวนบุคคล (คน)' }, grid: { display: false } },
-                        y: { ticks: { autoSkip: false }, afterFit: (axis) => { axis.width = 130; } }
-                    }
-                }
-            });
-
-            // 4. พายชาร์ท (กลุ่มอายุของบุคคลสูญหาย แจกแจงตามช่วงวัย)
-            new Chart(document.getElementById('ageChart'), {
-                type: 'pie',
-                data: {
-                    labels: ['เด็กเล็ก (0-5 ปี)', 'เด็กโต (6-11 ปี)', 'มัธยม (12-17 ปี)', 'มหาวิทยาลัย (18-22 ปี)', 'วัยทำงาน (23-59 ปี)', 'ผู้สูงอายุ (60 ปีขึ้นไป)'],
-                    datasets: [{ label: 'จำนวนบุคคล (คน)', data: [12, 18, 25, 20, 83, 42], backgroundColor: [colors.info, colors.success, colors.warning, colors.primary, colors.muted, colors.danger] }]
+                        x: { title: { display: true, text: 'จำนวนบุคคล (คน)' }, grid: { display: false }, beginAtZero: true, ticks: { precision: 0 } },
+                        y: { ticks: { autoSkip: false }, afterFit: (axis) => { axis.width = Math.max(axis.width, 130); } },
+                    },
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } } }
-            });
+            }, entries.length === 0);
+        }
 
-            // 5. แผนภูมิแท่งแนวนอนซ้อนทับ (10 อันดับจังหวัด) - แกน X = จำนวนบุคคล (คน), แกน Y = จังหวัด
-            new Chart(document.getElementById('provinceChart'), {
+        function renderAges(list) {
+            const counts = AGE_BRACKETS.map(b => list.filter(c => {
+                const a = Number(c.missingperson_age);
+                return c.missingperson_age !== null && c.missingperson_age !== '' && Number.isFinite(a) && a >= b.min && a <= b.max;
+            }).length);
+            drawChart('ageChart', {
+                type: 'pie',
+                data: { labels: AGE_BRACKETS.map(b => b.label), datasets: [{ label: 'จำนวนบุคคล (คน)', data: counts, backgroundColor: AGE_BRACKETS.map(b => b.color) }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } } },
+            }, counts.every(n => n === 0));
+        }
+
+        function provinceStats(list) {
+            const m = new Map();
+            list.forEach(c => {
+                const p = normProvince(c.Last_Seen_province);
+                if (!p) return;
+                const s = m.get(p) || { total: 0, found: 0 };
+                s.total++; if (isResolved(c)) s.found++;
+                m.set(p, s);
+            });
+            return [...m.entries()].sort((a, b) => b[1].total - a[1].total || a[0].localeCompare(b[0], 'th'));
+        }
+
+        function renderProvinces(list) {
+            const top = provinceStats(list).slice(0, 10);
+            drawChart('provinceChart', {
                 type: 'bar',
                 data: {
-                    labels: ['กรุงเทพมหานคร', 'นครปฐม', 'เชียงใหม่', 'อุดรธานี', 'ระยอง', 'สุราษฎร์ธานี', 'ชลบุรี', 'นนทบุรี', 'พิษณุโลก', 'น่าน'],
+                    labels: top.map(e => e[0]),
                     datasets: [
-                        { label: 'พบแล้ว', data: [80, 75, 65, 70, 85, 70, 60, 50, 40, 30], backgroundColor: colors.success },
-                        { label: 'ยังไม่พบ', data: [20, 15, 20, 10, 5, 20, 15, 10, 10, 5], backgroundColor: colors.danger }
-                    ]
+                        { label: 'พบแล้ว / ปิดเคส', data: top.map(e => e[1].found), backgroundColor: colors.success },
+                        { label: 'ยังไม่พบ', data: top.map(e => e[1].total - e[1].found), backgroundColor: colors.danger },
+                    ],
                 },
                 options: {
                     indexAxis: 'y', responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { position: 'bottom' } },
                     scales: {
-                        x: { stacked: true, title: { display: true, text: 'จำนวนบุคคล (คน)' } },
-                        y: { stacked: true, afterFit: (axis) => { axis.width = 110; } }
-                    }
-                }
-            });
+                        x: { stacked: true, title: { display: true, text: 'จำนวนบุคคล (คน)' }, beginAtZero: true, ticks: { precision: 0 } },
+                        y: { stacked: true, afterFit: (axis) => { axis.width = Math.max(axis.width, 110); } },
+                    },
+                },
+            }, top.length === 0);
+        }
 
-          } catch (e) {
-            console.error('การสร้างกราฟล้มเหลว (อาจเกิดจากปัญหาการเชื่อมต่อเครือข่าย):', e);
-          }
-        });
-
-        // หมายเหตุ: การสร้างกราฟทั้งหมดอยู่ใน try/catch ด้วยกัน เพื่อไม่ให้ปัญหาการโหลด Chart.js
-        // (เช่น เครือข่ายขัดข้อง) ส่งผลกระทบต่อการแสดงตารางข้อมูลด้านล่าง ซึ่งเป็นคนละส่วนกัน
-        // ฟังก์ชันโหลดแผนที่ (Map)
+        // ---------- แผนที่ ----------
         function initMap() {
             if (typeof L === 'undefined') {
                 document.getElementById('map').innerHTML = '<div class="d-flex align-items-center justify-content-center h-100 text-body-secondary"><i class="fa-solid fa-triangle-exclamation me-2"></i> ไม่สามารถโหลดแผนที่ได้ กรุณาตรวจสอบการเชื่อมต่อเครือข่าย</div>';
                 return;
             }
-            map = L.map('map').setView([13.7563, 100.5018], 5);
+            map = L.map('map').setView([13.0, 101.0], 5);
             L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-                attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+                attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
             }).addTo(map);
-            L.marker([13.7563, 100.5018]).addTo(map).bindPopup("<b>กรุงเทพมหานคร</b><br>มีผู้แจ้งเหตุ 100 คน");
-            L.marker([18.7883, 98.9853]).addTo(map).bindPopup("<b>เชียงใหม่</b><br>มีผู้แจ้งเหตุ 85 คน");
-            L.marker([12.9236, 100.8825]).addTo(map).bindPopup("<b>ชลบุรี (พัทยา)</b><br>มีผู้แจ้งเหตุ 75 คน");
+            mapLayer = L.layerGroup().addTo(map);
+            renderMap(filteredCases);
         }
 
-        // ---------- ตารางข้อมูลรายเคส (คลิกดูรายละเอียด) ----------
-        const rawCases = [
-            { id: '002', date: '8 ก.ค. 2563', gender: 'หญิง', age: 10, province: 'สุโขทัย', reason: 'มีอาการทางสมอง/ป่วย', status: 'พบแล้ว',
-              name: 'ด.ญ. (สงวนชื่อ) อายุ 10 ปี', reporter: 'มารดา', relation: 'บิดา/มารดา', lastSeen: 'ตลาดสดเทศบาล อ.เมือง จ.สุโขทัย', station: 'สภ.เมืองสุโขทัย', notes: 'พบตัวปลอดภัยหลังพลัดหลงในตลาดเป็นเวลา 2 วัน' },
-            { id: '016', date: '23 พ.ย. 2563', gender: 'ชาย', age: 45, province: 'ชัยภูมิ', reason: 'ล่อลวงเพื่อทางเพศ/แรงงาน', status: 'พบแล้ว',
-              name: 'นาย (สงวนชื่อ) อายุ 45 ปี', reporter: 'ภรรยา', relation: 'สามี/ภรรยา', lastSeen: 'สถานีขนส่งจังหวัดชัยภูมิ', station: 'สภ.เมืองชัยภูมิ', notes: 'ประสานตำรวจต่างจังหวัดจนพบตัว ปลอดภัยดี' },
-            { id: '034', date: '15 ก.พ. 2564', gender: 'หญิง', age: 75, province: 'เชียงใหม่', reason: 'หลงลืม/อัลไซเมอร์', status: 'ยังไม่พบ',
-              name: 'นาง (สงวนชื่อ) อายุ 75 ปี', reporter: 'บุตร/ธิดา', relation: 'บุตร/ธิดา', lastSeen: 'ตลาดวโรรส อ.เมือง จ.เชียงใหม่', station: 'สภ.เมืองเชียงใหม่', notes: 'อยู่ระหว่างประสานหน่วยกู้ภัยค้นหาในพื้นที่ใกล้เคียง' },
-            { id: '045', date: '10 เม.ย. 2564', gender: 'ชาย', age: 15, province: 'กรุงเทพมหานคร', reason: 'หนีออกจากบ้าน', status: 'พบเบาะแส',
-              name: 'ด.ช. (สงวนชื่อ) อายุ 15 ปี', reporter: 'บิดา/มารดา', relation: 'บิดา/มารดา', lastSeen: 'ห้างสรรพสินค้าย่านลาดพร้าว กรุงเทพฯ', station: 'สน.ลาดพร้าว', notes: 'มีผู้พบเห็นล่าสุดบริเวณสถานีรถไฟฟ้า อยู่ระหว่างตรวจสอบ' },
-            { id: '027', date: '16 เม.ย. 2564', gender: 'หญิง', age: 45, province: 'บุรีรัมย์', reason: 'ถูกลักพาตัว', status: 'พบแล้ว',
-              name: 'นาง (สงวนชื่อ) อายุ 45 ปี', reporter: 'พี่น้อง', relation: 'พี่น้อง', lastSeen: 'ตลาดนัดชุมชน อ.เมือง จ.บุรีรัมย์', station: 'สภ.เมืองบุรีรัมย์', notes: 'เจ้าหน้าที่ช่วยเหลือออกมาได้อย่างปลอดภัย ผู้ต้องหาถูกจับกุมแล้ว' },
-            { id: '058', date: '2 ก.ย. 2565', gender: 'LGBTQ+', age: 22, province: 'ชลบุรี', reason: 'ปัญหาการใช้สื่อโซเชียล', status: 'ยังไม่พบ',
-              name: '(สงวนชื่อ) อายุ 22 ปี', reporter: 'เพื่อน', relation: 'เพื่อน', lastSeen: 'ย่านพัทยาใต้ อ.บางละมุง จ.ชลบุรี', station: 'สภ.เมืองพัทยา', notes: 'ขาดการติดต่อหลังนัดพบบุคคลที่รู้จักผ่านสื่อสังคมออนไลน์' },
-            { id: '063', date: '19 ธ.ค. 2565', gender: 'ชาย', age: 8, province: 'นครราชสีมา', reason: 'พลัดหลงออกจากบ้าน', status: 'พบแล้ว',
-              name: 'ด.ช. (สงวนชื่อ) อายุ 8 ปี', reporter: 'บิดา/มารดา', relation: 'บิดา/มารดา', lastSeen: 'สวนสาธารณะเทศบาลนครราชสีมา', station: 'สภ.เมืองนครราชสีมา', notes: 'พลัดหลงจากครอบครัวขณะเที่ยวงานเทศกาล พบตัวภายในเวลาไม่ถึง 3 ชั่วโมง' }
-        ];
-
-        function statusBadge(status) {
-            if (status === 'พบแล้ว') return '<span class="badge bg-success">พบแล้ว</span>';
-            if (status === 'พบเบาะแส') return '<span class="badge bg-warning text-dark">พบเบาะแส</span>';
-            return '<span class="badge bg-danger">ยังไม่พบ</span>';
+        function renderMap(list) {
+            if (!map || !mapLayer) return;
+            mapLayer.clearLayers();
+            const rows = provinceStats(list);
+            const max = Math.max(1, ...rows.map(r => r[1].total));
+            const unmapped = [];
+            rows.forEach(([prov, s]) => {
+                const coords = PROVINCE_COORDS[prov];
+                if (!coords) { unmapped.push(prov); return; }
+                L.circleMarker(coords, {
+                    radius: 7 + 18 * Math.sqrt(s.total / max),
+                    color: colors.primary, weight: 1.5, fillColor: s.found === s.total ? colors.success : colors.danger, fillOpacity: 0.55,
+                }).addTo(mapLayer).bindPopup(`<b>${esc(prov)}</b><br>แจ้งหาย ${fmt(s.total)} คน<br>พบแล้ว/ปิดเคส ${fmt(s.found)} คน<br>ยังไม่พบ ${fmt(s.total - s.found)} คน`);
+            });
+            if (unmapped.length) console.info('ไม่พบพิกัดของจังหวัด:', unmapped);
+            map.invalidateSize();
         }
 
-        function renderCasesTable(data) {
+        function switchTab(tabId, btnElement) {
+            document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            document.querySelectorAll('#dashboardTabs .nav-link').forEach(el => el.classList.remove('active'));
+            btnElement.classList.add('active');
+            if (tabId === 'location') {
+                if (!mapInitialized) { mapInitialized = true; setTimeout(initMap, 100); }
+                else setTimeout(() => renderMap(filteredCases), 50);
+            }
+        }
+
+        // ---------- ตารางรายเคส ----------
+        function tableRows() {
+            const q = document.getElementById('tableSearchInput').value.trim().toLowerCase();
+            const rows = [...filteredCases].sort((a, b) => (receivedDate(b) || 0) - (receivedDate(a) || 0));
+            if (!q) return rows;
+            return rows.filter(c => [
+                c.case_id, c.missingperson_name, normProvince(c.Last_Seen_province), c.case_missing_reason, c.case_latest_status, c.missingperson_gender,
+            ].some(v => String(v || '').toLowerCase().includes(q)));
+        }
+
+        function renderCasesTable() {
             const tbody = document.getElementById('rawCasesBody');
-            if (data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-body-secondary py-4">ไม่พบข้อมูลที่ตรงกับคำค้นหา</td></tr>';
+            const rows = tableRows();
+            document.getElementById('tableCount').textContent = `(แสดง ${fmt(rows.length)} รายการ)`;
+            if (rows.length === 0) {
+                App.renderState(tbody, 'empty', allCases.length ? 'ไม่พบข้อมูลที่ตรงกับคำค้นหาหรือตัวกรอง' : 'ยังไม่มีเคสในระบบ', { colspan: 7 });
                 return;
             }
-            tbody.innerHTML = data.map(c => {
-                const i = rawCases.indexOf(c);
-                return `<tr role="button" style="cursor:pointer;" onclick="showCaseDetail(${i})">
-                    <td class="fw-bold">${c.id}</td><td class="text-nowrap">${c.date}</td><td>${c.gender}</td><td>${c.age}</td><td>${c.province}</td>
-                    <td>${c.reason}</td><td>${statusBadge(c.status)}</td>
-                </tr>`;
-            }).join('');
+            tbody.innerHTML = rows.map(c => `
+                <tr role="button" tabindex="0" style="cursor:pointer;" data-case-id="${esc(c.case_id)}">
+                    <td class="fw-bold">${esc(c.case_id)}</td>
+                    <td class="text-nowrap">${esc(App.formatThaiDate(c.case_received_date))}</td>
+                    <td>${esc(App.textOr(c.missingperson_gender))}</td>
+                    <td>${esc(App.textOr(c.missingperson_age))}</td>
+                    <td>${esc(normProvince(c.Last_Seen_province) || '-')}</td>
+                    <td>${esc(App.parseCauses(c.case_missing_reason).join(', ') || '-')}</td>
+                    <td>${App.statusBadge(c.case_latest_status)}</td>
+                </tr>`).join('');
         }
 
-        function filterCasesTable(query) {
-            const q = query.trim().toLowerCase();
-            if (!q) { renderCasesTable(rawCases); return; }
-            const filtered = rawCases.filter(c =>
-                c.id.toLowerCase().includes(q) || c.province.toLowerCase().includes(q) || c.reason.toLowerCase().includes(q)
-            );
-            renderCasesTable(filtered);
-        }
-
-        function showCaseDetail(i) {
-            const c = rawCases[i];
-            document.getElementById('modalCaseId').textContent = c.id;
+        function showCaseDetail(id) {
+            const c = allCases.find(x => String(x.case_id) === String(id));
+            if (!c) return;
+            const place = [App.textOr(c.Last_Seen_place, ''), App.textOr(c.Last_Seen_subdistrict, ''), App.textOr(c.Last_Seen_district, ''), normProvince(c.Last_Seen_province)].filter(Boolean).join(' ') || '-';
+            const field = (label, value, cls) => `<div class="${cls}"><div class="text-body-secondary small">${esc(label)}</div><div class="fw-bold">${value}</div></div>`;
+            document.getElementById('modalCaseId').textContent = c.case_id;
+            document.getElementById('modalDetailLink').href = `case-detail.html?id=${encodeURIComponent(c.case_id)}`;
             document.getElementById('modalCaseBody').innerHTML = `
                 <div class="row g-3">
-                    <div class="col-md-6"><div class="text-body-secondary small">ชื่อ (สงวนสิทธิ์บางส่วนเพื่อความเป็นส่วนตัว)</div><div class="fw-bold">${c.name}</div></div>
-                    <div class="col-md-6"><div class="text-body-secondary small">สถานะปัจจุบัน</div><div>${statusBadge(c.status)}</div></div>
-                    <div class="col-md-4"><div class="text-body-secondary small">เพศ</div><div class="fw-bold">${c.gender}</div></div>
-                    <div class="col-md-4"><div class="text-body-secondary small">อายุ</div><div class="fw-bold">${c.age} ปี</div></div>
-                    <div class="col-md-4"><div class="text-body-secondary small">วันที่รับแจ้ง</div><div class="fw-bold">${c.date}</div></div>
-                    <div class="col-md-6"><div class="text-body-secondary small">จังหวัดที่พบเห็นล่าสุด</div><div class="fw-bold">${c.province}</div></div>
-                    <div class="col-md-6"><div class="text-body-secondary small">สถานีตำรวจที่รับผิดชอบ</div><div class="fw-bold">${c.station}</div></div>
-                    <div class="col-12"><div class="text-body-secondary small">สถานที่พบเห็นครั้งสุดท้าย</div><div class="fw-bold">${c.lastSeen}</div></div>
-                    <div class="col-md-6"><div class="text-body-secondary small">สาเหตุการสูญหาย</div><div class="fw-bold">${c.reason}</div></div>
-                    <div class="col-md-6"><div class="text-body-secondary small">ผู้แจ้งเหตุ (ความสัมพันธ์: ${c.relation})</div><div class="fw-bold">${c.reporter}</div></div>
-                    <div class="col-12"><div class="text-body-secondary small">หมายเหตุเพิ่มเติม</div><div>${c.notes}</div></div>
-                </div>
-            `;
-            const modalEl = document.getElementById('caseDetailModal');
-            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-            modal.show();
+                    <div class="col-md-3 text-center"><img src="${esc(App.imageUrl(c.character_image_url))}" ${App.imgFallbackAttr()} alt="ภาพบุคคลสูญหาย" style="width:100%; max-width:150px; height:170px; object-fit:cover; border-radius:8px;"></div>
+                    <div class="col-md-9"><div class="row g-3">
+                        ${field('ชื่อ-สกุล', esc(App.fullName(c.missingperson_title, c.missingperson_name)), 'col-md-6')}
+                        ${field('สถานะปัจจุบัน / ความเร่งด่วน', `${App.statusBadge(c.case_latest_status)} ${App.priorityBadge(c.case_priority)}`, 'col-md-6')}
+                        ${field('เพศ', esc(App.textOr(c.missingperson_gender)), 'col-md-4')}
+                        ${field('อายุ', App.textOr(c.missingperson_age, '') !== '' ? `${esc(c.missingperson_age)} ปี` : '-', 'col-md-4')}
+                        ${field('วันที่รับแจ้ง', esc(App.formatThaiDate(c.case_received_date)), 'col-md-4')}
+                        ${field('วันที่หาย', esc(App.formatThaiDate(c.Last_Seen_date)), 'col-md-6')}
+                        ${field('สถานีตำรวจที่รับผิดชอบ', esc(App.textOr(c.policestation_name)), 'col-md-6')}
+                    </div></div>
+                    ${field('สถานที่พบเห็นครั้งสุดท้าย', esc(place), 'col-12')}
+                    ${field('สาเหตุการสูญหาย', esc(App.parseCauses(c.case_missing_reason).join(', ') || '-'), 'col-md-6')}
+                    ${field('ความสัมพันธ์ของผู้แจ้ง', esc(App.textOr(c.case_relation_to_missing)), 'col-md-6')}
+                    ${App.textOr(c.case_notes, '') ? `<div class="col-12"><div class="text-body-secondary small">หมายเหตุเพิ่มเติม</div><div style="white-space: pre-line;">${esc(c.case_notes)}</div></div>` : ''}
+                </div>`;
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('caseDetailModal')).show();
         }
 
-        // แสดงตารางเคสทันทีที่หน้าเว็บพร้อม แยกอิสระจากการสร้างกราฟด้านบน
-        // เพื่อไม่ให้ปัญหาการโหลด Chart.js (เช่น เครือข่ายขัดข้อง) กระทบต่อการแสดงตาราง
-        document.addEventListener('DOMContentLoaded', () => renderCasesTable(rawCases));
+        document.getElementById('rawCasesBody').addEventListener('click', e => {
+            const tr = e.target.closest('tr[data-case-id]');
+            if (tr) showCaseDetail(tr.dataset.caseId);
+        });
+        document.getElementById('rawCasesBody').addEventListener('keydown', e => {
+            const tr = e.target.closest('tr[data-case-id]');
+            if (tr && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); showCaseDetail(tr.dataset.caseId); }
+        });
+        document.getElementById('tableSearchInput').addEventListener('input', App.debounce(renderCasesTable, 200));
+
+        // ส่งออกตารางที่กรองแล้วเป็น CSV (เปิดด้วย Excel ได้ ภาษาไทยไม่เพี้ยน)
+        document.getElementById('exportBtn').addEventListener('click', () => {
+            const rows = tableRows();
+            if (rows.length === 0) { App.toast('ไม่มีข้อมูลสำหรับส่งออก', 'warning'); return; }
+            const header = ['รหัสเคส', 'วันที่รับแจ้ง', 'ชื่อ-สกุล', 'เพศ', 'อายุ', 'จังหวัดที่หาย', 'สาเหตุ', 'ความเร่งด่วน', 'สถานะ'];
+            const cell = v => `"${String(v === null || v === undefined ? '' : v).replace(/"/g, '""')}"`;
+            const lines = [header.map(cell).join(',')].concat(rows.map(c => [
+                c.case_id, App.formatThaiDate(c.case_received_date), App.fullName(c.missingperson_title, c.missingperson_name),
+                App.textOr(c.missingperson_gender, ''), App.textOr(c.missingperson_age, ''), normProvince(c.Last_Seen_province),
+                App.parseCauses(c.case_missing_reason).join(' / '), App.textOr(c.case_priority, ''), App.textOr(c.case_latest_status, ''),
+            ].map(cell).join(',')));
+            const blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `missing-cases-${new Date().toISOString().slice(0, 10)}.csv`;
+            document.body.appendChild(a); a.click(); a.remove();
+            setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+        });
+
+        // ---------- ตัวกรอง ----------
+        function populateFilters() {
+            const yearSel = document.getElementById('f_year');
+            const provSel = document.getElementById('f_province');
+            const monthSel = document.getElementById('f_month');
+            const keep = { y: yearSel.value, p: provSel.value, m: monthSel.value };
+            const years = [...new Set(allCases.map(c => App.thaiYear(c.case_received_date)).filter(Boolean))].sort((a, b) => b - a);
+            yearSel.innerHTML = '<option value="">ทั้งหมด</option>' + years.map(y => `<option value="${y}">${y}</option>`).join('');
+            const provs = [...new Set(allCases.map(c => normProvince(c.Last_Seen_province)).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'th'));
+            provSel.innerHTML = '<option value="">ทั่วประเทศไทย</option>' + provs.map(p => `<option value="${esc(p)}">${esc(p)}</option>`).join('');
+            monthSel.innerHTML = '<option value="">ทุกเดือน</option>' + MONTHS_TH.map((m, i) => `<option value="${i}">${m}</option>`).join('');
+            if ([...yearSel.options].some(o => o.value === keep.y)) yearSel.value = keep.y;
+            if ([...provSel.options].some(o => o.value === keep.p)) provSel.value = keep.p;
+            monthSel.value = keep.m;
+        }
+
+        function applyFilters() {
+            const year = document.getElementById('f_year').value;
+            const prov = document.getElementById('f_province').value;
+            const month = document.getElementById('f_month').value;
+            filteredCases = allCases.filter(c => {
+                const d = receivedDate(c);
+                if (year && (!d || d.getFullYear() + 543 !== Number(year))) return false;
+                if (month !== '' && (!d || d.getMonth() !== Number(month))) return false;
+                if (prov && normProvince(c.Last_Seen_province) !== prov) return false;
+                return true;
+            });
+            const unfiltered = !year && !prov && month === '';
+            document.getElementById('filterSummary').textContent = unfiltered ? '' : `ตรงตามตัวกรอง ${fmt(filteredCases.length)} จาก ${fmt(allCases.length)} เคส`;
+            renderKpis(filteredCases, unfiltered);
+            renderTrend(filteredCases);
+            renderRelation(filteredCases);
+            renderReasons(filteredCases);
+            renderAges(filteredCases);
+            renderProvinces(filteredCases);
+            renderMap(filteredCases);
+            renderCasesTable();
+        }
+
+        ['f_year', 'f_province', 'f_month'].forEach(id => document.getElementById(id).addEventListener('change', applyFilters));
+        document.getElementById('resetFilters').addEventListener('click', () => {
+            ['f_year', 'f_province', 'f_month'].forEach(id => { document.getElementById(id).value = ''; });
+            document.getElementById('tableSearchInput').value = '';
+            applyFilters();
+        });
+        document.getElementById('reloadData').addEventListener('click', () => loadData());
+
+        // ---------- โหลดข้อมูล ----------
+        function setLoading() {
+            document.querySelectorAll('.kpi-value').forEach(el => {
+                el.innerHTML = '<span class="spinner-border spinner-border-sm text-secondary" role="status" aria-label="กำลังโหลด"></span>';
+            });
+            overlayAll('<span><span class="spinner-border spinner-border-sm me-2"></span>กำลังโหลดข้อมูล...</span>');
+            document.getElementById('relationTop').innerHTML = '';
+            document.getElementById('filterSummary').textContent = '';
+            document.getElementById('tableCount').textContent = '';
+            App.renderState(document.getElementById('rawCasesBody'), 'loading', 'กำลังโหลดข้อมูลเคส...', { colspan: 7 });
+        }
+
+        async function loadData() {
+            const alertBox = document.getElementById('dataAlert');
+            const reloadBtn = document.getElementById('reloadData');
+            alertBox.classList.add('d-none');
+            reloadBtn.disabled = true;
+            setLoading();
+            const [casesRes, statsRes] = await Promise.allSettled([App.api('/cases'), App.api('/stats')]);
+            reloadBtn.disabled = false;
+
+            if (casesRes.status === 'rejected') {
+                const err = casesRes.reason;
+                console.error('GET /api/cases ล้มเหลว:', err);
+                document.querySelectorAll('.kpi-value').forEach(el => el.textContent = '–');
+                overlayAll('<span class="text-danger"><i class="fa-solid fa-triangle-exclamation me-1"></i> โหลดข้อมูลไม่สำเร็จ</span>');
+                App.renderState(document.getElementById('rawCasesBody'), 'error', `โหลดข้อมูลเคสไม่สำเร็จ: ${err.message}`, { colspan: 7, onRetry: loadData });
+                alertBox.innerHTML = `<i class="fa-solid fa-triangle-exclamation me-1"></i> โหลดข้อมูลแดชบอร์ดไม่สำเร็จ: ${esc(err.message)}
+                    <button type="button" class="btn btn-sm btn-outline-danger ms-2" id="retryData"><i class="fa-solid fa-rotate-right me-1"></i> ลองใหม่</button>`;
+                alertBox.classList.remove('d-none');
+                document.getElementById('retryData').addEventListener('click', loadData);
+                return;
+            }
+            allCases = Array.isArray(casesRes.value) ? casesRes.value : [];
+            stats = statsRes.status === 'fulfilled' ? statsRes.value : null;
+            if (!stats) console.warn('GET /api/stats ล้มเหลว ใช้ตัวเลขที่คำนวณจากรายการเคสแทน:', statsRes.reason);
+            populateFilters();
+            applyFilters();
+        }
+
+        document.addEventListener('DOMContentLoaded', loadData);
     </script>
 </body>
 </html>

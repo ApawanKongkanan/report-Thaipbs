@@ -11,9 +11,11 @@
     <link rel="stylesheet" href="assets/nifty/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/nifty/css/nifty.min.css">
     <link rel="stylesheet" href="assets/nifty/css/overrides.css">
+    <script src="common.js"></script>
+    <script>App.guardPage(['admin', 'relative']);</script>
     <style>
         .content-body { max-width: 1400px; margin: 0 auto; width: 100%; }
-        .person-img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; }
+        .person-img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: #e9ecef; }
     </style>
 </head>
 <body class="out-quart">
@@ -50,11 +52,11 @@
                      <div class="dropdown-menu dropdown-menu-end">
                         <div class="d-flex align-items-center border-bottom px-3 py-2">
                            <div class="flex-grow-1">
-                              <h6 class="mb-0">เจ้าหน้าที่ (ผู้ดูแลระบบ)</h6>
-                              <small class="text-body-secondary">Thai PBS Center</small>
+                              <h6 class="mb-0" data-auth-name>ผู้ใช้งาน</h6>
+                              <small class="text-body-secondary" data-auth-role-label>-</small>
                            </div>
                         </div>
-                        <a href="login.html" class="dropdown-item" onclick="localStorage.clear();">
+                        <a href="login.html" class="dropdown-item" data-logout>
                            <i class="fa-solid fa-right-from-bracket fs-6 me-2"></i> ออกจากระบบ
                         </a>
                      </div>
@@ -80,29 +82,13 @@
                      <div class="d-grid">
                         <button class="mainnav-widget-toggle d-block btn border-0 p-2" data-bs-toggle="collapse" data-bs-target="#usernav" aria-expanded="false" aria-controls="usernav">
                            <span class="dropdown-toggle d-flex justify-content-center align-items-center">
-                              <h5 class="mb-0 me-3">เจ้าหน้าที่ (ผู้ดูแลระบบ)</h5>
+                              <h5 class="mb-0 me-3" data-auth-name>ผู้ใช้งาน</h5>
                            </span>
-                           <small class="text-body-secondary">ผู้ดูแลระบบ</small>
+                           <small class="text-body-secondary" data-auth-role-label>-</small>
                         </button>
 
                         <div id="usernav" class="nav flex-column collapse">
-                           <a href="#" class="nav-link d-flex justify-content-between align-items-center">
-                              <span><i class="fa-solid fa-envelope fs-5 me-2"></i><span class="ms-1">ข้อความ</span></span>
-                              <span class="badge bg-danger rounded-pill">14</span>
-                           </a>
-                           <a href="#" class="nav-link">
-                              <i class="fa-solid fa-user fs-5 me-2"></i>
-                              <span class="ms-1">โปรไฟล์</span>
-                           </a>
-                           <a href="#" class="nav-link">
-                              <i class="fa-solid fa-gear fs-5 me-2"></i>
-                              <span class="ms-1">ตั้งค่า</span>
-                           </a>
-                           <a href="#" class="nav-link">
-                              <i class="fa-solid fa-lock fs-5 me-2"></i>
-                              <span class="ms-1">ล็อกหน้าจอ</span>
-                           </a>
-                           <a href="login.html" class="nav-link" onclick="localStorage.clear();">
+                           <a href="login.html" class="nav-link" data-logout>
                               <i class="fa-solid fa-right-from-bracket fs-5 me-2"></i>
                               <span class="ms-1">ออกจากระบบ</span>
                            </a>
@@ -133,7 +119,7 @@
                         </a>
                      </li>
 
-                     <li class="nav-item">
+                     <li class="nav-item" data-role-only="admin">
                         <a href="add-case.html" class="nav-link mininav-toggle"><i class="fa-solid fa-plus fs-5 me-2"></i>
                            <span class="nav-label mininav-content ms-1">
                               <span data-popper-arrow class="arrow"></span>
@@ -151,7 +137,7 @@
                         </a>
                      </li>
 
-                     <li class="nav-item">
+                     <li class="nav-item" data-role-only="admin">
                         <a href="dashboard.html" class="nav-link mininav-toggle"><i class="fa-solid fa-chart-pie fs-5 me-2"></i>
                            <span class="nav-label mininav-content ms-1">
                               <span data-popper-arrow class="arrow"></span>
@@ -174,49 +160,64 @@
             <div class="content__wrap py-4">
 
                <div class="content-body">
-                  <h1 class="page-title mb-4"><i class="fa-solid fa-magnifying-glass me-2 text-primary"></i> ติดตามและค้นหาคนหาย</h1>
+                  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+                     <h1 class="page-title m-0"><i class="fa-solid fa-magnifying-glass me-2 text-primary"></i> ติดตามและค้นหาคนหาย</h1>
+                     <a href="add-case.html" class="btn btn-primary fw-bold" data-role-only="admin"><i class="fa-solid fa-plus me-1"></i> เพิ่มเคสใหม่</a>
+                  </div>
 
-                  <!-- กล่องค้นหา (Filters) -->
+                  <!-- กล่องค้นหา (Filters) → GET /api/cases?search=&status=&priority=&province= -->
                   <div class="card mb-4">
                      <div class="card-body">
-                        <form class="row g-3 align-items-end">
-                            <div class="col-md-4 col-12">
-                                <label class="form-label fw-bold small text-body-secondary">ค้นหาชื่อ / รหัสเคส / เลขบัตร</label>
-                                <input type="text" class="form-control" placeholder="พิมพ์คำค้นหา...">
+                        <form class="row g-3 align-items-end" id="filterForm" novalidate>
+                            <div class="col-lg-4 col-12">
+                                <label for="f_search" class="form-label fw-bold small text-body-secondary">ค้นหาชื่อ / รหัสเคส / เลขบัตร</label>
+                                <input type="search" id="f_search" class="form-control" placeholder="พิมพ์คำค้นหา..." maxlength="100">
                             </div>
-                            <div class="col-md-2 col-6">
-                                <label class="form-label fw-bold small text-body-secondary">สถานะ</label>
-                                <select class="form-select">
+                            <div class="col-lg-2 col-md-4 col-6">
+                                <label for="f_status" class="form-label fw-bold small text-body-secondary">สถานะ</label>
+                                <select id="f_status" class="form-select">
                                     <option value="">ทั้งหมด</option>
-                                    <option value="active">กำลังค้นหา</option>
-                                    <option value="closed">พบแล้ว</option>
+                                    <option value="active">กำลังดำเนินการ (ยังไม่พบ)</option>
+                                    <option value="closed">พบแล้ว / ปิดเคส</option>
+                                    <optgroup label="ระบุสถานะ">
+                                        <option value="รับแจ้งเหตุ">รับแจ้งเหตุ</option>
+                                        <option value="กำลังตรวจสอบข้อมูล">กำลังตรวจสอบข้อมูล</option>
+                                        <option value="กำลังค้นหา - ประกาศโพสต์หา">กำลังค้นหา - ประกาศโพสต์หา</option>
+                                        <option value="กลับมาค้นหาอีกครั้ง">กลับมาค้นหาอีกครั้ง</option>
+                                        <option value="พบเจอ - ปลอดภัย">พบเจอ - ปลอดภัย</option>
+                                        <option value="พบเจอ - เสียชีวิต">พบเจอ - เสียชีวิต</option>
+                                        <option value="ปิดเคส">ปิดเคส</option>
+                                    </optgroup>
                                 </select>
                             </div>
-                            <div class="col-md-2 col-6">
-                                <label class="form-label fw-bold small text-body-secondary">ความเร่งด่วน</label>
-                                <select class="form-select">
+                            <div class="col-lg-2 col-md-4 col-6">
+                                <label for="f_priority" class="form-label fw-bold small text-body-secondary">ความเร่งด่วน</label>
+                                <select id="f_priority" class="form-select">
                                     <option value="">ทั้งหมด</option>
                                     <option value="high">เร่งด่วนมาก (แดง)</option>
                                     <option value="medium">เร่งด่วน (ส้ม)</option>
+                                    <option value="ปกติ">ปกติ</option>
                                 </select>
                             </div>
-                            <div class="col-md-2 col-12">
-                                <label class="form-label fw-bold small text-body-secondary">จังหวัดที่หาย</label>
-                                <select class="form-select">
+                            <div class="col-lg-2 col-md-4 col-12">
+                                <label for="f_province" class="form-label fw-bold small text-body-secondary">จังหวัดที่หาย</label>
+                                <select id="f_province" class="form-select">
                                     <option value="">ทุกจังหวัด</option>
-                                    <option value="กรุงเทพมหานคร">กรุงเทพมหานคร</option>
-                                    <option value="เชียงใหม่">เชียงใหม่</option>
-                                    <!-- เพิ่มจังหวัดอื่นๆ -->
                                 </select>
                             </div>
-                            <div class="col-md-2 col-12 d-grid">
-                                <button type="button" class="btn btn-primary fw-bold"><i class="fa-solid fa-filter me-1"></i> กรองข้อมูล</button>
+                            <div class="col-lg-2 col-12 d-flex gap-2">
+                                <button type="submit" class="btn btn-primary fw-bold flex-grow-1"><i class="fa-solid fa-filter me-1"></i> กรอง</button>
+                                <button type="button" class="btn btn-outline-secondary" id="resetBtn" title="ล้างตัวกรอง" aria-label="ล้างตัวกรอง"><i class="fa-solid fa-rotate-left"></i></button>
                             </div>
                         </form>
                      </div>
                   </div>
 
-                  <!-- ตารางแสดงผล (Data Table) -->
+                  <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                     <div class="small text-body-secondary" id="resultSummary" aria-live="polite"></div>
+                  </div>
+
+                  <!-- ตารางแสดงผล -->
                   <div class="card table-responsive">
                      <table class="table table-hover align-middle m-0">
                         <thead>
@@ -228,58 +229,13 @@
                                 <th class="text-center" width="150">จัดการ</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <!-- ตัวอย่างข้อมูล 1 -->
-                            <tr>
-                                <td><img src="https://via.placeholder.com/45" class="person-img" alt="pic"></td>
-                                <td>
-                                    <div class="fw-bold">ด.ช. สมมติ ทดสอบ (น้องเอ)</div>
-                                    <div class="small text-body-secondary"><i class="fa-solid fa-id-card"></i> TH-2026-0001</div>
-                                </td>
-                                <td>
-                                    <div><i class="fa-solid fa-location-dot text-danger"></i> เขตบางกะปิ กรุงเทพฯ</div>
-                                    <div class="small text-body-secondary">1 ก.ค. 2569</div>
-                                </td>
-                                <td>
-                                    <span class="badge bg-danger mb-1">เร่งด่วนมาก</span><br>
-                                    <span class="badge bg-light text-dark border">กำลังค้นหา</span>
-                                </td>
-                                <td class="text-center">
-                                    <a href="case-detail.html" class="btn btn-outline-primary btn-sm fw-bold">ดูประวัติ</a>
-                                </td>
-                            </tr>
-                            <!-- ตัวอย่างข้อมูล 2 -->
-                            <tr>
-                                <td><img src="https://via.placeholder.com/45" class="person-img" alt="pic"></td>
-                                <td>
-                                    <div class="fw-bold">นาง ลืมจำ ทดสอบ</div>
-                                    <div class="small text-body-secondary"><i class="fa-solid fa-id-card"></i> TH-2026-0002</div>
-                                </td>
-                                <td>
-                                    <div><i class="fa-solid fa-location-dot text-danger"></i> อ.เมือง จ.เชียงใหม่</div>
-                                    <div class="small text-body-secondary">3 ก.ค. 2569</div>
-                                </td>
-                                <td>
-                                    <span class="badge bg-danger mb-1">เร่งด่วนมาก</span><br>
-                                    <span class="badge bg-light text-dark border">กำลังค้นหา</span>
-                                </td>
-                                <td class="text-center">
-                                    <a href="case-detail.html" class="btn btn-outline-primary btn-sm fw-bold">ดูประวัติ</a>
-                                </td>
-                            </tr>
-                        </tbody>
+                        <tbody id="casesBody"></tbody>
                      </table>
                   </div>
 
                   <!-- Pagination -->
-                  <nav class="mt-4">
-                     <ul class="pagination justify-content-end">
-                        <li class="page-item disabled"><a class="page-link" href="#">ก่อนหน้า</a></li>
-                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                        <li class="page-item"><a class="page-link" href="#">ถัดไป</a></li>
-                     </ul>
+                  <nav class="mt-4" aria-label="เลื่อนหน้ารายการเคส">
+                     <ul class="pagination justify-content-end flex-wrap" id="pagination"></ul>
                   </nav>
 
                </div>
@@ -301,5 +257,165 @@
    <script src="assets/nifty/vendors/bootstrap/bootstrap.min.js"></script>
    <script src="assets/nifty/js/nifty.min.js"></script>
 
+    <script src="policeData.js"></script>
+    <script>
+        const PAGE_SIZE = 10;
+        const COLS = 5;
+        let allCases = [];
+        let currentPage = 1;
+        let requestSeq = 0;
+
+        const els = {
+            form: document.getElementById('filterForm'),
+            search: document.getElementById('f_search'),
+            status: document.getElementById('f_status'),
+            priority: document.getElementById('f_priority'),
+            province: document.getElementById('f_province'),
+            body: document.getElementById('casesBody'),
+            summary: document.getElementById('resultSummary'),
+            pagination: document.getElementById('pagination'),
+        };
+
+        // รายชื่อ 77 จังหวัด (policeData.js)
+        if (typeof allThaiProvincesList !== 'undefined') {
+            [...allThaiProvincesList].sort((a, b) => a.localeCompare(b, 'th')).forEach(prov => {
+                els.province.insertAdjacentHTML('beforeend', `<option value="${App.escapeHtml(prov)}">${App.escapeHtml(prov)}</option>`);
+            });
+        }
+
+        function currentFilters() {
+            return {
+                search: els.search.value.trim(),
+                status: els.status.value,
+                priority: els.priority.value,
+                province: els.province.value,
+            };
+        }
+
+        // เก็บตัวกรองไว้ใน URL เพื่อให้กดย้อนกลับ/แชร์ลิงก์ได้
+        function syncUrl(filters) {
+            const qs = new URLSearchParams();
+            Object.entries(filters).forEach(([k, v]) => { if (v) qs.set(k, v); });
+            if (currentPage > 1) qs.set('page', currentPage);
+            const s = qs.toString();
+            history.replaceState(null, '', location.pathname + (s ? `?${s}` : ''));
+        }
+
+        function restoreFromUrl() {
+            const qs = new URLSearchParams(location.search);
+            els.search.value = qs.get('search') || '';
+            const setSelect = (el, v) => { if (v && [...el.options].some(o => o.value === v)) el.value = v; };
+            setSelect(els.status, qs.get('status'));
+            setSelect(els.priority, qs.get('priority'));
+            setSelect(els.province, qs.get('province'));
+            currentPage = Math.max(1, parseInt(qs.get('page'), 10) || 1);
+        }
+
+        function rowHtml(c) {
+            const place = [App.textOr(c.Last_Seen_place, ''), App.textOr(c.Last_Seen_district, ''), App.textOr(c.Last_Seen_province, '')]
+                .filter(Boolean).join(' ') || 'ไม่ระบุสถานที่';
+            const age = App.textOr(c.missingperson_age, '');
+            const gender = App.textOr(c.missingperson_gender, '');
+            const meta = [gender && `เพศ ${gender}`, age !== '' && `อายุ ${age} ปี`].filter(Boolean).join(' • ');
+            return `
+            <tr>
+                <td><img src="${App.escapeHtml(App.imageUrl(c.character_image_url))}" ${App.imgFallbackAttr()} class="person-img" alt="ภาพบุคคลสูญหาย"></td>
+                <td>
+                    <div class="fw-bold">${App.escapeHtml(App.fullName(c.missingperson_title, c.missingperson_name))}</div>
+                    <div class="small text-body-secondary"><i class="fa-solid fa-hashtag"></i> รหัสเคส ${App.escapeHtml(c.case_id)}${meta ? ` • ${App.escapeHtml(meta)}` : ''}</div>
+                </td>
+                <td>
+                    <div><i class="fa-solid fa-location-dot text-danger"></i> ${App.escapeHtml(place)}</div>
+                    <div class="small text-body-secondary">หายเมื่อ ${App.escapeHtml(App.formatThaiDate(c.Last_Seen_date))} • รับแจ้ง ${App.escapeHtml(App.formatThaiDate(c.case_received_date))}</div>
+                </td>
+                <td>
+                    ${App.priorityBadge(c.case_priority, 'mb-1')}<br>
+                    ${App.statusBadge(c.case_latest_status)}
+                </td>
+                <td class="text-center">
+                    <a href="case-detail.html?id=${encodeURIComponent(c.case_id)}" class="btn btn-outline-primary btn-sm fw-bold">ดูรายละเอียด</a>
+                </td>
+            </tr>`;
+        }
+
+        function renderPagination(totalPages) {
+            if (totalPages <= 1) { els.pagination.innerHTML = ''; return; }
+            const item = (label, page, { disabled = false, active = false } = {}) =>
+                `<li class="page-item ${disabled ? 'disabled' : ''} ${active ? 'active' : ''}">
+                    <a class="page-link" href="#" data-page="${page}" ${active ? 'aria-current="page"' : ''}>${label}</a></li>`;
+            let html = item('ก่อนหน้า', currentPage - 1, { disabled: currentPage === 1 });
+            const pages = new Set([1, totalPages, currentPage - 1, currentPage, currentPage + 1]);
+            let last = 0;
+            [...pages].filter(p => p >= 1 && p <= totalPages).sort((a, b) => a - b).forEach(p => {
+                if (p - last > 1) html += '<li class="page-item disabled"><span class="page-link">…</span></li>';
+                html += item(p, p, { active: p === currentPage });
+                last = p;
+            });
+            html += item('ถัดไป', currentPage + 1, { disabled: currentPage === totalPages });
+            els.pagination.innerHTML = html;
+        }
+
+        function renderPage() {
+            const total = allCases.length;
+            const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+            currentPage = Math.min(Math.max(1, currentPage), totalPages);
+            if (total === 0) {
+                const f = currentFilters();
+                const filtered = Object.values(f).some(Boolean);
+                App.renderState(els.body, 'empty', filtered ? 'ไม่พบเคสที่ตรงกับเงื่อนไขการค้นหา' : 'ยังไม่มีเคสในระบบ', { colspan: COLS });
+                els.summary.textContent = 'พบ 0 รายการ';
+                renderPagination(0);
+                return;
+            }
+            const startIdx = (currentPage - 1) * PAGE_SIZE;
+            const pageItems = allCases.slice(startIdx, startIdx + PAGE_SIZE);
+            els.body.innerHTML = pageItems.map(rowHtml).join('');
+            els.summary.textContent = `พบ ${total.toLocaleString('th-TH')} รายการ • แสดง ${startIdx + 1}-${startIdx + pageItems.length}`;
+            renderPagination(totalPages);
+        }
+
+        async function loadCases(keepPage) {
+            const seq = ++requestSeq;
+            const filters = currentFilters();
+            if (!keepPage) currentPage = 1;
+            syncUrl(filters);
+            App.renderState(els.body, 'loading', 'กำลังโหลดรายการเคส...', { colspan: COLS });
+            els.summary.textContent = '';
+            els.pagination.innerHTML = '';
+            try {
+                const data = await App.api('/cases', { query: filters });
+                if (seq !== requestSeq) return; // มีคำค้นใหม่กว่าแล้ว
+                allCases = Array.isArray(data) ? data : [];
+                renderPage();
+                syncUrl(filters);
+            } catch (err) {
+                if (seq !== requestSeq) return;
+                console.error('GET /api/cases ล้มเหลว:', err);
+                allCases = [];
+                App.renderState(els.body, 'error', `โหลดรายการเคสไม่สำเร็จ: ${err.message}`, { colspan: COLS, onRetry: () => loadCases(true) });
+            }
+        }
+
+        els.form.addEventListener('submit', (e) => { e.preventDefault(); loadCases(); });
+        els.search.addEventListener('input', App.debounce(() => loadCases(), 450));
+        [els.status, els.priority, els.province].forEach(el => el.addEventListener('change', () => loadCases()));
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            els.form.reset();
+            loadCases();
+        });
+        els.pagination.addEventListener('click', (e) => {
+            const a = e.target.closest('a[data-page]');
+            if (!a) return;
+            e.preventDefault();
+            if (a.parentElement.classList.contains('disabled')) return;
+            currentPage = parseInt(a.dataset.page, 10);
+            renderPage();
+            syncUrl(currentFilters());
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        restoreFromUrl();
+        loadCases(true);
+    </script>
 </body>
 </html>

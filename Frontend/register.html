@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="assets/nifty/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/nifty/css/nifty.min.css">
     <link rel="stylesheet" href="assets/nifty/css/overrides.css">
+    <script src="common.js"></script>
     <style>
         .login-header { background-color: var(--bs-primary); padding: 30px; text-align: center; color: white; border-radius: var(--bs-card-border-radius) var(--bs-card-border-radius) 0 0; }
         .login-header h3 { margin: 0; font-weight: 600; font-size: 22px; color: #ffffff; }
@@ -24,6 +25,8 @@
         .pw-rules li i { width: 16px; text-align: center; }
         .pw-rules li.met { color: #3d7a04; font-weight: 600; }
         .field-hint { font-size: 12px; color: #495057; margin-top: 6px; }
+        .section-label { font-size: 13px; font-weight: 700; color: var(--bs-primary); text-transform: none; letter-spacing: .2px; display: flex; align-items: center; gap: 8px; margin: 4px 0 12px; }
+        .section-label::after { content: ""; flex: 1; height: 1px; background: var(--bs-border-color); }
     </style>
 </head>
 <body class="out-quart">
@@ -34,7 +37,7 @@
       <!-- CONTENTS -->
       <section id="content" class="content">
          <div class="content__boxed w-100 min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
-            <div class="content__wrap" style="max-width: 440px; width: 100%;">
+            <div class="content__wrap" style="max-width: 460px; width: 100%;">
 
                <!-- Register card -->
                <div class="card shadow-lg">
@@ -45,20 +48,50 @@
                   </div>
                   <div class="card-body p-4">
 
+                     <div class="alert alert-info small py-2 px-3" role="note">
+                        <i class="fa-solid fa-circle-info me-1"></i>
+                        ระบบจะนำ <strong>เบอร์โทรศัพท์</strong> และ <strong>เลขประจำตัวประชาชน</strong> ไปตรวจสอบกับข้อมูลผู้แจ้งที่เจ้าหน้าที่บันทึกไว้แล้ว
+                        จึงต้องกรอกให้ตรงกับที่แจ้งไว้กับเจ้าหน้าที่
+                     </div>
+
                      <div id="formAlert" class="alert alert-danger d-none" role="alert"></div>
+                     <div id="successAlert" class="alert alert-success d-none" role="status"></div>
 
                      <form id="registerForm" class="mt-2" novalidate>
+                        <div class="section-label"><i class="fa-solid fa-id-card"></i> ข้อมูลยืนยันตัวตน</div>
+
+                        <!-- เบอร์โทรศัพท์ -->
+                        <div class="mb-3">
+                           <label for="phone" class="form-label fw-bold req"><i class="fa-solid fa-phone me-2"></i>เบอร์โทรศัพท์</label>
+                           <input type="tel" id="phone" class="form-control" placeholder="080-000-0000" maxlength="12"
+                                  inputmode="numeric" autocomplete="tel-national" required aria-describedby="phoneHint">
+                           <div class="invalid-feedback" id="phoneError">กรุณากรอกเบอร์มือถือ 10 หลักในรูปแบบ 080-000-0000 (ขึ้นต้นด้วย 06, 08 หรือ 09)</div>
+                           <div class="field-hint" id="phoneHint">เบอร์เดียวกับที่ให้ไว้ตอนแจ้งเคส ระบบจะใส่ขีดให้อัตโนมัติ</div>
+                        </div>
+
+                        <!-- เลขบัตรประชาชน -->
+                        <div class="mb-4">
+                           <label for="identity" class="form-label fw-bold req"><i class="fa-solid fa-address-card me-2"></i>เลขประจำตัวประชาชน 13 หลัก</label>
+                           <input type="text" id="identity" class="form-control" placeholder="1-2345-67890-12-3" maxlength="17"
+                                  inputmode="numeric" autocomplete="off" required aria-describedby="identityHint">
+                           <div class="invalid-feedback" id="identityError">กรุณากรอกเลขประจำตัวประชาชนให้ครบ 13 หลัก</div>
+                           <div class="field-hint" id="identityHint">ตัวเลข 13 หลัก ระบบจะใส่ขีดให้อัตโนมัติ</div>
+                        </div>
+
+                        <div class="section-label"><i class="fa-solid fa-user-lock"></i> ตั้งค่าบัญชีผู้ใช้</div>
+
                         <!-- ชื่อผู้ใช้ -->
                         <div class="mb-3">
-                           <label for="username" class="form-label fw-bold"><i class="fa-solid fa-user me-2"></i>ชื่อผู้ใช้</label>
+                           <label for="username" class="form-label fw-bold req"><i class="fa-solid fa-user me-2"></i>ชื่อผู้ใช้</label>
                            <input type="text" id="username" class="form-control" placeholder="เช่น somchai.k" maxlength="20"
                                   autocomplete="username" autocapitalize="none" spellcheck="false" required>
+                           <div class="invalid-feedback" id="usernameError">ชื่อผู้ใช้ไม่ตรงตามเงื่อนไข</div>
                            <div class="field-hint">4-20 ตัว ใช้ได้เฉพาะ a-z, 0-9, จุด (.) และขีดล่าง (_) และต้องมีตัวอักษรอย่างน้อย 1 ตัว</div>
                         </div>
 
                         <!-- รหัสผ่าน -->
                         <div class="mb-3">
-                           <label for="password" class="form-label fw-bold"><i class="fa-solid fa-lock me-2"></i>รหัสผ่าน</label>
+                           <label for="password" class="form-label fw-bold req"><i class="fa-solid fa-lock me-2"></i>รหัสผ่าน</label>
                            <div class="input-group">
                               <input type="password" id="password" class="form-control" placeholder="ตั้งรหัสผ่าน" maxlength="64"
                                      autocomplete="new-password" required aria-describedby="pwRules">
@@ -77,14 +110,14 @@
 
                         <!-- ยืนยันรหัสผ่าน -->
                         <div class="mb-4">
-                           <label for="confirmPassword" class="form-label fw-bold"><i class="fa-solid fa-lock me-2"></i>ยืนยันรหัสผ่าน</label>
+                           <label for="confirmPassword" class="form-label fw-bold req"><i class="fa-solid fa-lock me-2"></i>ยืนยันรหัสผ่าน</label>
                            <input type="password" id="confirmPassword" class="form-control" placeholder="กรอกรหัสผ่านอีกครั้ง" maxlength="64"
                                   autocomplete="new-password" required>
                            <div class="invalid-feedback">รหัสผ่านทั้งสองช่องไม่ตรงกัน</div>
                         </div>
 
                         <div class="d-grid">
-                           <button class="btn btn-primary btn-lg" type="submit" id="submitBtn" disabled>
+                           <button class="btn btn-primary btn-lg" type="submit" id="submitBtn">
                               <i class="fa-solid fa-user-plus me-2"></i> ลงทะเบียน
                            </button>
                         </div>
@@ -114,28 +147,50 @@
     };
 
     const form = document.getElementById('registerForm');
+    const phoneInput = document.getElementById('phone');
+    const identityInput = document.getElementById('identity');
     const usernameInput = document.getElementById('username');
     const passwordInput = document.getElementById('password');
     const confirmInput = document.getElementById('confirmPassword');
     const submitBtn = document.getElementById('submitBtn');
     const formAlert = document.getElementById('formAlert');
+    const successAlert = document.getElementById('successAlert');
     const pwExtraError = document.getElementById('pwExtraError');
+    const usernameError = document.getElementById('usernameError');
+    const USERNAME_DEFAULT_ERROR = usernameError.textContent;
+
+    // ช่องที่ผู้ใช้แตะแล้ว (แสดงข้อผิดพลาดเฉพาะช่องที่กรอกแล้ว จนกว่าจะกดลงทะเบียน)
+    const touched = new Set();
+    let submitAttempted = false;
+    let serverUsernameError = '';
+
+    App.attachFormatter(phoneInput, App.formatPhoneInput);
+    App.attachFormatter(identityInput, App.formatThaiIdInput);
 
     function normalizedUsername() {
         return usernameInput.value.trim().toLowerCase();
     }
 
+    function mark(input, ok) {
+        const show = submitAttempted || touched.has(input.id);
+        input.classList.toggle('is-valid', ok && show);
+        input.classList.toggle('is-invalid', !ok && show);
+    }
+
     function validate() {
+        const phoneOk = App.PHONE_PATTERN.test(phoneInput.value.trim());
+        mark(phoneInput, phoneOk);
+
+        const identityOk = /^\d{13}$/.test(App.digitsOnly(identityInput.value));
+        mark(identityInput, identityOk);
+
         const username = normalizedUsername();
+        const usernameRuleOk = USERNAME_RULE.test(username);
+        const usernameOk = usernameRuleOk && !serverUsernameError;
+        usernameError.textContent = serverUsernameError || USERNAME_DEFAULT_ERROR;
+        mark(usernameInput, usernameOk);
+
         const pw = passwordInput.value;
-        const confirm = confirmInput.value;
-
-        // ชื่อผู้ใช้
-        const usernameOk = USERNAME_RULE.test(username);
-        usernameInput.classList.toggle('is-valid', usernameOk);
-        usernameInput.classList.toggle('is-invalid', username.length > 0 && !usernameOk);
-
-        // เงื่อนไขรหัสผ่านแต่ละข้อ
         let allRulesMet = true;
         for (const [rule, test] of Object.entries(PASSWORD_RULES)) {
             const met = test(pw);
@@ -147,25 +202,29 @@
         let extraError = '';
         if (/\s/.test(pw)) extraError = 'รหัสผ่านห้ามมีช่องว่าง';
         else if (pw.length > 64) extraError = 'รหัสผ่านยาวเกินไป (ไม่เกิน 64 ตัวอักษร)';
+        else if (new TextEncoder().encode(pw).length > 72) extraError = 'รหัสผ่านยาวเกินไป';
+        else if (submitAttempted && !pw) extraError = 'กรุณาตั้งรหัสผ่าน';
+        else if (submitAttempted && !allRulesMet) extraError = 'รหัสผ่านยังไม่ครบตามเงื่อนไขด้านบน';
         pwExtraError.textContent = extraError;
-        const passwordOk = allRulesMet && !extraError;
-        passwordInput.classList.toggle('is-valid', passwordOk);
-        passwordInput.classList.toggle('is-invalid', pw.length > 0 && !passwordOk);
+        const passwordOk = allRulesMet && !/\s/.test(pw) && pw.length <= 64 && new TextEncoder().encode(pw).length <= 72;
+        mark(passwordInput, passwordOk);
 
-        // ยืนยันรหัสผ่าน
+        const confirm = confirmInput.value;
         const confirmOk = confirm.length > 0 && confirm === pw;
-        confirmInput.classList.toggle('is-valid', confirmOk);
-        confirmInput.classList.toggle('is-invalid', confirm.length > 0 && !confirmOk);
+        mark(confirmInput, confirmOk);
 
-        const allOk = usernameOk && passwordOk && confirmOk;
-        submitBtn.disabled = !allOk;
-        return allOk;
+        return { phoneOk, identityOk, usernameOk, passwordOk, confirmOk };
     }
 
-    [usernameInput, passwordInput, confirmInput].forEach(el => el.addEventListener('input', () => {
-        formAlert.classList.add('d-none');
-        validate();
-    }));
+    [phoneInput, identityInput, usernameInput, passwordInput, confirmInput].forEach(el => {
+        el.addEventListener('input', () => {
+            if (el.value) touched.add(el.id);
+            if (el === usernameInput) serverUsernameError = '';
+            formAlert.classList.add('d-none');
+            validate();
+        });
+        el.addEventListener('blur', () => { if (el.value) { touched.add(el.id); validate(); } });
+    });
 
     // แสดง/ซ่อนรหัสผ่าน
     document.getElementById('togglePassword').addEventListener('click', function() {
@@ -177,39 +236,67 @@
     });
 
     function showError(message) {
-        formAlert.textContent = message;
+        formAlert.innerHTML = `<i class="fa-solid fa-triangle-exclamation me-1"></i> ${App.escapeHtml(message)}`;
         formAlert.classList.remove('d-none');
+        formAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function setBusy(busy) {
+        [phoneInput, identityInput, usernameInput, passwordInput, confirmInput].forEach(el => el.disabled = busy);
+        submitBtn.disabled = busy;
+        submitBtn.innerHTML = busy
+            ? '<span class="spinner-border spinner-border-sm me-2"></span> กำลังตรวจสอบข้อมูล...'
+            : '<i class="fa-solid fa-user-plus me-2"></i> ลงทะเบียน';
     }
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        if (!validate()) return;
+        submitAttempted = true;
+        formAlert.classList.add('d-none');
+        const r = validate();
+        const firstInvalid = [
+            [r.phoneOk, phoneInput], [r.identityOk, identityInput], [r.usernameOk, usernameInput],
+            [r.passwordOk, passwordInput], [r.confirmOk, confirmInput],
+        ].find(([ok]) => !ok);
+        if (firstInvalid) {
+            showError('กรุณากรอกข้อมูลให้ครบถ้วนและถูกต้องตามที่ระบุ');
+            firstInvalid[1].focus();
+            return;
+        }
 
-        const originalLabel = submitBtn.innerHTML;
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> กำลังลงทะเบียน...';
+        // POST /api/register — Body: { phone, identity, username, password }
+        const payload = {
+            phone: phoneInput.value.trim(),                       // รูปแบบ 080-000-0000
+            identity: App.digitsOnly(identityInput.value),        // ตัวเลข 13 หลัก
+            username: normalizedUsername(),
+            password: passwordInput.value,
+        };
 
+        setBusy(true);
         try {
-            const response = await fetch(`${window.location.origin}/api/register`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: normalizedUsername(), password: passwordInput.value })
-            });
-            const data = await response.json().catch(() => ({}));
-
-            if (response.ok && data.success) {
-                // ส่งชื่อผู้ใช้ไปกรอกให้ที่หน้า login (ไม่ส่งรหัสผ่าน)
-                sessionStorage.setItem('registeredUsername', normalizedUsername());
-                window.location.href = 'login.html?registered=1';
-                return;
-            }
-            showError(data.message || 'ลงทะเบียนไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
+            const data = await App.api('/register', { method: 'POST', json: payload });
+            successAlert.innerHTML = `<i class="fa-solid fa-circle-check me-1"></i> ${App.escapeHtml(data.message || 'ลงทะเบียนสำเร็จ')} กำลังพาไปหน้าเข้าสู่ระบบ...`;
+            successAlert.classList.remove('d-none');
+            submitBtn.innerHTML = '<i class="fa-solid fa-circle-check me-2"></i> ลงทะเบียนสำเร็จ';
+            // ส่งชื่อผู้ใช้ไปกรอกให้ที่หน้า login (ไม่ส่งรหัสผ่าน)
+            try { sessionStorage.setItem('registeredUsername', payload.username); } catch (_) {}
+            setTimeout(() => { window.location.href = 'login.html?registered=1'; }, 1200);
+            return;
         } catch (err) {
             console.error('Register Error:', err);
-            showError('ไม่สามารถติดต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง');
+            setBusy(false);
+            const msg = err.message || 'ลงทะเบียนไม่สำเร็จ กรุณาลองใหม่อีกครั้ง';
+            if (err.status === 409 && /ชื่อผู้ใช้/.test(msg)) {
+                serverUsernameError = msg;
+                validate();
+                usernameInput.focus();
+            }
+            if (err.status === 400 && /ยืนยันข้อมูล/.test(msg)) {
+                showError(`${msg} (ตรวจสอบเบอร์โทรศัพท์และเลขบัตรประชาชนให้ตรงกับที่แจ้งไว้)`);
+            } else {
+                showError(msg);
+            }
         }
-        submitBtn.innerHTML = originalLabel;
-        validate();
     });
 </script>
 
