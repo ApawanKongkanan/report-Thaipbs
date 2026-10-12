@@ -1,202 +1,457 @@
+
 const express = require("express");
-const router = express.Router();
-const bcrypt = require("bcrypt");
 const { sql, dbConfig } = require("../config/db");
+const bcrypt = require("bcrypt");
+const rateLimit = require("express-rate-limit");
 
-// ==========================================================
-// 🔐 กติกาความปลอดภัยขั้นพื้นฐาน (ต้องตรงกับหน้า register.html)
-// ==========================================================
-const BCRYPT_ROUNDS = 10;
+const router = express.Router();
 
-// ชื่อผู้ใช้: 4-20 ตัว ใช้ได้เฉพาะ a-z, 0-9, จุด และขีดล่าง
-// และต้องมีตัวอักษรอย่างน้อย 1 ตัว (กันไม่ให้ตั้งชื่อเป็นเบอร์โทรศัพท์ของคนอื่น)
-const USERNAME_RULE = /^(?=.*[a-z])[a-z0-9._]{4,20}$/;
+// ========================================
+// 1. RATE LIMITING
+// ========================================
 
-const PASSWORD_MIN = 8;
-const PASSWORD_MAX = 64; // bcrypt อ่านได้สูงสุด 72 ไบต์ จึงจำกัดความยาวไว้
-
-function checkPassword(pw) {
-    const errors = [];
-    if (pw.length < PASSWORD_MIN) errors.push("ต้องมีความยาวอย่างน้อย 8 ตัวอักษร");
-    if (pw.length > PASSWORD_MAX || Buffer.byteLength(pw, "utf8") > 72) errors.push("ยาวเกินไป (ไม่เกิน 64 ตัวอักษร)");
-    if (!/[a-z]/.test(pw)) errors.push("ต้องมีตัวพิมพ์เล็ก (a-z) อย่างน้อย 1 ตัว");
-    if (!/[A-Z]/.test(pw)) errors.push("ต้องมีตัวพิมพ์ใหญ่ (A-Z) อย่างน้อย 1 ตัว");
-    if (!/[0-9]/.test(pw)) errors.push("ต้องมีตัวเลข (0-9) อย่างน้อย 1 ตัว");
-    if (/\s/.test(pw)) errors.push("ห้ามมีช่องว่าง");
-    return errors;
-}
-
-// ==========================================================
-// 🛡️ จำกัดจำนวนครั้งต่อ IP (กันการเดารหัสผ่าน/สมัครรัวๆ) — เก็บในหน่วยความจำ
-// ==========================================================
-function rateLimit({ windowMs, max, message }) {
-    const hits = new Map(); // ip -> { count, resetAt }
-    const sweeper = setInterval(() => {
-        const now = Date.now();
-        for (const [ip, entry] of hits) if (entry.resetAt <= now) hits.delete(ip);
-    }, windowMs);
-    sweeper.unref();
-
-    return (req, res, next) => {
-        const now = Date.now();
-        const key = req.ip || "unknown";
-        let entry = hits.get(key);
-        if (!entry || entry.resetAt <= now) {
-            entry = { count: 0, resetAt: now + windowMs };
-            hits.set(key, entry);
-        }
-        entry.count++;
-        if (entry.count > max) {
-            res.set("Retry-After", String(Math.ceil((entry.resetAt - now) / 1000)));
-            return res.status(429).json({ success: false, message });
-        }
-        next();
-    };
-}
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: "ลองเข้าสู่ระบบหลายครั้งเกินไป กรุณารอสักครู่แล้วลองใหม่",
+  },
+});
 
 const registerLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 10,
-    message: "มีการลงทะเบียนจากเครื่องนี้บ่อยเกินไป กรุณาลองใหม่ในอีก 15 นาที",
-});
-const loginLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 30,
-    message: "พยายามเข้าสู่ระบบบ่อยเกินไป กรุณาลองใหม่ในอีก 15 นาที",
-});
-
-// --- 1. ลงทะเบียนบัญชีญาติผู้สูญหาย (ใช้แค่ username + password) ---
-router.post("/register", registerLimiter, async (req, res) => {
-    const { username, password } = req.body || {};
-
-    if (typeof username !== "string" || typeof password !== "string" || !username.trim() || !password) {
-        return res.status(400).json({ success: false, message: "กรุณากรอกชื่อผู้ใช้และรหัสผ่านให้ครบถ้วน" });
-    }
-
-    const account = username.trim().toLowerCase();
-    if (!USERNAME_RULE.test(account)) {
-        return res.status(400).json({
-            success: false,
-            message: "ชื่อผู้ใช้ต้องยาว 4-20 ตัว ใช้ได้เฉพาะ a-z, 0-9, จุด (.) และขีดล่าง (_) และต้องมีตัวอักษรอย่างน้อย 1 ตัว",
-        });
-    }
-
-    const pwErrors = checkPassword(password);
-    if (pwErrors.length > 0) {
-        return res.status(400).json({ success: false, message: "รหัสผ่าน" + pwErrors.join(", "), errors: pwErrors });
-    }
-
-    try {
-        const pool = await sql.connect(dbConfig);
-
-        // ห้ามชื่อผู้ใช้ซ้ำ (เช็คทั้งชื่อบัญชีและเบอร์โทรของบัญชีเดิม)
-        const exists = await pool.request()
-            .input("account", sql.NVarChar, account)
-            .query(`SELECT TOP 1 1 AS found FROM People
-                    WHERE LOWER(people_account) = @account OR people_phone = @account`);
-        if (exists.recordset.length > 0) {
-            return res.status(409).json({ success: false, message: "ชื่อผู้ใช้นี้ถูกใช้งานแล้ว กรุณาเลือกชื่ออื่น" });
-        }
-
-        // เก็บเฉพาะค่า hash ไม่เก็บรหัสผ่านจริงลงฐานข้อมูล
-        const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
-
-        // สุ่ม people_id ฝั่งเซิร์ฟเวอร์ (แบบเดียวกับตอนสร้างเคส) ถ้าชนกับของเดิมให้สุ่มใหม่
-        for (let attempt = 0; attempt < 5; attempt++) {
-            const peopleId = Math.floor(100000 + Math.random() * 900000);
-            try {
-                await pool.request()
-                    .input("id", sql.Int, peopleId)
-                    .input("title", sql.NVarChar, "")
-                    .input("name", sql.NVarChar, account)
-                    .input("account", sql.NVarChar, account)
-                    .input("hash", sql.NVarChar, passwordHash)
-                    .query(`
-                        INSERT INTO People (people_id, people_title, people_name, people_account, people_password_hash, people_created_at)
-                        VALUES (@id, @title, @name, @account, @hash, GETDATE())
-                    `);
-                return res.status(201).json({ success: true, message: "ลงทะเบียนสำเร็จ" });
-            } catch (err) {
-                if (err.number === 2627 || err.number === 2601) continue; // id ซ้ำ ลองใหม่
-                throw err;
-            }
-        }
-        throw new Error("Could not allocate a unique people_id");
-    } catch (err) {
-        console.error("Register Error:", err);
-        // ไม่ส่งรายละเอียด error ของระบบกลับไปให้ผู้ใช้เห็น
-        return res.status(500).json({ success: false, message: "เกิดข้อผิดพลาดในระบบ กรุณาลองใหม่อีกครั้ง" });
-    }
+  windowMs: 15 * 60 * 1000,
+  limit: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: "ลงทะเบียนหลายครั้งเกินไป กรุณาลองใหม่ภายหลัง",
+  },
 });
 
-// ตรวจรหัสผ่านของญาติ
-async function verifyRelativePassword(input, user) {
-    const stored = user.password ? String(user.password) : "";
+// ========================================
+// 2. VALIDATION HELPERS
+// ========================================
 
-    // บัญชีที่สมัครผ่านหน้า register.html (เก็บเป็น bcrypt hash)
-    if (stored.startsWith("$2")) return bcrypt.compare(input, stored);
-
-    // บัญชีเดิมที่เจ้าหน้าที่สร้างให้ตอนเพิ่มเคส (ยังเก็บแบบข้อความธรรมดา) — คงไว้เพื่อไม่ให้ระบบเดิมใช้งานไม่ได้
-    const typed = input.trim();
-    if (stored && typed === stored.trim()) return true;
-    const phone = user.people_phone ? String(user.people_phone) : "";
-    if (phone.length >= 4 && typed === phone.slice(-4)) return true;
-    return false;
+function isPlainObject(value) {
+  return (
+    value !== null &&
+    typeof value === "object" &&
+    !Array.isArray(value)
+  );
 }
 
-// --- 2. เข้าสู่ระบบ  ---
-router.post("/login", loginLimiter, async (req, res) => {
-    try {
-        const { username, password, role } = req.body || {};
-        if (typeof username !== "string" || typeof password !== "string" || !username.trim() || !password) {
-            return res.status(400).json({ success: false, message: "กรุณากรอกชื่อผู้ใช้และรหัสผ่าน" });
-        }
+function isValidText(value, maxLength) {
+  return (
+    typeof value === "string" &&
+    value.trim().length > 0 &&
+    value.trim().length <= maxLength
+  );
+}
 
-        const pool = await sql.connect(dbConfig);
+function normalizePhone(value) {
+  if (typeof value !== "string") return "";
 
-        let user = null;
-        let queryResult = null;
+  let phone = value.replace(/\D/g, "");
 
-        if (role === "admin") {
-            queryResult = await pool.request()
-                .input("user", sql.NVarChar, username.trim())
-                .query(`SELECT staff_id as id, staff_name as name, staff_password_hash as password, 'admin' as role FROM Staff WHERE RTRIM(staff_account) = @user`);
-        }
-        else if (role === "relative") {
-            // ค้นหาได้ทั้งชื่อผู้ใช้ (บัญชีที่สมัครเอง) และเบอร์โทรศัพท์ (บัญชีที่เจ้าหน้าที่สร้างให้)
-            const relativeResult = await pool.request()
-                .input("loginId", sql.NVarChar, username.trim())
-                .query(`SELECT people_id as id, people_name as name, people_phone, people_password_hash as password, 'relative' as role
-                        FROM People WHERE people_phone = @loginId OR LOWER(people_account) = LOWER(@loginId)`);
+  // รองรับเบอร์ที่เขียนเป็นรหัสประเทศ 66
+  if (phone.startsWith("66") && phone.length === 11) {
+    phone = "0" + phone.slice(2);
+  }
 
-            const relative = relativeResult.recordset[0];
-            if (relative && await verifyRelativePassword(password, relative)) {
-                return res.json({
-                    success: true,
-                    user: { user_id: relative.id, name: relative.name, role: relative.role }
-                });
-            }
-            // ใช้ข้อความเดียวกันทุกกรณี เพื่อไม่ให้รู้ว่าชื่อผู้ใช้นี้มีอยู่ในระบบหรือไม่
-            return res.status(401).json({ success: false, message: "ชื่อผู้ใช้งาน หรือ รหัสผ่านไม่ถูกต้อง" });
-        }
+  return phone;
+}
 
-        if (queryResult && queryResult.recordset.length > 0) {
-            user = queryResult.recordset[0];
+function normalizeThaiId(value) {
+  if (typeof value !== "string") return "";
+  return value.replace(/\D/g, "");
+}
 
-            // 🌟 4. เปรียบเทียบรหัสผ่านแบบธรรมดา (Plain Text) สำหรับโปรเจกต์ทดสอบ
-            const isMatch = (password.toString() === user.password.toString());
+// people_identity ในฐานข้อมูลตัวอย่าง:
+// "บัตรประชาชน: 1-2232-33332-32-3"
+function extractThaiId(value) {
+  if (typeof value !== "string") return "";
 
-            if (isMatch) {
-                return res.json({ success: true, user: { user_id: user.id, name: user.name, role: user.role } });
-            }
-        }
+  const match = value.match(
+    /บัตรประชาชน\s*:\s*([0-9\s-]{13,25})/
+  );
 
-        return res.status(401).json({ success: false, message: "ชื่อผู้ใช้งาน หรือ รหัสผ่านไม่ถูกต้อง" });
+  if (!match) return "";
 
-    } catch (err) {
-        console.error("Login Error:", err);
-        res.status(500).json({ success: false, message: "เกิดข้อผิดพลาดในระบบ กรุณาลองใหม่อีกครั้ง" });
+  const id = match[1].replace(/\D/g, "");
+
+  return id.length === 13 ? id : "";
+}
+
+function isValidThaiId(value) {
+  return /^\d{13}$/.test(value);
+}
+
+function isValidUsername(username) {
+  return (
+    typeof username === "string" &&
+    /^(?=.*[a-z])[a-z0-9._]{4,20}$/.test(username)
+  );
+}
+
+function isValidRegisterPassword(password) {
+  return (
+    typeof password === "string" &&
+    password.length >= 8 &&
+    password.length <= 64 &&
+    !/\s/.test(password) &&
+    Buffer.byteLength(password, "utf8") <= 72 &&
+    /[a-z]/.test(password) &&
+    /[A-Z]/.test(password) &&
+    /[0-9]/.test(password)
+  );
+}
+
+function isValidLoginPassword(password) {
+  return (
+    typeof password === "string" &&
+    password.length > 0 &&
+    password.trim().length > 0 &&
+    Buffer.byteLength(password, "utf8") <= 72
+  );
+}
+
+function invalidCredentials(res) {
+  return res.status(401).json({
+    success: false,
+    message: "ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง",
+  });
+}
+
+function normalizeThaiPhone(phone) {
+  if (typeof phone !== "string") {
+    return null;
+  }
+
+  const value = phone.trim();
+
+  // ต้องเป็นรูปแบบ 080-000-0000 เท่านั้น
+  if (!/^0[689]\d-\d{3}-\d{4}$/.test(value)) {
+    return null;
+  }
+
+  return value.replace(/-/g, "");
+}
+
+// ========================================
+// 3. REGISTER
+// POST /api/register
+//
+// Body:
+// {
+//   "phone": "0966851040",
+//   "identity": "เลขบัตรประชาชน 13 หลัก",
+//   "username": "testuser01",
+//   "password": "TestPass123"
+// }
+//
+// เชื่อมบัญชีกับ People เดิมเท่านั้น
+// ========================================
+
+router.post("/register", registerLimiter, async (req, res) => {
+  if (!isPlainObject(req.body)) {
+    return res.status(400).json({
+      success: false,
+      message: "รูปแบบข้อมูลไม่ถูกต้อง",
+    });
+  }
+
+  const { phone, identity, username, password } = req.body;
+
+  const normalizedPhone = normalizePhone(phone);
+  const normalizedIdentity = normalizeThaiId(identity);
+  const normalizedUsername =
+    typeof username === "string"
+      ? username.trim().toLowerCase()
+      : "";
+
+  if (!/^0\d{9}$/.test(normalizedPhone)) {
+    return res.status(400).json({
+      success: false,
+      message: "กรุณากรอกเบอร์โทรศัพท์ 10 หลักให้ถูกต้อง",
+    });
+  }
+
+  if (!isValidThaiId(normalizedIdentity)) {
+    return res.status(400).json({
+      success: false,
+      message: "กรุณากรอกเลขประจำตัวประชาชน 13 หลักให้ถูกต้อง",
+    });
+  }
+
+  if (!isValidUsername(normalizedUsername)) {
+    return res.status(400).json({
+      success: false,
+      message:
+        "ชื่อผู้ใช้ต้องมี 4-20 ตัว ใช้ a-z, 0-9, จุด หรือ underscore และต้องมีตัวอักษรภาษาอังกฤษตัวพิมพ์เล็ก",
+    });
+  }
+
+  if (!isValidRegisterPassword(password)) {
+    return res.status(400).json({
+      success: false,
+      message:
+        "รหัสผ่านต้องมีอย่างน้อย 8 ตัว มีตัวพิมพ์เล็ก ตัวพิมพ์ใหญ่ และตัวเลข โดยห้ามมีช่องว่าง",
+    });
+  }
+
+  let transaction;
+  let transactionFinished = false;
+
+  try {
+    const pool = await sql.connect(dbConfig);
+
+    transaction = new sql.Transaction(pool);
+
+    await transaction.begin(sql.ISOLATION_LEVEL.SERIALIZABLE);
+
+    // 1. ตรวจสอบ username ซ้ำ
+    const accountResult = await new sql.Request(transaction)
+      .input("account", sql.NVarChar(100), normalizedUsername)
+      .query(`
+        SELECT TOP (1) people_id
+        FROM dbo.People WITH (UPDLOCK, HOLDLOCK)
+        WHERE LOWER(people_account) = @account
+      `);
+
+    if (accountResult.recordset.length > 0) {
+      await transaction.rollback();
+      transactionFinished = true;
+
+      return res.status(409).json({
+        success: false,
+        message: "ชื่อผู้ใช้นี้มีอยู่แล้ว",
+      });
     }
+
+    // 2. ค้นหาบุคคลด้วยเบอร์โทรศัพท์
+    // รองรับขีดและช่องว่างในเบอร์ที่บันทึกไว้
+    const peopleResult = await new sql.Request(transaction)
+      .input("phone", sql.NVarChar(30), normalizedPhone)
+      .query(`
+        SELECT
+          people_id,
+          people_phone,
+          people_identity,
+          people_account,
+          people_password_hash
+        FROM dbo.People WITH (UPDLOCK, HOLDLOCK)
+        WHERE REPLACE(
+                REPLACE(
+                  LTRIM(RTRIM(people_phone)),
+                  '-', ''
+                ),
+                ' ', ''
+              ) = @phone
+      `);
+
+    // 3. ตรวจเลขบัตรจากข้อความใน people_identity
+    const matches = peopleResult.recordset.filter((person) => {
+      return extractThaiId(person.people_identity) === normalizedIdentity;
+    });
+
+    // ต้องตรงกับบุคคลเพียงหนึ่งรายการเท่านั้น
+    if (matches.length !== 1) {
+      await transaction.rollback();
+      transactionFinished = true;
+
+      return res.status(400).json({
+        success: false,
+        message:
+          "ไม่สามารถยืนยันข้อมูลได้ กรุณาตรวจสอบข้อมูลหรือติดต่อเจ้าหน้าที่",
+      });
+    }
+
+    const person = matches[0];
+
+    // 4. ห้ามเขียนทับบัญชีเดิม
+    if (
+      person.people_account !== null ||
+      person.people_password_hash !== null
+    ) {
+      await transaction.rollback();
+      transactionFinished = true;
+
+      return res.status(409).json({
+        success: false,
+        message:
+          "ข้อมูลนี้มีบัญชีอยู่แล้ว กรุณาเข้าสู่ระบบหรือติดต่อเจ้าหน้าที่",
+      });
+    }
+
+    // 5. Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // 6. อัปเดตแถว People เดิม ไม่ INSERT แถวใหม่
+    const updateResult = await new sql.Request(transaction)
+      .input("id", sql.Int, person.people_id)
+      .input("account", sql.NVarChar(100), normalizedUsername)
+      .input("passwordHash", sql.NVarChar(255), hashedPassword)
+      .query(`
+        UPDATE dbo.People
+        SET
+          people_account = @account,
+          people_password_hash = @passwordHash
+        WHERE people_id = @id
+          AND people_account IS NULL
+          AND people_password_hash IS NULL
+      `);
+
+    if (updateResult.rowsAffected[0] !== 1) {
+      await transaction.rollback();
+      transactionFinished = true;
+
+      return res.status(409).json({
+        success: false,
+        message:
+          "ไม่สามารถสร้างบัญชีได้ กรุณาลองใหม่หรือติดต่อเจ้าหน้าที่",
+      });
+    }
+
+    await transaction.commit();
+    transactionFinished = true;
+
+    return res.status(201).json({
+      success: true,
+      message: "ลงทะเบียนสำเร็จ",
+    });
+  } catch (err) {
+    if (transaction && !transactionFinished) {
+      try {
+        await transaction.rollback();
+      } catch (_) {
+        // Transaction อาจสิ้นสุดไปแล้ว
+      }
+    }
+
+    console.error("Register Error:", err.message);
+
+    return res.status(500).json({
+      success: false,
+      message: "เกิดข้อผิดพลาดในการลงทะเบียน",
+    });
+  }
+});
+
+// ========================================
+// 4. LOGIN
+// POST /api/login
+// Body: { username, password, role }
+// role: relative หรือ admin
+// ========================================
+
+router.post("/login", loginLimiter, async (req, res) => {
+  if (!isPlainObject(req.body)) {
+    return res.status(400).json({
+      success: false,
+      message: "รูปแบบข้อมูลไม่ถูกต้อง",
+    });
+  }
+
+  const { username, password, role } = req.body;
+
+  if (!isValidText(username, 100)) {
+    return res.status(400).json({
+      success: false,
+      message: "กรุณากรอกชื่อผู้ใช้งาน",
+    });
+  }
+
+  if (!isValidLoginPassword(password)) {
+    return res.status(400).json({
+      success: false,
+      message: "กรุณากรอกรหัสผ่านให้ถูกต้อง",
+    });
+  }
+
+  if (role !== "admin" && role !== "relative") {
+    return res.status(400).json({
+      success: false,
+      message: "ประเภทผู้ใช้ไม่ถูกต้อง",
+    });
+  }
+
+  try {
+    const pool = await sql.connect(dbConfig);
+
+    let result;
+    const usernameValue =
+      role === "relative"
+        ? username.trim().toLowerCase()
+        : username.trim();
+
+    if (role === "admin") {
+      result = await pool
+        .request()
+        .input("user", sql.NVarChar(100), usernameValue)
+        .query(`
+          SELECT TOP (2)
+            staff_id AS id,
+            staff_name AS name,
+            staff_password_hash AS password
+          FROM dbo.Staff
+          WHERE RTRIM(staff_account) = @user
+        `);
+    } else {
+      // Login ด้วย username เท่านั้น
+      // ไม่ใช้เลข 4 ตัวท้ายของเบอร์โทรศัพท์เป็น password
+      result = await pool
+        .request()
+        .input("user", sql.NVarChar(100), usernameValue)
+        .query(`
+          SELECT TOP (2)
+            people_id AS id,
+            people_name AS name,
+            people_password_hash AS password
+          FROM dbo.People
+          WHERE LOWER(people_account) = @user
+        `);
+    }
+
+    if (result.recordset.length !== 1) {
+      return invalidCredentials(res);
+    }
+
+    const user = result.recordset[0];
+
+    if (
+      typeof user.password !== "string" ||
+      !/^\$2[aby]\$\d{2}\$/.test(user.password)
+    ) {
+      return invalidCredentials(res);
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return invalidCredentials(res);
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "เข้าสู่ระบบสำเร็จ",
+      user: {
+        user_id: user.id,
+        name: user.name,
+        role,
+      },
+    });
+  } catch (err) {
+    console.error("Login Error:", err.message);
+
+    return res.status(500).json({
+      success: false,
+      message: "เกิดข้อผิดพลาดในการเข้าสู่ระบบ",
+    });
+  }
 });
 
 module.exports = router;
