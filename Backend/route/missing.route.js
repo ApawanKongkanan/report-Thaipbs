@@ -1,6 +1,27 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const router = express.Router();
+
+function requireRole(role) {
+  return (req, res, next) => {
+    if (!req.session || !req.session.user) {
+      return res.status(401).json({
+        success: false,
+        message: "กรุณาเข้าสู่ระบบก่อนใช้งาน",
+      });
+    }
+
+    if (req.session.user.role !== role) {
+      return res.status(403).json({
+        success: false,
+        message: "คุณไม่มีสิทธิ์ดำเนินการนี้",
+      });
+    }
+
+    next();
+  };
+}
+
 const { sql, dbConfig } = require("../config/db"); 
 const multer = require('multer');// ไลบรารีจัดการการอัปโหลดไฟล์ (multipart/form-data)
 const { BlobServiceClient } = require('@azure/storage-blob');// สำหรับเชื่อมต่อและจัดการไฟล์บน Azure
@@ -201,6 +222,7 @@ function safeInt(v) {
 // ==========================================
 router.post(
   '/cases',
+  requireRole('admin'),
   upload.fields([
     { name: 'missing_image', maxCount: 1 },
     { name: 'police_document', maxCount: 1 },
@@ -213,8 +235,6 @@ router.post(
       transaction = new sql.Transaction(pool);
       await transaction.begin();
 
-      // --- เตรียมข้อมูลจาก body ---
-      const hashedPassword = await bcrypt.hash(body.reporter_password || 'temp1234', 10);
 
       // 🌟 แก้ไข: ฟอร์มส่ง causes มาเป็น JSON string ต้อง parse ก่อน (ไม่งั้น case_missing_reason จะว่างเปล่าเสมอ)
       let causes = [];
@@ -232,24 +252,135 @@ router.post(
       const lastSeenDate = safeDate(body.last_seen_date);
       const reportDate = safeDate(body.policereport_date) || new Date();
 
-      const finalReporterIdentity = `${body.reporter_id_type || 'ไม่ระบุ'}: ${body.reporter_id_number || '-'}`;
+      
+      const reporterIdType = body.reporter_id_type || "ไม่ระบุ";
+      const reporterIdNumber = body.reporter_id_number || "-";
+
+      // จัดรูปแบบเลขบัตรประชาชนเป็น X-XXXX-XXXXX-XX-X
+      const digitsOnly = String(reporterIdNumber).replace(/\D/g, "");
+
+      const formattedReporterId =
+      reporterIdType === "บัตรประชาชน" && /^\d{13}$/.test(digitsOnly)
+      ? `${digitsOnly[0]}-${digitsOnly.slice(1, 5)}-${digitsOnly.slice(5, 10)}-${digitsOnly.slice(10, 12)}-${digitsOnly[12]}`
+      : reporterIdNumber;
+
+      const finalReporterIdentity =
+      `${reporterIdType}: ${formattedReporterId}`;
+
       const finalMissingIdentity = `${body.missing_id_type || 'ไม่ระบุ'}: ${body.missing_id_number || '-'}`;
 
       // --- 1. People --- 
-      let result = await transaction.request()
-        .input('people_title', sql.NVarChar, body.reporter_title || '')
-        .input('people_name', sql.NVarChar, body.reporter_name || '')
-        .input('people_phone', sql.NVarChar, body.reporter_phone || '')
-        .input('people_identity', sql.NVarChar, finalReporterIdentity)
-        .input('people_account', sql.NVarChar, body.reporter_phone || '')
-        .input('people_password_hash', sql.NVarChar, hashedPassword)
+      
+      // --- 1. People ---
+      const normalizePhoneForMatch = (value) => {
+        let phone = String(value ?? "").replace(/\D/g, "");
+
+        if (phone.startsWith("66") && phone.length === 11) {
+          phone = "0" + phone.slice(2);
+        }
+
+        return phone;
+      };
+
+      const normalizeIdentityForMatch = (value) => {
+        const text = String(value ?? "").trim();
+        const separator = text.indexOf(":");
+
+        if (separator < 0) return text.toLowerCase();
+
+        const type = text.slice(0, separator).trim().toLowerCase();
+        const number = text.slice(separator + 1).trim();
+
+        if (type === "บัตรประชาชน") {
+          return `${type}:${number.replace(/\D/g, "")}`;
+        }
+
+        return `${type}:${number.replace(/\s+/g, " ").toLowerCase()}`;
+      };
+
+      const reporterPhoneNormalized =
+        normalizePhoneForMatch(body.reporter_phone);
+
+      const reporterPhoneInternational =
+        reporterPhoneNormalized.startsWith("0")
+          ? `66${reporterPhoneNormalized.slice(1)}`
+          : reporterPhoneNormalized;
+
+      // ค้นหาบุคคลที่มีเบอร์โทรศัพท์ตรงกันก่อน
+      const existingPeopleResult = await transaction.request()
+        .input("phone", sql.NVarChar(30), reporterPhoneNormalized)
+        .input("phoneInternational", sql.NVarChar(30), reporterPhoneInternational)
         .query(`
-          SET NOCOUNT ON;
-          INSERT INTO People (people_title, people_name, people_phone, people_identity, people_account, people_password_hash)
-          VALUES (@people_title, @people_name, @people_phone, @people_identity, @people_account, @people_password_hash);
-          SELECT CAST(SCOPE_IDENTITY() AS INT) AS new_id;
+          SELECT people_id, people_phone, people_identity
+          FROM dbo.People WITH (UPDLOCK, HOLDLOCK)
+          WHERE REPLACE(
+                  REPLACE(
+                    REPLACE(LTRIM(RTRIM(people_phone)), '-', ''),
+                    ' ', ''
+                  ),
+                  '+', ''
+                ) IN (@phone, @phoneInternational)
         `);
-      const people_id = result.recordset[0].new_id;
+
+      // ต้องตรงทั้งเบอร์โทรศัพท์และเอกสารยืนยันตัวตน
+      const identityKey = normalizeIdentityForMatch(finalReporterIdentity);
+
+      const matchingPeople = existingPeopleResult.recordset.filter((person) => {
+        return (
+          normalizePhoneForMatch(person.people_phone) === reporterPhoneNormalized &&
+          normalizeIdentityForMatch(person.people_identity) === identityKey
+        );
+      });
+
+      if (matchingPeople.length > 1) {
+        if (transaction.isActive) await transaction.rollback();
+
+        return res.status(409).json({
+          success: false,
+          message: "พบข้อมูลผู้แจ้งซ้ำในระบบ กรุณาติดต่อเจ้าหน้าที่",
+        });
+      }
+
+      let people_id;
+
+      if (matchingPeople.length === 1) {
+        // มีบุคคลนี้อยู่แล้ว ใช้ people_id เดิม
+        people_id = matchingPeople[0].people_id;
+      } else {
+        // ยังไม่มีข้อมูลบุคคล จึงสร้างแถวใหม่ที่ยังไม่มีบัญชี
+        const personInsertResult = await transaction.request()
+          .input("people_title", sql.NVarChar, body.reporter_title || "")
+          .input("people_name", sql.NVarChar, body.reporter_name || "")
+          .input("people_phone", sql.NVarChar, body.reporter_phone || "")
+          .input("people_identity", sql.NVarChar, finalReporterIdentity)
+          .input("people_account", sql.NVarChar, null)
+          .input("people_password_hash", sql.NVarChar, null)
+          .query(`
+            SET NOCOUNT ON;
+
+            INSERT INTO dbo.People (
+              people_title,
+              people_name,
+              people_phone,
+              people_identity,
+              people_account,
+              people_password_hash
+            )
+            VALUES (
+              @people_title,
+              @people_name,
+              @people_phone,
+              @people_identity,
+              @people_account,
+              @people_password_hash
+            );
+
+            SELECT CAST(SCOPE_IDENTITY() AS INT) AS new_id;
+          `);
+
+        people_id = personInsertResult.recordset[0].new_id;
+      }
+
 
       const forceCreate = body.force_create === true || body.force_create === 'true';
       if (!forceCreate && body.missing_name && body.missing_name.trim() !== '') {
@@ -315,8 +446,7 @@ router.post(
         ? (body.reporter_relationship_other || '')
         : (body.reporter_relationship || '');
       // เจ้าหน้าที่ผู้รับเคส ส่งมาจาก session/หน้าเว็บ ถ้าไม่มีเป็น null ได้
-      const staff_id = body.staff_id ? parseInt(body.staff_id, 10) : null;
-
+const staff_id = req.session.user.user_id;
       result = await transaction.request()
         .input('case_priority', sql.NVarChar, body.urgency_level || 'ปกติ')
         .input('case_latest_status', sql.NVarChar, CASE_STATUSES.RECEIVED)

@@ -212,10 +212,28 @@
         return session;
     }
 
-    function logout() {
+    
+async function logout() {
+    try {
+        // ทำลาย Session ที่ Backend ก่อน
+        await api('/logout', {
+            method: 'POST'
+        });
+
+        // ล้างข้อมูล Login ฝั่ง Browser
         clearSession();
+
+        // กลับไปหน้า Login
         global.location.href = 'login.html?logout=1';
+    } catch (err) {
+        console.error('Logout Error:', err);
+
+        alert(
+            'ออกจากระบบไม่สำเร็จ กรุณาตรวจสอบการเชื่อมต่อเซิร์ฟเวอร์ แล้วลองอีกครั้ง'
+        );
     }
+}
+
 
     // เติมชื่อผู้ใช้ / ซ่อนเมนูที่ role นี้ใช้ไม่ได้ / ผูกปุ่มออกจากระบบ
     function applySessionUi() {

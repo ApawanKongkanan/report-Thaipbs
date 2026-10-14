@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const session = require('express-session');
 const path = require('path');
 require('dotenv').config();
 
@@ -9,8 +10,25 @@ const authRoutes = require('./route/auth');
 
 const app = express();
 
+if (!process.env.SESSION_SECRET) {
+    throw new Error('SESSION_SECRET is missing in .env');
+}
+
 app.use(cors());
 app.use(express.json());
+
+app.use(session({
+    name: 'thaipbs.sid',
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 8 * 60 * 60 * 1000
+    }
+}));
 
 // เปิดให้หน้าบ้านเข้าถึงไฟล์รูปภาพ
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

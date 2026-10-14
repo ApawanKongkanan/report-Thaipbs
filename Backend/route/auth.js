@@ -65,13 +65,28 @@ function normalizePhone(value) {
   return phone;
 }
 
-function normalizeThaiId(value) {
-  if (typeof value !== "string") return "";
-  return value.replace(/\D/g, "");
+function normalizeThaiId(identity) {
+  if (typeof identity !== "string") {
+    return "";
+  }
+
+  const value = identity.trim();
+
+  // รับได้ทั้งแบบมีขีดและไม่มีขีด
+  if (!/^[0-9-]+$/.test(value)) {
+    return "";
+  }
+
+  const id = value.replace(/-/g, "");
+
+  // ต้องมีตัวเลข 13 หลัก
+  if (!/^\d{13}$/.test(id)) {
+    return "";
+  }
+
+  return id;
 }
 
-// people_identity ในฐานข้อมูลตัวอย่าง:
-// "บัตรประชาชน: 1-2232-33332-32-3"
 function extractThaiId(value) {
   if (typeof value !== "string") return "";
 
@@ -86,8 +101,22 @@ function extractThaiId(value) {
   return id.length === 13 ? id : "";
 }
 
-function isValidThaiId(value) {
-  return /^\d{13}$/.test(value);
+function isValidThaiId(identity) {
+    const id = normalizeThaiId(identity);
+
+    if (!/^\d{13}$/.test(id)) {
+        return false;
+    }
+
+    let sum = 0;
+
+    for (let i = 0; i < 12; i++) {
+        sum += Number(id[i]) * (13 - i);
+    }
+
+    const checkDigit = (11 - (sum % 11)) % 10;
+
+    return checkDigit === Number(id[12]);
 }
 
 function isValidUsername(username) {
@@ -435,15 +464,38 @@ router.post("/login", loginLimiter, async (req, res) => {
       return invalidCredentials(res);
     }
 
-    return res.status(200).json({
-      success: true,
-      message: "เข้าสู่ระบบสำเร็จ",
-      user: {
-        user_id: user.id,
-        name: user.name,
-        role,
-      },
-    });
+
+await new Promise((resolve, reject) => {
+  req.session.regenerate((err) => {
+    if (err) return reject(err);
+    resolve();
+  });
+});
+
+// เก็บข้อมูลผู้ใช้ที่ Backend ตรวจสอบแล้วใน Session
+req.session.user = {
+  user_id: user.id,
+  name: user.name,
+  role,
+};
+
+await new Promise((resolve, reject) => {
+  req.session.save((err) => {
+    if (err) return reject(err);
+    resolve();
+  });
+});
+
+return res.status(200).json({
+  success: true,
+  message: "เข้าสู่ระบบสำเร็จ",
+  user: {
+    user_id: user.id,
+    name: user.name,
+    role,
+  },
+});
+
   } catch (err) {
     console.error("Login Error:", err.message);
 
@@ -453,5 +505,53 @@ router.post("/login", loginLimiter, async (req, res) => {
     });
   }
 });
+
+router.get("/session", (req, res) => {
+  if (!req.session || !req.session.user) {
+    return res.status(401).json({
+      success: false,
+      authenticated: false,
+      message: "กรุณาเข้าสู่ระบบก่อนใช้งาน",
+    });
+  }
+
+  return res.status(200).json({
+    success: true,
+    authenticated: true,
+    user: req.session.user,
+  });
+});
+
+
+router.post("/logout", (req, res) => {
+  if (!req.session) {
+    return res.status(200).json({
+      success: true,
+      message: "ออกจากระบบเรียบร้อยแล้ว",
+    });
+  }
+
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).json({
+        success: false,
+        message: "ออกจากระบบไม่สำเร็จ",
+      });
+    }
+
+    res.clearCookie("thaipbs.sid", {
+      path: "/",
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "ออกจากระบบเรียบร้อยแล้ว",
+    });
+  });
+});
+
 
 module.exports = router;
